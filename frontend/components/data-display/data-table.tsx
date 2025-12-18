@@ -255,7 +255,7 @@ export function DataTable<T extends { id: number | string }>({
         </Table>
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
+      {pagination && (
         <div className="mt-4">
           <DataPagination
             currentPage={pagination.currentPage}

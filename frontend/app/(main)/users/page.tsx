@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Edit, Trash2, User } from 'lucide-react';
+import { Search, Plus, User, Edit, Trash2, UserX, UserCheck } from 'lucide-react';
 import { UserForm } from '@/components/forms/user-form';
 import { useToast } from '@/components/ui/use-toast';
 import { DataView } from '@/components/data-display/data-view';
 import type { Column } from '@/components/data-display/data-table';
 import { Badge } from '@/components/ui/badge';
+import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
+import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 
 interface User {
   id: number;
@@ -36,6 +38,8 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{ id: number; name: string } | null>(null);
   const { toast } = useToast();
 
   const { data, isLoading, error, refetch } = useQuery<any>({
@@ -59,20 +63,47 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (userId: number) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete({ id: user.id, name: user.name });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
 
     try {
-      await api.delete(`/users/${userId}`);
+      await api.delete(`/users/${userToDelete.id}`);
       toast({
         title: 'Success',
         description: 'User deleted successfully',
       });
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
       refetch();
     } catch (error: any) {
       toast({
         title: 'Error',
         description: error.response?.data?.error || 'Failed to delete user',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleToggleStatus = async (user: User) => {
+    const newStatus = user.is_active === 'true' ? 'false' : 'true';
+    const statusText = newStatus === 'true' ? 'activated' : 'deactivated';
+
+    try {
+      await api.put(`/users/${user.id}`, { is_active: newStatus });
+      toast({
+        title: 'Success',
+        description: `User ${statusText} successfully`,
+      });
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.error || `Failed to ${statusText} user`,
         variant: 'destructive',
       });
     }
@@ -143,26 +174,37 @@ export default function UsersPage() {
       key: 'actions',
       header: 'Actions',
       sortable: false, // Actions column is not sortable
-      render: (user) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEdit(user)}
-            className="h-8 w-8"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(user.id)}
-            className="h-8 w-8 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      render: (user) => {
+        const actions: Array<{
+          label: string;
+          icon: React.ReactNode;
+          onClick: () => void;
+          variant?: 'default' | 'destructive';
+        }> = [
+          {
+            label: 'Edit User',
+            icon: ActionIcons.Edit,
+            onClick: () => handleEdit(user),
+          },
+          {
+            label: user.is_active === 'true' ? 'Deactivate User' : 'Activate User',
+            icon: user.is_active === 'true' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
+            onClick: () => handleToggleStatus(user),
+          },
+        ];
+
+        // Only add delete action if user is active
+        if (user.is_active === 'true') {
+          actions.push({
+            label: 'Delete User',
+            icon: ActionIcons.Delete,
+            onClick: () => handleDeleteClick(user),
+            variant: 'destructive',
+          });
+        }
+
+        return <ActionsMenu actions={actions} />;
+      },
     },
   ];
 
@@ -212,6 +254,7 @@ export default function UsersPage() {
           size="sm"
           onClick={() => handleEdit(user)}
           className="flex-1"
+          title="Edit User"
         >
           <Edit className="h-3 w-3 mr-1" />
           Edit
@@ -219,12 +262,39 @@ export default function UsersPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleDelete(user.id)}
-          className="flex-1 text-red-600 hover:text-red-700"
+          onClick={() => handleToggleStatus(user)}
+          className={`flex-1 ${
+            user.is_active === 'true'
+              ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
+              : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+          }`}
+          title={user.is_active === 'true' ? 'Deactivate User' : 'Activate User'}
         >
-          <Trash2 className="h-3 w-3 mr-1" />
-          Delete
+          {user.is_active === 'true' ? (
+            <>
+              <UserX className="h-3 w-3 mr-1" />
+              Deactivate
+            </>
+          ) : (
+            <>
+              <UserCheck className="h-3 w-3 mr-1" />
+              Activate
+            </>
+          )}
         </Button>
+        {/* Only show delete button for active users */}
+        {user.is_active === 'true' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDeleteClick(user)}
+            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+            title="Delete User"
+          >
+            <Trash2 className="h-3 w-3 mr-1" />
+            Delete
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -259,6 +329,23 @@ export default function UsersPage() {
         </div>
 
         <div className="p-4">
+          {/* Pagination Info */}
+          {/* {pagination && (
+            <div className="mb-4 flex items-center justify-between text-sm text-gray-600">
+              <div>
+                Showing <span className="font-medium">{((pagination.page || 1) - 1) * (pagination.limit || 10) + 1}</span> to{' '}
+                <span className="font-medium">
+                  {Math.min((pagination.page || 1) * (pagination.limit || 10), pagination.total || 0)}
+                </span>{' '}
+                of <span className="font-medium">{pagination.total || 0}</span> users
+              </div>
+              <div>
+                Page <span className="font-medium">{pagination.page || 1}</span> of{' '}
+                <span className="font-medium">{pagination.totalPages || 1}</span>
+              </div>
+            </div>
+          )} */}
+
           <DataView
             data={users}
             columns={columns}
@@ -281,6 +368,7 @@ export default function UsersPage() {
             defaultView="table"
             gridCols={3}
             showViewSwitcher={true}
+            storageKey="users-view-mode"
           />
         </div>
       </div>
@@ -290,6 +378,15 @@ export default function UsersPage() {
         onOpenChange={setIsFormOpen}
         user={selectedUser}
         mode={formMode}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User"
+        itemName={userToDelete?.name}
+        description={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone and will permanently remove this user and all associated data.`}
       />
     </div>
   );

@@ -75,7 +75,7 @@ export function DataGrid<T extends { id: number | string }>({
             ))}
           </div>
 
-          {pagination && pagination.totalPages > 1 && (
+          {pagination && (
             <div className="mt-4">
               <DataPagination
                 currentPage={pagination.currentPage}

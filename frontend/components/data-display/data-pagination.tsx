@@ -63,9 +63,8 @@ export function DataPagination({
     return pages;
   };
 
-  if (totalPages <= 1) {
-    return null;
-  }
+  // Always show pagination, even if there's only 1 page or 0 pages
+  const displayTotalPages = Math.max(1, totalPages);
 
   return (
     <Pagination className={className}>
@@ -77,26 +76,38 @@ export function DataPagination({
           />
         </PaginationItem>
 
-        {getPageNumbers().map((page, index) => (
-          <PaginationItem key={index}>
-            {page === 'ellipsis' ? (
-              <PaginationEllipsis />
-            ) : (
-              <PaginationLink
-                onClick={() => onPageChange(page)}
-                isActive={currentPage === page}
-                className="cursor-pointer"
-              >
-                {page}
-              </PaginationLink>
-            )}
+        {displayTotalPages > 1 ? (
+          getPageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === 'ellipsis' ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => onPageChange(page)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))
+        ) : (
+          <PaginationItem>
+            <PaginationLink
+              onClick={() => onPageChange(1)}
+              isActive={true}
+              className="cursor-pointer"
+            >
+              1
+            </PaginationLink>
           </PaginationItem>
-        ))}
+        )}
 
         <PaginationItem>
           <PaginationNext
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            onClick={() => onPageChange(Math.min(displayTotalPages, currentPage + 1))}
+            className={currentPage >= displayTotalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
           />
         </PaginationItem>
       </PaginationContent>

@@ -26,8 +26,28 @@ export class AuthService {
     }
 
     if (user.is_active === 'false') {
-      throw new UnauthorizedError('Account is inactive');
+      throw new UnauthorizedError('Account is inactive. Please contact your administrator to reactivate your account.');
     }
+
+    // Check company license expiration (if license_expiry field exists in CompanySettings)
+    // Note: Add license_expiry field to CompanySettings model if needed
+    // TODO: Uncomment when license_expiry field is added to CompanySettings
+    // if (user.company) {
+    //   const companySettings = await prisma.companySettings.findUnique({
+    //     where: { company_id: user.company.id },
+    //   });
+    //
+    //   if (companySettings?.license_expiry) {
+    //     const now = new Date();
+    //     const licenseExpiry = new Date(companySettings.license_expiry);
+    //     
+    //     if (licenseExpiry < now) {
+    //       throw new UnauthorizedError(
+    //         `Company license has expired on ${licenseExpiry.toLocaleDateString()}. Please contact your administrator to renew the license.`
+    //       );
+    //     }
+    //   }
+    // }
 
     // Verify password
     if (!user.password) {

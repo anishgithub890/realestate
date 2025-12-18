@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -50,18 +51,35 @@ export function UserForm({ open, onOpenChange, user, mode }: UserFormProps) {
     reset,
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
-    defaultValues: user
-      ? {
-          name: user.name,
-          email: user.email,
-          phone: user.phone || '',
-          role_id: user.role_id,
-          is_active: user.is_active || 'true',
-        }
-      : {
-          is_active: 'true',
-        },
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      role_id: undefined,
+      is_active: 'true',
+    },
   });
+
+  // Reset form when user changes (for edit mode)
+  useEffect(() => {
+    if (user && mode === 'edit') {
+      reset({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        role_id: user.role_id || undefined,
+        is_active: user.is_active || 'true',
+      });
+    } else if (mode === 'create') {
+      reset({
+        name: '',
+        email: '',
+        phone: '',
+        role_id: undefined,
+        is_active: 'true',
+      });
+    }
+  }, [user, mode, reset]);
 
   const onSubmit = async (data: UserFormData) => {
     try {

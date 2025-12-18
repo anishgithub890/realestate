@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setAuth } from '@/store/slices/authSlice';
 import { RootState } from '@/store';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/use-toast';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -24,8 +25,8 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [show2FA, setShow2FA] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState('');
 
@@ -46,7 +47,6 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
-    setError(null);
 
     try {
       const response = await authService.login(
@@ -68,16 +68,68 @@ export default function LoginPage() {
           localStorage.setItem('remember_me', 'true');
         }
 
-        router.push('/dashboard');
+        toast({
+          title: 'Login Successful',
+          description: 'Welcome back! Redirecting to dashboard...',
+          variant: 'default',
+        });
+
+        // Small delay to show success toast before redirect
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
       } else {
         if (response.error?.includes('Two-factor')) {
           setShow2FA(true);
+          toast({
+            title: 'Two-Factor Authentication Required',
+            description: 'Please enter your 2FA code to continue',
+            variant: 'default',
+          });
         } else {
-          setError(response.error || 'Login failed');
+          const errorMessage = response.error || 'Login failed';
+          
+          // Determine error type for appropriate styling
+          let errorTypeValue: 'inactive' | 'license_expired' | 'general' = 'general';
+          if (errorMessage.toLowerCase().includes('inactive')) {
+            errorTypeValue = 'inactive';
+          } else if (errorMessage.toLowerCase().includes('license') || errorMessage.toLowerCase().includes('expired')) {
+            errorTypeValue = 'license_expired';
+          }
+
+          // Show toast notification only (no page refresh)
+          toast({
+            title: errorTypeValue === 'inactive' 
+              ? 'Account Inactive' 
+              : errorTypeValue === 'license_expired'
+              ? 'License Expired'
+              : 'Login Failed',
+            description: errorMessage,
+            variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
+          });
         }
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred during login');
+      const errorMessage = err.response?.data?.error || 'An error occurred during login';
+      
+      // Determine error type for appropriate styling
+      let errorTypeValue: 'inactive' | 'license_expired' | 'general' = 'general';
+      if (errorMessage.toLowerCase().includes('inactive')) {
+        errorTypeValue = 'inactive';
+      } else if (errorMessage.toLowerCase().includes('license') || errorMessage.toLowerCase().includes('expired')) {
+        errorTypeValue = 'license_expired';
+      }
+
+      // Show toast notification only (no page refresh)
+      toast({
+        title: errorTypeValue === 'inactive' 
+          ? 'Account Inactive' 
+          : errorTypeValue === 'license_expired'
+          ? 'License Expired'
+          : 'Login Error',
+        description: errorMessage,
+        variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -90,12 +142,6 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-gray-900">Real Estate Management</h1>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
