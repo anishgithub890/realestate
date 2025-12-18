@@ -11,6 +11,16 @@ import { setAuth } from '@/store/slices/authSlice';
 import { RootState } from '@/store';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { UserX } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -29,6 +39,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState('');
+  const [showInactiveDialog, setShowInactiveDialog] = useState(false);
+  const [inactiveMessage, setInactiveMessage] = useState<string>('');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -97,16 +109,20 @@ export default function LoginPage() {
             errorTypeValue = 'license_expired';
           }
 
-          // Show toast notification only (no page refresh)
-          toast({
-            title: errorTypeValue === 'inactive' 
-              ? 'Account Inactive' 
-              : errorTypeValue === 'license_expired'
-              ? 'License Expired'
-              : 'Login Failed',
-            description: errorMessage,
-            variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
-          });
+          // Show alert dialog for inactive users, toast for others
+          if (errorTypeValue === 'inactive') {
+            setInactiveMessage(errorMessage);
+            setShowInactiveDialog(true);
+          } else {
+            // Show toast notification for other errors
+            toast({
+              title: errorTypeValue === 'license_expired'
+                ? 'License Expired'
+                : 'Login Failed',
+              description: errorMessage,
+              variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
+            });
+          }
         }
       }
     } catch (err: any) {
@@ -120,16 +136,20 @@ export default function LoginPage() {
         errorTypeValue = 'license_expired';
       }
 
-      // Show toast notification only (no page refresh)
-      toast({
-        title: errorTypeValue === 'inactive' 
-          ? 'Account Inactive' 
-          : errorTypeValue === 'license_expired'
-          ? 'License Expired'
-          : 'Login Error',
-        description: errorMessage,
-        variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
-      });
+      // Show alert dialog for inactive users, toast for others
+      if (errorTypeValue === 'inactive') {
+        setInactiveMessage(errorMessage);
+        setShowInactiveDialog(true);
+      } else {
+        // Show toast notification for other errors
+        toast({
+          title: errorTypeValue === 'license_expired'
+            ? 'License Expired'
+            : 'Login Error',
+          description: errorMessage,
+          variant: errorTypeValue === 'license_expired' ? 'default' : 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -231,6 +251,31 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+
+      {/* Inactive User Alert Dialog */}
+      <AlertDialog open={showInactiveDialog} onOpenChange={setShowInactiveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                <UserX className="h-5 w-5 text-red-600" />
+              </div>
+              <AlertDialogTitle>Account Inactive</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="pt-2">
+              <p className="mb-2">{inactiveMessage}</p>
+              <p className="text-sm text-gray-600">
+                Your account has been deactivated. Please contact your administrator to reactivate your account.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowInactiveDialog(false)}>
+              Understood
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

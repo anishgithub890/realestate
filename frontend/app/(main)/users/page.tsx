@@ -13,6 +13,7 @@ import type { Column } from '@/components/data-display/data-table';
 import { Badge } from '@/components/ui/badge';
 import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
+import { StatusToggleDialog } from '@/components/data-display/status-toggle-dialog';
 
 interface User {
   id: number;
@@ -40,6 +41,8 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [statusToggleDialogOpen, setStatusToggleDialogOpen] = useState(false);
+  const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const { toast } = useToast();
 
   const { data, isLoading, error, refetch } = useQuery<any>({
@@ -89,16 +92,25 @@ export default function UsersPage() {
     }
   };
 
-  const handleToggleStatus = async (user: User) => {
-    const newStatus = user.is_active === 'true' ? 'false' : 'true';
+  const handleToggleStatusClick = (user: User) => {
+    setUserToToggle(user);
+    setStatusToggleDialogOpen(true);
+  };
+
+  const handleToggleStatusConfirm = async () => {
+    if (!userToToggle) return;
+
+    const newStatus = userToToggle.is_active === 'true' ? 'false' : 'true';
     const statusText = newStatus === 'true' ? 'activated' : 'deactivated';
 
     try {
-      await api.put(`/users/${user.id}`, { is_active: newStatus });
+      await api.put(`/users/${userToToggle.id}`, { is_active: newStatus });
       toast({
         title: 'Success',
         description: `User ${statusText} successfully`,
       });
+      setStatusToggleDialogOpen(false);
+      setUserToToggle(null);
       refetch();
     } catch (error: any) {
       toast({
@@ -189,7 +201,7 @@ export default function UsersPage() {
           {
             label: user.is_active === 'true' ? 'Deactivate User' : 'Activate User',
             icon: user.is_active === 'true' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
-            onClick: () => handleToggleStatus(user),
+            onClick: () => handleToggleStatusClick(user),
           },
         ];
 
@@ -262,7 +274,7 @@ export default function UsersPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleToggleStatus(user)}
+          onClick={() => handleToggleStatusClick(user)}
           className={`flex-1 ${
             user.is_active === 'true'
               ? 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
@@ -387,6 +399,14 @@ export default function UsersPage() {
         title="Delete User"
         itemName={userToDelete?.name}
         description={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone and will permanently remove this user and all associated data.`}
+      />
+
+      <StatusToggleDialog
+        open={statusToggleDialogOpen}
+        onOpenChange={setStatusToggleDialogOpen}
+        onConfirm={handleToggleStatusConfirm}
+        isActive={userToToggle?.is_active === 'true'}
+        itemName={userToToggle?.name || ''}
       />
     </div>
   );

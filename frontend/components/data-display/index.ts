@@ -5,4 +5,5 @@ export { DataGrid } from './data-grid';
 export { DataView } from './data-view';
 export { ActionsMenu, ActionIcons, type ActionItem } from './actions-menu';
 export { DeleteConfirmDialog } from './delete-confirm-dialog';
+export { StatusToggleDialog } from './status-toggle-dialog';
 
