@@ -5,6 +5,14 @@
 -- This SQL script creates the complete database schema for the Real Estate
 -- Management System. It includes all tables, indexes, and foreign key constraints.
 --
+-- SAFE MODE: This script is designed to be safe for existing databases.
+-- - Tables are created only if they don't exist (CREATE TABLE IF NOT EXISTS)
+-- - Foreign key constraints are added only if they don't exist
+-- - New columns are added only if they don't exist
+-- - Existing data is preserved
+-- - Can be run multiple times without errors
+-- - No errors if tables/constraints/columns already exist
+--
 -- Usage:
 --   1. Create the database: CREATE DATABASE realestate;
 --   2. Use the database: USE realestate;
@@ -12,6 +20,10 @@
 --
 -- Or import directly:
 --   mysql -u root -p realestate < mysql-schema.sql
+--
+-- For existing databases:
+--   This script will safely add new columns (like is_active) without
+--   affecting existing data. All existing records will be preserved.
 --
 -- Generated from Prisma Schema
 -- ============================================================================
@@ -32,7 +44,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ============================================================================
 
 -- CreateTable
-CREATE TABLE `User` (
+CREATE TABLE IF NOT EXISTS `User` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
@@ -66,7 +78,7 @@ CREATE TABLE `User` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Company` (
+CREATE TABLE IF NOT EXISTS `Company` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `hosting_id` INTEGER NULL,
@@ -76,7 +88,7 @@ CREATE TABLE `Company` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Hosting` (
+CREATE TABLE IF NOT EXISTS `Hosting` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
 
@@ -84,7 +96,7 @@ CREATE TABLE `Hosting` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Role` (
+CREATE TABLE IF NOT EXISTS `Role` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -95,7 +107,7 @@ CREATE TABLE `Role` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Permission` (
+CREATE TABLE IF NOT EXISTS `Permission` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `category` VARCHAR(191) NOT NULL,
@@ -108,7 +120,7 @@ CREATE TABLE `Permission` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `OAuthToken` (
+CREATE TABLE IF NOT EXISTS `OAuthToken` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
     `access_token` VARCHAR(191) NOT NULL,
@@ -124,7 +136,7 @@ CREATE TABLE `OAuthToken` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Session` (
+CREATE TABLE IF NOT EXISTS `Session` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
     `session_token` VARCHAR(191) NOT NULL,
@@ -145,7 +157,7 @@ CREATE TABLE `Session` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ProviderAccount` (
+CREATE TABLE IF NOT EXISTS `ProviderAccount` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
     `provider` VARCHAR(191) NOT NULL,
@@ -165,7 +177,7 @@ CREATE TABLE `ProviderAccount` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Tenant` (
+CREATE TABLE IF NOT EXISTS `Tenant` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
@@ -179,6 +191,7 @@ CREATE TABLE `Tenant` (
     `passport_expiry` DATETIME(3) NOT NULL,
     `fax` VARCHAR(191) NULL,
     `address` VARCHAR(191) NOT NULL,
+    `is_active` VARCHAR(191) NOT NULL DEFAULT 'true',
     `company_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -188,7 +201,7 @@ CREATE TABLE `Tenant` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Landlord` (
+CREATE TABLE IF NOT EXISTS `Landlord` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
@@ -202,6 +215,7 @@ CREATE TABLE `Landlord` (
     `passport_expiry` DATETIME(3) NOT NULL,
     `fax` VARCHAR(191) NULL,
     `address` VARCHAR(191) NOT NULL,
+    `is_active` VARCHAR(191) NOT NULL DEFAULT 'true',
     `company_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -211,7 +225,7 @@ CREATE TABLE `Landlord` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `KycDocument` (
+CREATE TABLE IF NOT EXISTS `KycDocument` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `tenant_id` INTEGER NULL,
     `landlord_id` INTEGER NULL,
@@ -225,7 +239,7 @@ CREATE TABLE `KycDocument` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `KycDocType` (
+CREATE TABLE IF NOT EXISTS `KycDocType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `is_mandatory` VARCHAR(191) NOT NULL DEFAULT 'false',
@@ -237,7 +251,7 @@ CREATE TABLE `KycDocType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Country` (
+CREATE TABLE IF NOT EXISTS `Country` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -248,7 +262,7 @@ CREATE TABLE `Country` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `State` (
+CREATE TABLE IF NOT EXISTS `State` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `authorative_name` VARCHAR(191) NULL,
@@ -262,7 +276,7 @@ CREATE TABLE `State` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Area` (
+CREATE TABLE IF NOT EXISTS `Area` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `state_id` INTEGER NOT NULL,
@@ -275,7 +289,7 @@ CREATE TABLE `Area` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Building` (
+CREATE TABLE IF NOT EXISTS `Building` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `completion_date` DATETIME(3) NULL,
@@ -291,7 +305,7 @@ CREATE TABLE `Building` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Floor` (
+CREATE TABLE IF NOT EXISTS `Floor` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `building_id` INTEGER NOT NULL,
@@ -302,7 +316,7 @@ CREATE TABLE `Floor` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `unit` (
+CREATE TABLE IF NOT EXISTS `unit` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `gross_area_in_sqft` DOUBLE NOT NULL,
@@ -352,7 +366,7 @@ CREATE TABLE `unit` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `UnitImage` (
+CREATE TABLE IF NOT EXISTS `UnitImage` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `image_url` VARCHAR(191) NOT NULL,
@@ -368,7 +382,7 @@ CREATE TABLE `UnitImage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `UnitDocument` (
+CREATE TABLE IF NOT EXISTS `UnitDocument` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `doc_type` VARCHAR(191) NOT NULL,
@@ -383,7 +397,7 @@ CREATE TABLE `UnitDocument` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `unitType` (
+CREATE TABLE IF NOT EXISTS `unitType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -394,7 +408,7 @@ CREATE TABLE `unitType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Amenity` (
+CREATE TABLE IF NOT EXISTS `Amenity` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -405,7 +419,7 @@ CREATE TABLE `Amenity` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `unitAmenity` (
+CREATE TABLE IF NOT EXISTS `unitAmenity` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `amenity_id` INTEGER NOT NULL,
@@ -415,7 +429,7 @@ CREATE TABLE `unitAmenity` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Parking` (
+CREATE TABLE IF NOT EXISTS `Parking` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `building_id` INTEGER NOT NULL,
@@ -428,7 +442,7 @@ CREATE TABLE `Parking` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Vehicle` (
+CREATE TABLE IF NOT EXISTS `Vehicle` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `vehicle_no` VARCHAR(191) NOT NULL,
     `vehicle_type` VARCHAR(191) NULL,
@@ -440,7 +454,7 @@ CREATE TABLE `Vehicle` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RentalContract` (
+CREATE TABLE IF NOT EXISTS `RentalContract` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_no` VARCHAR(191) NOT NULL,
     `contract_date` DATETIME(3) NOT NULL,
@@ -483,7 +497,7 @@ CREATE TABLE `RentalContract` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `SalesContract` (
+CREATE TABLE IF NOT EXISTS `SalesContract` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_no` VARCHAR(191) NOT NULL,
     `contract_date` DATETIME(3) NOT NULL,
@@ -512,7 +526,7 @@ CREATE TABLE `SalesContract` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RentalContractunit` (
+CREATE TABLE IF NOT EXISTS `RentalContractunit` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_id` INTEGER NOT NULL,
     `unit_id` INTEGER NOT NULL,
@@ -522,7 +536,7 @@ CREATE TABLE `RentalContractunit` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `SalesContractunit` (
+CREATE TABLE IF NOT EXISTS `SalesContractunit` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_id` INTEGER NOT NULL,
     `unit_id` INTEGER NOT NULL,
@@ -532,7 +546,7 @@ CREATE TABLE `SalesContractunit` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ContractParking` (
+CREATE TABLE IF NOT EXISTS `ContractParking` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_id` INTEGER NOT NULL,
     `contract_type` VARCHAR(191) NOT NULL,
@@ -545,7 +559,7 @@ CREATE TABLE `ContractParking` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Handover` (
+CREATE TABLE IF NOT EXISTS `Handover` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `contract_id` INTEGER NOT NULL,
     `contract_type` VARCHAR(191) NOT NULL,
@@ -560,7 +574,7 @@ CREATE TABLE `Handover` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `HandoverDocument` (
+CREATE TABLE IF NOT EXISTS `HandoverDocument` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `handover_id` INTEGER NOT NULL,
     `doc_type_id` INTEGER NOT NULL,
@@ -572,7 +586,7 @@ CREATE TABLE `HandoverDocument` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Receipt` (
+CREATE TABLE IF NOT EXISTS `Receipt` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `receipt_no` VARCHAR(191) NOT NULL,
     `date` DATETIME(3) NOT NULL,
@@ -591,7 +605,7 @@ CREATE TABLE `Receipt` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Payment` (
+CREATE TABLE IF NOT EXISTS `Payment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `receipt_id` INTEGER NOT NULL,
     `payment_type` VARCHAR(191) NOT NULL,
@@ -609,7 +623,7 @@ CREATE TABLE `Payment` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Cheque` (
+CREATE TABLE IF NOT EXISTS `Cheque` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `payment_id` INTEGER NOT NULL,
     `date` DATETIME(3) NOT NULL,
@@ -626,7 +640,7 @@ CREATE TABLE `Cheque` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PaymentUnder` (
+CREATE TABLE IF NOT EXISTS `PaymentUnder` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -637,7 +651,7 @@ CREATE TABLE `PaymentUnder` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Invoice` (
+CREATE TABLE IF NOT EXISTS `Invoice` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `invoice_no` VARCHAR(191) NOT NULL,
     `contract_id` INTEGER NOT NULL,
@@ -653,7 +667,7 @@ CREATE TABLE `Invoice` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Lead` (
+CREATE TABLE IF NOT EXISTS `Lead` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
@@ -682,7 +696,7 @@ CREATE TABLE `Lead` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `LeadStatus` (
+CREATE TABLE IF NOT EXISTS `LeadStatus` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `category` VARCHAR(191) NOT NULL,
@@ -695,7 +709,7 @@ CREATE TABLE `LeadStatus` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ActivitySource` (
+CREATE TABLE IF NOT EXISTS `ActivitySource` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -706,7 +720,7 @@ CREATE TABLE `ActivitySource` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `LeadFollowup` (
+CREATE TABLE IF NOT EXISTS `LeadFollowup` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(191) NOT NULL,
     `lead_id` INTEGER NOT NULL,
@@ -726,7 +740,7 @@ CREATE TABLE `LeadFollowup` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `FollowupType` (
+CREATE TABLE IF NOT EXISTS `FollowupType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -737,7 +751,7 @@ CREATE TABLE `FollowupType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `LeadPreferredArea` (
+CREATE TABLE IF NOT EXISTS `LeadPreferredArea` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `lead_id` INTEGER NOT NULL,
     `area_id` INTEGER NOT NULL,
@@ -747,7 +761,7 @@ CREATE TABLE `LeadPreferredArea` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `LeadPreferredunitType` (
+CREATE TABLE IF NOT EXISTS `LeadPreferredunitType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `lead_id` INTEGER NOT NULL,
     `unit_type_id` INTEGER NOT NULL,
@@ -757,7 +771,7 @@ CREATE TABLE `LeadPreferredunitType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `LeadPreferredAmenity` (
+CREATE TABLE IF NOT EXISTS `LeadPreferredAmenity` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `lead_id` INTEGER NOT NULL,
     `amenity_id` INTEGER NOT NULL,
@@ -767,7 +781,7 @@ CREATE TABLE `LeadPreferredAmenity` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Request` (
+CREATE TABLE IF NOT EXISTS `Request` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `request_no` VARCHAR(191) NOT NULL,
     `type_id` INTEGER NOT NULL,
@@ -787,7 +801,7 @@ CREATE TABLE `Request` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RequestType` (
+CREATE TABLE IF NOT EXISTS `RequestType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -798,7 +812,7 @@ CREATE TABLE `RequestType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RequestStatus` (
+CREATE TABLE IF NOT EXISTS `RequestStatus` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -809,7 +823,7 @@ CREATE TABLE `RequestStatus` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Ticket` (
+CREATE TABLE IF NOT EXISTS `Ticket` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ticket_no` VARCHAR(191) NOT NULL,
     `type_id` INTEGER NOT NULL,
@@ -831,7 +845,7 @@ CREATE TABLE `Ticket` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `MaintenanceType` (
+CREATE TABLE IF NOT EXISTS `MaintenanceType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -842,7 +856,7 @@ CREATE TABLE `MaintenanceType` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `MaintenanceStatus` (
+CREATE TABLE IF NOT EXISTS `MaintenanceStatus` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -853,7 +867,7 @@ CREATE TABLE `MaintenanceStatus` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `TicketComment` (
+CREATE TABLE IF NOT EXISTS `TicketComment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ticket_id` INTEGER NOT NULL,
     `comment` VARCHAR(191) NOT NULL,
@@ -865,7 +879,7 @@ CREATE TABLE `TicketComment` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `TicketFollowup` (
+CREATE TABLE IF NOT EXISTS `TicketFollowup` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ticket_id` INTEGER NOT NULL,
     `remarks` VARCHAR(191) NOT NULL,
@@ -878,7 +892,7 @@ CREATE TABLE `TicketFollowup` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Complaint` (
+CREATE TABLE IF NOT EXISTS `Complaint` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `complaint_no` VARCHAR(191) NOT NULL,
     `type` VARCHAR(191) NOT NULL,
@@ -899,7 +913,7 @@ CREATE TABLE `Complaint` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ComplaintStatus` (
+CREATE TABLE IF NOT EXISTS `ComplaintStatus` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `company_id` INTEGER NOT NULL,
@@ -910,7 +924,7 @@ CREATE TABLE `ComplaintStatus` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ComplaintFollowup` (
+CREATE TABLE IF NOT EXISTS `ComplaintFollowup` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `complaint_id` INTEGER NOT NULL,
     `remarks` VARCHAR(191) NOT NULL,
@@ -923,7 +937,7 @@ CREATE TABLE `ComplaintFollowup` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Announcement` (
+CREATE TABLE IF NOT EXISTS `Announcement` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
     `message` VARCHAR(191) NOT NULL,
@@ -942,7 +956,7 @@ CREATE TABLE `Announcement` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `RentalApproval` (
+CREATE TABLE IF NOT EXISTS `RentalApproval` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `request_no` VARCHAR(191) NOT NULL,
     `unit_id` INTEGER NOT NULL,
@@ -963,7 +977,7 @@ CREATE TABLE `RentalApproval` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `CompanySettings` (
+CREATE TABLE IF NOT EXISTS `CompanySettings` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `company_id` INTEGER NOT NULL,
     `logo_path` VARCHAR(191) NULL,
@@ -980,7 +994,7 @@ CREATE TABLE `CompanySettings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Broker` (
+CREATE TABLE IF NOT EXISTS `Broker` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
@@ -1000,7 +1014,7 @@ CREATE TABLE `Broker` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyViewing` (
+CREATE TABLE IF NOT EXISTS `PropertyViewing` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `lead_id` INTEGER NULL,
@@ -1028,7 +1042,7 @@ CREATE TABLE `PropertyViewing` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `UnitFavorite` (
+CREATE TABLE IF NOT EXISTS `UnitFavorite` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `user_id` INTEGER NULL,
@@ -1045,7 +1059,7 @@ CREATE TABLE `UnitFavorite` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyInspection` (
+CREATE TABLE IF NOT EXISTS `PropertyInspection` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `contract_id` INTEGER NULL,
@@ -1069,7 +1083,7 @@ CREATE TABLE `PropertyInspection` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyValuation` (
+CREATE TABLE IF NOT EXISTS `PropertyValuation` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `valuation_type` VARCHAR(191) NOT NULL,
@@ -1091,7 +1105,7 @@ CREATE TABLE `PropertyValuation` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyInsurance` (
+CREATE TABLE IF NOT EXISTS `PropertyInsurance` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `insurance_type` VARCHAR(191) NOT NULL,
@@ -1117,7 +1131,7 @@ CREATE TABLE `PropertyInsurance` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyMaintenanceHistory` (
+CREATE TABLE IF NOT EXISTS `PropertyMaintenanceHistory` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `maintenance_type` VARCHAR(191) NOT NULL,
@@ -1138,7 +1152,7 @@ CREATE TABLE `PropertyMaintenanceHistory` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyNotification` (
+CREATE TABLE IF NOT EXISTS `PropertyNotification` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NULL,
     `user_id` INTEGER NULL,
@@ -1158,7 +1172,7 @@ CREATE TABLE `PropertyNotification` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `PropertyAnalytics` (
+CREATE TABLE IF NOT EXISTS `PropertyAnalytics` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `unit_id` INTEGER NOT NULL,
     `date` DATETIME(3) NOT NULL,
@@ -1178,7 +1192,7 @@ CREATE TABLE `PropertyAnalytics` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `_PermissionToRole` (
+CREATE TABLE IF NOT EXISTS `_PermissionToRole` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
 
@@ -1187,480 +1201,578 @@ CREATE TABLE `_PermissionToRole` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `User` ADD CONSTRAINT `User_role_id_fkey` FOREIGN KEY (`role_id`) REFERENCES `Role`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('User', 'User_role_id_fkey', 'role_id', 'Role', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `User` ADD CONSTRAINT `User_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('User', 'User_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Company` ADD CONSTRAINT `Company_hosting_id_fkey` FOREIGN KEY (`hosting_id`) REFERENCES `Hosting`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Company', 'Company_hosting_id_fkey', 'hosting_id', 'Hosting', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Role` ADD CONSTRAINT `Role_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Role', 'Role_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Permission` ADD CONSTRAINT `Permission_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Permission', 'Permission_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `OAuthToken` ADD CONSTRAINT `OAuthToken_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('OAuthToken', 'OAuthToken_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Session` ADD CONSTRAINT `Session_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Session', 'Session_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ProviderAccount` ADD CONSTRAINT `ProviderAccount_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ProviderAccount', 'ProviderAccount_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Tenant` ADD CONSTRAINT `Tenant_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Tenant', 'Tenant_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Landlord` ADD CONSTRAINT `Landlord_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Landlord', 'Landlord_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `KycDocument` ADD CONSTRAINT `KycDocument_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('KycDocument', 'KycDocument_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `KycDocument` ADD CONSTRAINT `KycDocument_landlord_id_fkey` FOREIGN KEY (`landlord_id`) REFERENCES `Landlord`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('KycDocument', 'KycDocument_landlord_id_fkey', 'landlord_id', 'Landlord', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `KycDocument` ADD CONSTRAINT `KycDocument_doc_type_id_fkey` FOREIGN KEY (`doc_type_id`) REFERENCES `KycDocType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('KycDocument', 'KycDocument_doc_type_id_fkey', 'doc_type_id', 'KycDocType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `KycDocType` ADD CONSTRAINT `KycDocType_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('KycDocType', 'KycDocType_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Country` ADD CONSTRAINT `Country_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Country', 'Country_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `State` ADD CONSTRAINT `State_country_id_fkey` FOREIGN KEY (`country_id`) REFERENCES `Country`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('State', 'State_country_id_fkey', 'country_id', 'Country', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `State` ADD CONSTRAINT `State_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('State', 'State_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Area` ADD CONSTRAINT `Area_state_id_fkey` FOREIGN KEY (`state_id`) REFERENCES `State`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Area', 'Area_state_id_fkey', 'state_id', 'State', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Area` ADD CONSTRAINT `Area_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Area', 'Area_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Building` ADD CONSTRAINT `Building_area_id_fkey` FOREIGN KEY (`area_id`) REFERENCES `Area`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Building', 'Building_area_id_fkey', 'area_id', 'Area', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Building` ADD CONSTRAINT `Building_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Building', 'Building_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Floor` ADD CONSTRAINT `Floor_building_id_fkey` FOREIGN KEY (`building_id`) REFERENCES `Building`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Floor', 'Floor_building_id_fkey', 'building_id', 'Building', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unit` ADD CONSTRAINT `unit_building_id_fkey` FOREIGN KEY (`building_id`) REFERENCES `Building`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unit', 'unit_building_id_fkey', 'building_id', 'Building', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unit` ADD CONSTRAINT `unit_floor_id_fkey` FOREIGN KEY (`floor_id`) REFERENCES `Floor`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unit', 'unit_floor_id_fkey', 'floor_id', 'Floor', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unit` ADD CONSTRAINT `unit_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unitType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unit', 'unit_unit_type_id_fkey', 'unit_type_id', 'unitType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unit` ADD CONSTRAINT `unit_owned_by_fkey` FOREIGN KEY (`owned_by`) REFERENCES `Landlord`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unit', 'unit_owned_by_fkey', 'owned_by', 'Landlord', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unit` ADD CONSTRAINT `unit_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unit', 'unit_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `UnitImage` ADD CONSTRAINT `UnitImage_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('UnitImage', 'UnitImage_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `UnitDocument` ADD CONSTRAINT `UnitDocument_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('UnitDocument', 'UnitDocument_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unitType` ADD CONSTRAINT `unitType_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unitType', 'unitType_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Amenity` ADD CONSTRAINT `Amenity_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Amenity', 'Amenity_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unitAmenity` ADD CONSTRAINT `unitAmenity_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unitAmenity', 'unitAmenity_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `unitAmenity` ADD CONSTRAINT `unitAmenity_amenity_id_fkey` FOREIGN KEY (`amenity_id`) REFERENCES `Amenity`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('unitAmenity', 'unitAmenity_amenity_id_fkey', 'amenity_id', 'Amenity', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Parking` ADD CONSTRAINT `Parking_building_id_fkey` FOREIGN KEY (`building_id`) REFERENCES `Building`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Parking', 'Parking_building_id_fkey', 'building_id', 'Building', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Parking` ADD CONSTRAINT `Parking_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Parking', 'Parking_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Vehicle` ADD CONSTRAINT `Vehicle_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Vehicle', 'Vehicle_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_salesman_id_fkey` FOREIGN KEY (`salesman_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_salesman_id_fkey', 'salesman_id', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_broker_id_fkey` FOREIGN KEY (`broker_id`) REFERENCES `Broker`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_broker_id_fkey', 'broker_id', 'Broker', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContract` ADD CONSTRAINT `RentalContract_previous_contract_id_fkey` FOREIGN KEY (`previous_contract_id`) REFERENCES `RentalContract`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContract', 'RentalContract_previous_contract_id_fkey', 'previous_contract_id', 'RentalContract', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_seller_id_fkey` FOREIGN KEY (`seller_id`) REFERENCES `Landlord`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_seller_id_fkey', 'seller_id', 'Landlord', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_buyer_id_fkey` FOREIGN KEY (`buyer_id`) REFERENCES `Landlord`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_buyer_id_fkey', 'buyer_id', 'Landlord', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_salesman_id_fkey` FOREIGN KEY (`salesman_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_salesman_id_fkey', 'salesman_id', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_broker_id_fkey` FOREIGN KEY (`broker_id`) REFERENCES `Broker`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_broker_id_fkey', 'broker_id', 'Broker', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContract` ADD CONSTRAINT `SalesContract_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContract', 'SalesContract_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContractunit` ADD CONSTRAINT `RentalContractunit_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `RentalContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContractunit', 'RentalContractunit_contract_id_fkey', 'contract_id', 'RentalContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalContractunit` ADD CONSTRAINT `RentalContractunit_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalContractunit', 'RentalContractunit_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContractunit` ADD CONSTRAINT `SalesContractunit_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `SalesContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContractunit', 'SalesContractunit_contract_id_fkey', 'contract_id', 'SalesContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `SalesContractunit` ADD CONSTRAINT `SalesContractunit_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('SalesContractunit', 'SalesContractunit_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ContractParking` ADD CONSTRAINT `ContractParking_rental_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `RentalContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ContractParking', 'ContractParking_rental_contract_id_fkey', 'contract_id', 'RentalContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ContractParking` ADD CONSTRAINT `ContractParking_sales_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `SalesContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ContractParking', 'ContractParking_sales_contract_id_fkey', 'contract_id', 'SalesContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ContractParking` ADD CONSTRAINT `ContractParking_parking_id_fkey` FOREIGN KEY (`parking_id`) REFERENCES `Parking`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ContractParking', 'ContractParking_parking_id_fkey', 'parking_id', 'Parking', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ContractParking` ADD CONSTRAINT `ContractParking_vehicle_id_fkey` FOREIGN KEY (`vehicle_id`) REFERENCES `Vehicle`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ContractParking', 'ContractParking_vehicle_id_fkey', 'vehicle_id', 'Vehicle', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Handover` ADD CONSTRAINT `Handover_rental_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `RentalContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Handover', 'Handover_rental_contract_id_fkey', 'contract_id', 'RentalContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Handover` ADD CONSTRAINT `Handover_sales_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `SalesContract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Handover', 'Handover_sales_contract_id_fkey', 'contract_id', 'SalesContract', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `HandoverDocument` ADD CONSTRAINT `HandoverDocument_handover_id_fkey` FOREIGN KEY (`handover_id`) REFERENCES `Handover`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('HandoverDocument', 'HandoverDocument_handover_id_fkey', 'handover_id', 'Handover', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `HandoverDocument` ADD CONSTRAINT `HandoverDocument_doc_type_id_fkey` FOREIGN KEY (`doc_type_id`) REFERENCES `KycDocType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('HandoverDocument', 'HandoverDocument_doc_type_id_fkey', 'doc_type_id', 'KycDocType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Receipt` ADD CONSTRAINT `Receipt_rental_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `RentalContract`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Receipt', 'Receipt_rental_contract_id_fkey', 'contract_id', 'RentalContract', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Receipt` ADD CONSTRAINT `Receipt_sales_contract_id_fkey` FOREIGN KEY (`contract_id`) REFERENCES `SalesContract`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Receipt', 'Receipt_sales_contract_id_fkey', 'contract_id', 'SalesContract', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Receipt` ADD CONSTRAINT `Receipt_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Receipt', 'Receipt_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Receipt` ADD CONSTRAINT `Receipt_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Receipt', 'Receipt_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Receipt` ADD CONSTRAINT `Receipt_invoice_id_fkey` FOREIGN KEY (`invoice_id`) REFERENCES `Invoice`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Receipt', 'Receipt_invoice_id_fkey', 'invoice_id', 'Invoice', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Payment` ADD CONSTRAINT `Payment_receipt_id_fkey` FOREIGN KEY (`receipt_id`) REFERENCES `Receipt`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Payment', 'Payment_receipt_id_fkey', 'receipt_id', 'Receipt', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Payment` ADD CONSTRAINT `Payment_payment_under_id_fkey` FOREIGN KEY (`payment_under_id`) REFERENCES `PaymentUnder`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Payment', 'Payment_payment_under_id_fkey', 'payment_under_id', 'PaymentUnder', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Cheque` ADD CONSTRAINT `Cheque_payment_id_fkey` FOREIGN KEY (`payment_id`) REFERENCES `Payment`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Cheque', 'Cheque_payment_id_fkey', 'payment_id', 'Payment', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PaymentUnder` ADD CONSTRAINT `PaymentUnder_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PaymentUnder', 'PaymentUnder_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Lead` ADD CONSTRAINT `Lead_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `LeadStatus`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Lead', 'Lead_status_id_fkey', 'status_id', 'LeadStatus', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Lead` ADD CONSTRAINT `Lead_activity_source_id_fkey` FOREIGN KEY (`activity_source_id`) REFERENCES `ActivitySource`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Lead', 'Lead_activity_source_id_fkey', 'activity_source_id', 'ActivitySource', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Lead` ADD CONSTRAINT `Lead_assigned_to_fkey` FOREIGN KEY (`assigned_to`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Lead', 'Lead_assigned_to_fkey', 'assigned_to', 'User', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Lead` ADD CONSTRAINT `Lead_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Lead', 'Lead_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Lead` ADD CONSTRAINT `Lead_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Lead', 'Lead_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadStatus` ADD CONSTRAINT `LeadStatus_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadStatus', 'LeadStatus_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ActivitySource` ADD CONSTRAINT `ActivitySource_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ActivitySource', 'ActivitySource_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadFollowup` ADD CONSTRAINT `LeadFollowup_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadFollowup', 'LeadFollowup_lead_id_fkey', 'lead_id', 'Lead', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadFollowup` ADD CONSTRAINT `LeadFollowup_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `LeadStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadFollowup', 'LeadFollowup_status_id_fkey', 'status_id', 'LeadStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadFollowup` ADD CONSTRAINT `LeadFollowup_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `FollowupType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadFollowup', 'LeadFollowup_type_id_fkey', 'type_id', 'FollowupType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadFollowup` ADD CONSTRAINT `LeadFollowup_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadFollowup', 'LeadFollowup_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadFollowup` ADD CONSTRAINT `LeadFollowup_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadFollowup', 'LeadFollowup_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `FollowupType` ADD CONSTRAINT `FollowupType_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('FollowupType', 'FollowupType_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredArea` ADD CONSTRAINT `LeadPreferredArea_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredArea', 'LeadPreferredArea_lead_id_fkey', 'lead_id', 'Lead', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredArea` ADD CONSTRAINT `LeadPreferredArea_area_id_fkey` FOREIGN KEY (`area_id`) REFERENCES `Area`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredArea', 'LeadPreferredArea_area_id_fkey', 'area_id', 'Area', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredunitType` ADD CONSTRAINT `LeadPreferredunitType_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredunitType', 'LeadPreferredunitType_lead_id_fkey', 'lead_id', 'Lead', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredunitType` ADD CONSTRAINT `LeadPreferredunitType_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unitType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredunitType', 'LeadPreferredunitType_unit_type_id_fkey', 'unit_type_id', 'unitType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredAmenity` ADD CONSTRAINT `LeadPreferredAmenity_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredAmenity', 'LeadPreferredAmenity_lead_id_fkey', 'lead_id', 'Lead', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `LeadPreferredAmenity` ADD CONSTRAINT `LeadPreferredAmenity_amenity_id_fkey` FOREIGN KEY (`amenity_id`) REFERENCES `Amenity`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('LeadPreferredAmenity', 'LeadPreferredAmenity_amenity_id_fkey', 'amenity_id', 'Amenity', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `RequestType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_type_id_fkey', 'type_id', 'RequestType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `RequestStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_status_id_fkey', 'status_id', 'RequestStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_landlord_id_fkey` FOREIGN KEY (`landlord_id`) REFERENCES `Landlord`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_landlord_id_fkey', 'landlord_id', 'Landlord', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Request` ADD CONSTRAINT `Request_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Request', 'Request_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RequestType` ADD CONSTRAINT `RequestType_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RequestType', 'RequestType_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RequestStatus` ADD CONSTRAINT `RequestStatus_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RequestStatus', 'RequestStatus_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `MaintenanceType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_type_id_fkey', 'type_id', 'MaintenanceType', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `MaintenanceStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_status_id_fkey', 'status_id', 'MaintenanceStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_landlord_id_fkey` FOREIGN KEY (`landlord_id`) REFERENCES `Landlord`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_landlord_id_fkey', 'landlord_id', 'Landlord', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_unit_id_fkey', 'unit_id', 'unit', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_assigned_to_fkey` FOREIGN KEY (`assigned_to`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_assigned_to_fkey', 'assigned_to', 'User', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Ticket` ADD CONSTRAINT `Ticket_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Ticket', 'Ticket_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `MaintenanceType` ADD CONSTRAINT `MaintenanceType_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('MaintenanceType', 'MaintenanceType_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `MaintenanceStatus` ADD CONSTRAINT `MaintenanceStatus_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('MaintenanceStatus', 'MaintenanceStatus_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `TicketComment` ADD CONSTRAINT `TicketComment_ticket_id_fkey` FOREIGN KEY (`ticket_id`) REFERENCES `Ticket`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('TicketComment', 'TicketComment_ticket_id_fkey', 'ticket_id', 'Ticket', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `TicketComment` ADD CONSTRAINT `TicketComment_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('TicketComment', 'TicketComment_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `TicketFollowup` ADD CONSTRAINT `TicketFollowup_ticket_id_fkey` FOREIGN KEY (`ticket_id`) REFERENCES `Ticket`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('TicketFollowup', 'TicketFollowup_ticket_id_fkey', 'ticket_id', 'Ticket', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `TicketFollowup` ADD CONSTRAINT `TicketFollowup_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `MaintenanceStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('TicketFollowup', 'TicketFollowup_status_id_fkey', 'status_id', 'MaintenanceStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `TicketFollowup` ADD CONSTRAINT `TicketFollowup_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('TicketFollowup', 'TicketFollowup_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Complaint` ADD CONSTRAINT `Complaint_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `ComplaintStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Complaint', 'Complaint_status_id_fkey', 'status_id', 'ComplaintStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Complaint` ADD CONSTRAINT `Complaint_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Complaint', 'Complaint_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Complaint` ADD CONSTRAINT `Complaint_landlord_id_fkey` FOREIGN KEY (`landlord_id`) REFERENCES `Landlord`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Complaint', 'Complaint_landlord_id_fkey', 'landlord_id', 'Landlord', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Complaint` ADD CONSTRAINT `Complaint_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Complaint', 'Complaint_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Complaint` ADD CONSTRAINT `Complaint_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Complaint', 'Complaint_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ComplaintStatus` ADD CONSTRAINT `ComplaintStatus_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ComplaintStatus', 'ComplaintStatus_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ComplaintFollowup` ADD CONSTRAINT `ComplaintFollowup_complaint_id_fkey` FOREIGN KEY (`complaint_id`) REFERENCES `Complaint`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ComplaintFollowup', 'ComplaintFollowup_complaint_id_fkey', 'complaint_id', 'Complaint', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ComplaintFollowup` ADD CONSTRAINT `ComplaintFollowup_status_id_fkey` FOREIGN KEY (`status_id`) REFERENCES `ComplaintStatus`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ComplaintFollowup', 'ComplaintFollowup_status_id_fkey', 'status_id', 'ComplaintStatus', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `ComplaintFollowup` ADD CONSTRAINT `ComplaintFollowup_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('ComplaintFollowup', 'ComplaintFollowup_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Announcement` ADD CONSTRAINT `Announcement_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Announcement', 'Announcement_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Announcement` ADD CONSTRAINT `Announcement_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Announcement', 'Announcement_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalApproval` ADD CONSTRAINT `RentalApproval_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalApproval', 'RentalApproval_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalApproval` ADD CONSTRAINT `RentalApproval_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalApproval', 'RentalApproval_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalApproval` ADD CONSTRAINT `RentalApproval_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalApproval', 'RentalApproval_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalApproval` ADD CONSTRAINT `RentalApproval_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalApproval', 'RentalApproval_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `RentalApproval` ADD CONSTRAINT `RentalApproval_approved_by_fkey` FOREIGN KEY (`approved_by`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('RentalApproval', 'RentalApproval_approved_by_fkey', 'approved_by', 'User', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `CompanySettings` ADD CONSTRAINT `CompanySettings_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('CompanySettings', 'CompanySettings_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `Broker` ADD CONSTRAINT `Broker_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('Broker', 'Broker_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_lead_id_fkey', 'lead_id', 'Lead', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_tenant_id_fkey` FOREIGN KEY (`tenant_id`) REFERENCES `Tenant`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_tenant_id_fkey', 'tenant_id', 'Tenant', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_assigned_to_fkey` FOREIGN KEY (`assigned_to`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_assigned_to_fkey', 'assigned_to', 'User', 'id', 'SET NULL', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyViewing` ADD CONSTRAINT `PropertyViewing_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyViewing', 'PropertyViewing_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `UnitFavorite` ADD CONSTRAINT `UnitFavorite_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('UnitFavorite', 'UnitFavorite_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `UnitFavorite` ADD CONSTRAINT `UnitFavorite_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('UnitFavorite', 'UnitFavorite_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `UnitFavorite` ADD CONSTRAINT `UnitFavorite_lead_id_fkey` FOREIGN KEY (`lead_id`) REFERENCES `Lead`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('UnitFavorite', 'UnitFavorite_lead_id_fkey', 'lead_id', 'Lead', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInspection` ADD CONSTRAINT `PropertyInspection_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInspection', 'PropertyInspection_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInspection` ADD CONSTRAINT `PropertyInspection_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInspection', 'PropertyInspection_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInspection` ADD CONSTRAINT `PropertyInspection_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInspection', 'PropertyInspection_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyValuation` ADD CONSTRAINT `PropertyValuation_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyValuation', 'PropertyValuation_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyValuation` ADD CONSTRAINT `PropertyValuation_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyValuation', 'PropertyValuation_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyValuation` ADD CONSTRAINT `PropertyValuation_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyValuation', 'PropertyValuation_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInsurance` ADD CONSTRAINT `PropertyInsurance_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInsurance', 'PropertyInsurance_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInsurance` ADD CONSTRAINT `PropertyInsurance_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInsurance', 'PropertyInsurance_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyInsurance` ADD CONSTRAINT `PropertyInsurance_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyInsurance', 'PropertyInsurance_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyMaintenanceHistory` ADD CONSTRAINT `PropertyMaintenanceHistory_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyMaintenanceHistory', 'PropertyMaintenanceHistory_unit_id_fkey', 'unit_id', 'unit', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyMaintenanceHistory` ADD CONSTRAINT `PropertyMaintenanceHistory_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyMaintenanceHistory', 'PropertyMaintenanceHistory_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyMaintenanceHistory` ADD CONSTRAINT `PropertyMaintenanceHistory_created_by_fkey` FOREIGN KEY (`created_by`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyMaintenanceHistory', 'PropertyMaintenanceHistory_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyNotification` ADD CONSTRAINT `PropertyNotification_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyNotification', 'PropertyNotification_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyNotification` ADD CONSTRAINT `PropertyNotification_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyNotification', 'PropertyNotification_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyNotification` ADD CONSTRAINT `PropertyNotification_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyNotification', 'PropertyNotification_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyAnalytics` ADD CONSTRAINT `PropertyAnalytics_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyAnalytics', 'PropertyAnalytics_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `PropertyAnalytics` ADD CONSTRAINT `PropertyAnalytics_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `Company`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('PropertyAnalytics', 'PropertyAnalytics_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `_PermissionToRole` ADD CONSTRAINT `_PermissionToRole_A_fkey` FOREIGN KEY (`A`) REFERENCES `Permission`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('_PermissionToRole', '_PermissionToRole_A_fkey', 'A', 'Permission', 'id', 'CASCADE', 'CASCADE');
 
 -- AddForeignKey
-ALTER TABLE `_PermissionToRole` ADD CONSTRAINT `_PermissionToRole_B_fkey` FOREIGN KEY (`B`) REFERENCES `Role`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+CALL AddForeignKeyIfNotExists('_PermissionToRole', '_PermissionToRole_B_fkey', 'B', 'Role', 'id', 'CASCADE', 'CASCADE');
 
 
 -- ============================================================================
 -- END OF SCHEMA DEFINITION
 -- ============================================================================
+
+-- ============================================================================
+-- SAFE MODE: HELPER PROCEDURE FOR FOREIGN KEY CONSTRAINTS
+-- ============================================================================
+-- This procedure safely adds a foreign key constraint only if it doesn't exist
+-- ============================================================================
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS `AddForeignKeyIfNotExists`$$
+
+CREATE PROCEDURE `AddForeignKeyIfNotExists`(
+    IN p_table_name VARCHAR(64),
+    IN p_constraint_name VARCHAR(64),
+    IN p_column_name VARCHAR(64),
+    IN p_referenced_table VARCHAR(64),
+    IN p_referenced_column VARCHAR(64),
+    IN p_on_delete_action VARCHAR(20),
+    IN p_on_update_action VARCHAR(20)
+)
+BEGIN
+    DECLARE constraint_exists INT DEFAULT 0;
+    DECLARE db_name VARCHAR(64);
+    
+    SET db_name = DATABASE();
+    
+    -- Check if constraint already exists
+    SELECT COUNT(*) INTO constraint_exists
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = db_name
+      AND TABLE_NAME = p_table_name
+      AND CONSTRAINT_NAME = p_constraint_name
+      AND CONSTRAINT_TYPE = 'FOREIGN KEY';
+    
+    -- Add constraint only if it doesn't exist
+    IF constraint_exists = 0 THEN
+        SET @sql = CONCAT(
+            'ALTER TABLE `', p_table_name, '` ',
+            'ADD CONSTRAINT `', p_constraint_name, '` ',
+            'FOREIGN KEY (`', p_column_name, '`) ',
+            'REFERENCES `', p_referenced_table, '`(`', p_referenced_column, '`) ',
+            'ON DELETE ', p_on_delete_action, ' ',
+            'ON UPDATE ', p_on_update_action
+        );
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================================================
+-- SAFE MODE: MIGRATION STATEMENTS FOR EXISTING DATABASES
+-- ============================================================================
+-- These ALTER TABLE statements safely add new columns to existing tables
+-- without losing data. They will only execute if the columns don't exist.
+-- Foreign key constraints are handled by the AddForeignKeyIfNotExists procedure
+-- above, which checks for existence before adding.
+-- ============================================================================
+
+-- Add is_active column to Tenant table if it doesn't exist
+SET @dbname = DATABASE();
+SET @tablename = 'Tenant';
+SET @columnname = 'is_active';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1', -- Column exists, do nothing
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NOT NULL DEFAULT ''true'' AFTER `address`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add is_active column to Landlord table if it doesn't exist
+SET @dbname = DATABASE();
+SET @tablename = 'Landlord';
+SET @columnname = 'is_active';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1', -- Column exists, do nothing
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NOT NULL DEFAULT ''true'' AFTER `address`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
 
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;

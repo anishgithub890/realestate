@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { useEffect } from 'react';
 
-const tenantSchema = z.object({
+const landlordSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   phone_no: z.string().optional(),
@@ -35,16 +35,16 @@ const tenantSchema = z.object({
   address: z.string().optional(),
 });
 
-type TenantFormData = z.infer<typeof tenantSchema>;
+type LandlordFormData = z.infer<typeof landlordSchema>;
 
-interface TenantFormProps {
+interface LandlordFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tenant?: any;
+  landlord?: any;
   mode: 'create' | 'edit';
 }
 
-export function TenantForm({ open, onOpenChange, tenant, mode }: TenantFormProps) {
+export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
@@ -54,36 +54,36 @@ export function TenantForm({ open, onOpenChange, tenant, mode }: TenantFormProps
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<TenantFormData>({
-    resolver: zodResolver(tenantSchema),
+  } = useForm<LandlordFormData>({
+    resolver: zodResolver(landlordSchema),
   });
 
-  // Reset form when tenant prop changes
+  // Reset form when landlord prop changes
   useEffect(() => {
-    if (tenant) {
+    if (landlord) {
       reset({
-        name: tenant.name,
-        email: tenant.email,
-        phone_no: tenant.phone_no || '',
-        mobile_no: tenant.mobile_no,
-        emirates_id: tenant.emirates_id,
-        emirates_id_expiry: tenant.emirates_id_expiry
-          ? new Date(tenant.emirates_id_expiry).toISOString().split('T')[0]
+        name: landlord.name,
+        email: landlord.email,
+        phone_no: landlord.phone_no || '',
+        mobile_no: landlord.mobile_no,
+        emirates_id: landlord.emirates_id,
+        emirates_id_expiry: landlord.emirates_id_expiry
+          ? new Date(landlord.emirates_id_expiry).toISOString().split('T')[0]
           : '',
-        residential: tenant.residential || '',
-        nationality: tenant.nationality || '',
-        passport_no: tenant.passport_no || '',
-        passport_expiry: tenant.passport_expiry
-          ? new Date(tenant.passport_expiry).toISOString().split('T')[0]
+        residential: landlord.residential || '',
+        nationality: landlord.nationality || '',
+        passport_no: landlord.passport_no || '',
+        passport_expiry: landlord.passport_expiry
+          ? new Date(landlord.passport_expiry).toISOString().split('T')[0]
           : '',
-        address: tenant.address || '',
+        address: landlord.address || '',
       });
     } else {
       reset({});
     }
-  }, [tenant, reset]);
+  }, [landlord, reset]);
 
-  const onSubmit = async (data: TenantFormData) => {
+  const onSubmit = async (data: LandlordFormData) => {
     try {
       if (mode === 'create') {
         // Include company_id from authenticated user
@@ -91,25 +91,25 @@ export function TenantForm({ open, onOpenChange, tenant, mode }: TenantFormProps
           ...data,
           company_id: currentUser?.company_id,
         };
-        await api.post('/tenants', payload);
+        await api.post('/landlords', payload);
         toast({
           title: 'Success',
-          description: 'Tenant created successfully',
+          description: 'Landlord created successfully',
         });
       } else {
-        await api.put(`/tenants/${tenant.id}`, data);
+        await api.put(`/landlords/${landlord.id}`, data);
         toast({
           title: 'Success',
-          description: 'Tenant updated successfully',
+          description: 'Landlord updated successfully',
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+      queryClient.invalidateQueries({ queryKey: ['landlords'] });
       onOpenChange(false);
       reset();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.response?.data?.error || 'Failed to save tenant',
+        description: error.response?.data?.error || 'Failed to save landlord',
         variant: 'destructive',
       });
     }
@@ -119,11 +119,11 @@ export function TenantForm({ open, onOpenChange, tenant, mode }: TenantFormProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{mode === 'create' ? 'Create Tenant' : 'Edit Tenant'}</DialogTitle>
+          <DialogTitle>{mode === 'create' ? 'Create Landlord' : 'Edit Landlord'}</DialogTitle>
           <DialogDescription>
             {mode === 'create'
-              ? 'Add a new tenant to the system'
-              : 'Update tenant information'}
+              ? 'Add a new landlord to the system'
+              : 'Update landlord information'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

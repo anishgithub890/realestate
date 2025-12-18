@@ -218,6 +218,7 @@ model Tenant {
   passport_expiry    DateTime
   fax                String?
   address            String
+  is_active          String            @default("true")
   company_id         Int
   created_at         DateTime          @default(now())
   complaints         Complaint[]
@@ -247,6 +248,7 @@ model Landlord {
   passport_expiry    DateTime
   fax                String?
   address            String
+  is_active          String          @default("true")
   company_id         Int
   created_at         DateTime        @default(now())
   complaints         Complaint[]
