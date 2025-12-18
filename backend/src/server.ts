@@ -15,6 +15,7 @@ import brokerRoutes from './routes/brokerRoutes';
 import propertyViewingRoutes from './routes/propertyViewingRoutes';
 import propertyAdvancedRoutes from './routes/propertyAdvancedRoutes';
 import contractRoutes from './routes/contractRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 
 const app = express();
 
@@ -101,6 +102,7 @@ app.get(`${config.API_PREFIX}`, (_req: Request, res: Response) => {
         contracts: '/api/rental-contracts, /api/sales-contracts',
         viewings: '/api/viewings/*',
         brokers: '/api/brokers/*',
+        payments: '/api/payments/*',
         '2fa': '/api/2fa/*',
         sessions: '/api/sessions/*',
         providers: '/api/providers/*',
@@ -123,6 +125,7 @@ app.use(`${config.API_PREFIX}/brokers`, brokerRoutes);
 app.use(`${config.API_PREFIX}/viewings`, propertyViewingRoutes);
 app.use(`${config.API_PREFIX}`, propertyAdvancedRoutes);
 app.use(`${config.API_PREFIX}`, contractRoutes);
+app.use(`${config.API_PREFIX}/payments`, paymentRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

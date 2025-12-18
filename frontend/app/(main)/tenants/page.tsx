@@ -368,23 +368,6 @@ export default function TenantsPage() {
         </div>
 
         <div className="p-4">
-          {/* Pagination Info */}
-          {pagination && (
-            <div className="mb-4 flex items-center justify-between text-sm text-gray-600">
-              <div>
-                Showing <span className="font-medium">{((pagination.page || 1) - 1) * (pagination.limit || 10) + 1}</span> to{' '}
-                <span className="font-medium">
-                  {Math.min((pagination.page || 1) * (pagination.limit || 10), pagination.total || 0)}
-                </span>{' '}
-                of <span className="font-medium">{pagination.total || 0}</span> tenants
-              </div>
-              <div>
-                Page <span className="font-medium">{pagination.page || 1}</span> of{' '}
-                <span className="font-medium">{pagination.totalPages || 1}</span>
-              </div>
-            </div>
-          )}
-
           <DataView
             data={tenants}
             columns={columns}

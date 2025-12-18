@@ -34,3 +34,28 @@ export const validateUserUpdate = [
   body('is_active').optional().isIn(['true', 'false']).withMessage('is_active must be true or false'),
 ];
 
+export const validatePaymentCreate = [
+  body('receipt_id').isInt({ min: 1 }).withMessage('Receipt ID is required and must be a positive integer'),
+  body('payment_type').isIn(['cash', 'cheque', 'bank_transfer', 'credit_card', 'debit_card', 'other']).withMessage('Invalid payment type'),
+  body('amount_incl').isFloat({ min: 0 }).withMessage('Amount must be a positive number'),
+  body('status').isIn(['pending', 'completed', 'failed', 'returned', 'cancelled']).withMessage('Invalid payment status'),
+  body('instrument_no').optional().isString().withMessage('Instrument number must be a string'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('vat_amount').optional().isFloat({ min: 0 }).withMessage('VAT amount must be a positive number'),
+  body('payment_under_id').optional().isInt({ min: 1 }).withMessage('Payment under ID must be a positive integer'),
+  body('cheque').optional().isObject().withMessage('Cheque must be an object'),
+  body('cheque.date').optional().isISO8601().withMessage('Cheque date must be a valid date'),
+  body('cheque.bank_name').optional().isString().withMessage('Bank name must be a string'),
+];
+
+export const validatePaymentUpdate = [
+  body('payment_type').optional().isIn(['cash', 'cheque', 'bank_transfer', 'credit_card', 'debit_card', 'other']).withMessage('Invalid payment type'),
+  body('amount_incl').optional().isFloat({ min: 0 }).withMessage('Amount must be a positive number'),
+  body('status').optional().isIn(['pending', 'completed', 'failed', 'returned', 'cancelled']).withMessage('Invalid payment status'),
+  body('instrument_no').optional().isString().withMessage('Instrument number must be a string'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('vat_amount').optional().isFloat({ min: 0 }).withMessage('VAT amount must be a positive number'),
+  body('payment_under_id').optional().isInt({ min: 1 }).withMessage('Payment under ID must be a positive integer'),
+  body('cheque').optional().isObject().withMessage('Cheque must be an object'),
+];
+

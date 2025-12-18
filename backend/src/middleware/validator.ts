@@ -9,6 +9,8 @@ export {
   validateLogin,
   validateUserCreate,
   validateUserUpdate,
+  validatePaymentCreate,
+  validatePaymentUpdate,
 } from '../utils/validation';
 
 export const validate = (validations: ValidationChain[]) => {
