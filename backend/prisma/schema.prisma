@@ -1,0 +1,1440 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTHENTICATION & AUTHORIZATION ====================
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  password      String?
+  phone          String?
+  is_admin      String    @default("false")
+  is_active     String    @default("true")
+  role_id       Int?
+  company_id    Int
+  // Two-Step Verification
+  two_factor_enabled Boolean @default(false)
+  two_factor_secret  String?
+  two_factor_backup_codes String? // JSON array of backup codes
+  // Email verification
+  email_verified Boolean @default(false)
+  email_verification_token String?
+  email_verification_expires DateTime?
+  // Password reset
+  password_reset_token String?
+  password_reset_expires DateTime?
+  // Last login tracking
+  last_login_at DateTime?
+  last_login_ip String?
+  // Profile
+  avatar_url    String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  
+  role          Role?     @relation(fields: [role_id], references: [id])
+  company       Company   @relation(fields: [company_id], references: [id])
+  oauth_tokens  OAuthToken[]
+  sessions      Session[]
+  provider_accounts ProviderAccount[]
+  
+  // Relations
+  created_rental_contracts  RentalContract[] @relation("CreatedRentalContracts")
+  created_sales_contracts    SalesContract[] @relation("CreatedSalesContracts")
+  created_receipts           Receipt[]
+  created_leads              Lead[] @relation("CreatedLeads")
+  assigned_leads             Lead[] @relation("AssignedLeads")
+  created_requests           Request[]
+  created_tickets            Ticket[] @relation("CreatedTickets")
+  assigned_tickets           Ticket[] @relation("AssignedTickets")
+  created_complaints         Complaint[]
+  created_announcements      Announcement[]
+  created_approvals          RentalApproval[] @relation("CreatedApprovals")
+  approved_approvals          RentalApproval[] @relation("ApprovedApprovals")
+  created_followups          LeadFollowup[]
+  ticket_comments            TicketComment[]
+  ticket_followups           TicketFollowup[]
+  complaint_followups        ComplaintFollowup[]
+  salesman_rental_contracts   RentalContract[] @relation("SalesmanRental")
+  salesman_sales_contracts   SalesContract[] @relation("SalesmanSales")
+  user_favorites             UnitFavorite[] @relation("UserFavorites")
+  assigned_viewings          PropertyViewing[] @relation("AssignedViewings")
+  created_viewings           PropertyViewing[] @relation("CreatedViewings")
+  created_inspections        PropertyInspection[]
+  created_valuations          PropertyValuation[]
+  created_insurance           PropertyInsurance[]
+  created_maintenance_history PropertyMaintenanceHistory[]
+  notifications              PropertyNotification[] @relation("UserNotifications")
+  
+  @@index([email])
+  @@index([company_id])
+  @@index([role_id])
+  @@index([email_verified])
+  @@index([two_factor_enabled])
+}
+
+model Company {
+  id            Int       @id @default(autoincrement())
+  name          String
+  hosting_id    Int?
+  created_at    DateTime  @default(now())
+  
+  users         User[]
+  tenants       Tenant[]
+  landlords     Landlord[]
+  buildings     Building[]
+  units         unit[]
+  settings      CompanySettings?
+  hosting       Hosting?  @relation(fields: [hosting_id], references: [id])
+  roles         Role[]
+  permissions   Permission[]
+  countries     Country[]
+  states        State[]
+  areas         Area[]
+  unit_types    unitType[]
+  amenities     Amenity[]
+  parkings      Parking[]
+  contracts     RentalContract[]
+  sales_contracts SalesContract[]
+  receipts      Receipt[]
+  leads         Lead[]
+  requests      Request[]
+  tickets       Ticket[]
+  complaints    Complaint[]
+  announcements Announcement[]
+  approvals     RentalApproval[]
+  vehicles      Vehicle[]
+  payment_under PaymentUnder[]
+  kyc_doc_types KycDocType[]
+  lead_statuses LeadStatus[]
+  activity_sources ActivitySource[]
+  followup_types FollowupType[]
+  maintenance_types MaintenanceType[]
+  maintenance_statuses MaintenanceStatus[]
+  request_types RequestType[]
+  request_statuses RequestStatus[]
+  complaint_statuses ComplaintStatus[]
+  brokers       Broker[]
+  viewings      PropertyViewing[]
+  notifications PropertyNotification[]
+  analytics     PropertyAnalytics[]
+  lead_followups LeadFollowup[] @relation("LeadFollowupCompany")
+  inspections   PropertyInspection[] @relation("PropertyInspectionCompany")
+  valuations    PropertyValuation[] @relation("PropertyValuationCompany")
+  insurances     PropertyInsurance[] @relation("PropertyInsuranceCompany")
+  maintenance_history PropertyMaintenanceHistory[] @relation("PropertyMaintenanceHistoryCompany")
+}
+
+model Hosting {
+  id            Int       @id @default(autoincrement())
+  name          String
+  companies     Company[]
+}
+
+model Role {
+  id            Int       @id @default(autoincrement())
+  name          String
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  permissions   Permission[]
+  users         User[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model Permission {
+  id            Int       @id @default(autoincrement())
+  name          String
+  category      String
+  description   String?
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  roles         Role[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model OAuthToken {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  access_token  String    @unique
+  refresh_token String?  @unique
+  expires_at    DateTime
+  created_at    DateTime  @default(now())
+  
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([access_token])
+}
+
+// ==================== SESSION MANAGEMENT ====================
+
+model Session {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  session_token String    @unique
+  ip_address    String?
+  user_agent    String?
+  device_type   String?   // "mobile", "desktop", "tablet"
+  device_name   String?
+  is_active     Boolean   @default(true)
+  expires_at    DateTime
+  last_activity DateTime  @default(now())
+  created_at    DateTime  @default(now())
+  
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([session_token])
+  @@index([expires_at])
+}
+
+// ==================== PROVIDER SIGNUP (OAuth) ====================
+
+model ProviderAccount {
+  id                Int       @id @default(autoincrement())
+  user_id           Int
+  provider          String    // "google", "facebook", "apple", "microsoft"
+  provider_account_id String  // External provider user ID
+  provider_email    String?
+  provider_name     String?
+  access_token      String?
+  refresh_token     String?
+  expires_at        DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, provider_account_id], name: "provider_provider_account_id")
+  @@index([user_id])
+  @@index([provider])
+}
+
+// ==================== TENANT MANAGEMENT ====================
+
+model Tenant {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  email               String
+  phone_no            String
+  mobile_no           String
+  emirates_id         String
+  emirates_id_expiry  DateTime?
+  residential         String
+  nationality         String
+  passport_no         String
+  passport_expiry     DateTime
+  fax                 String?
+  address             String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+  contracts           RentalContract[]
+  kyc_documents       KycDocument[]
+  requests            Request[]
+  complaints          Complaint[]
+  tickets             Ticket[]
+  approvals           RentalApproval[]
+  viewings            PropertyViewing[]
+  
+  @@index([email])
+  @@index([company_id])
+}
+
+// ==================== LANDLORD MANAGEMENT ====================
+
+model Landlord {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  email               String
+  phone_no            String
+  mobile_no           String
+  emirates_id         String
+  emirates_id_expiry  DateTime?
+  residential         String
+  nationality         String
+  passport_no         String
+  passport_expiry     DateTime
+  fax                 String?
+  address             String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+  units               unit[]
+  kyc_documents       KycDocument[]
+  sales_contracts     SalesContract[] @relation("SellerContracts")
+  buyer_contracts     SalesContract[] @relation("BuyerContracts")
+  requests            Request[]
+  complaints          Complaint[]
+  tickets             Ticket[]
+  
+  @@index([email])
+  @@index([company_id])
+}
+
+// ==================== KYC DOCUMENTS ====================
+
+model KycDocument {
+  id            Int       @id @default(autoincrement())
+  tenant_id     Int?
+  landlord_id   Int?
+  doc_type_id   Int
+  path          String
+  created_at    DateTime  @default(now())
+  
+  tenant        Tenant?   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  landlord      Landlord? @relation(fields: [landlord_id], references: [id], onDelete: Cascade)
+  doc_type      KycDocType @relation(fields: [doc_type_id], references: [id])
+  
+  @@index([tenant_id])
+  @@index([landlord_id])
+}
+
+model KycDocType {
+  id            Int       @id @default(autoincrement())
+  name          String
+  is_mandatory  String    @default("false")
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  documents     KycDocument[]
+  handover_docs HandoverDocument[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+// ==================== PROPERTY MANAGEMENT ====================
+
+model Country {
+  id            Int       @id @default(autoincrement())
+  name          String
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  states        State[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model State {
+  id              Int       @id @default(autoincrement())
+  name            String
+  authorative_name String?
+  country_id      Int
+  company_id      Int
+  created_at      DateTime  @default(now())
+  
+  country         Country   @relation(fields: [country_id], references: [id])
+  areas           Area[]
+  company         Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([country_id])
+  @@index([company_id])
+}
+
+model Area {
+  id            Int       @id @default(autoincrement())
+  name          String
+  state_id      Int
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  state         State     @relation(fields: [state_id], references: [id])
+  buildings     Building[]
+  lead_preferences LeadPreferredArea[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([state_id])
+  @@index([company_id])
+}
+
+model Building {
+  id              Int       @id @default(autoincrement())
+  name            String
+  completion_date DateTime?
+  is_exempt       String    @default("false")
+  status          String    @default("active")
+  area_id         Int
+  company_id      Int
+  created_at      DateTime  @default(now())
+  
+  area            Area      @relation(fields: [area_id], references: [id])
+  company         Company   @relation(fields: [company_id], references: [id])
+  floors          Floor[]
+  units           unit[]
+  parkings        Parking[]
+  
+  @@index([area_id])
+  @@index([company_id])
+}
+
+model Floor {
+  id            Int       @id @default(autoincrement())
+  name          String
+  building_id   Int
+  created_at    DateTime  @default(now())
+  
+  building      Building  @relation(fields: [building_id], references: [id], onDelete: Cascade)
+  units         unit[]
+  
+  @@index([building_id])
+}
+
+model unit {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  gross_area_in_sqft  Float
+  ownership           String
+  basic_rent          Float?
+  basic_sale_value    Float?
+  is_exempt           String    @default("false")
+  premise_no          String
+  status              String    @default("available")
+  property_type       String
+  no_of_bathrooms     Int
+  no_of_bedrooms       Int?
+  no_of_parkings      Int?
+  // Dubai Real Estate Specific
+  ejari_number        String?   // Ejari registration number
+  ejari_expiry        DateTime? // Ejari expiry date
+  dewa_account        String?   // DEWA account number
+  municipality_fees   Float?   // Annual municipality fees
+  // Property Details
+  furnished_type      String?   // "furnished", "semi-furnished", "unfurnished"
+  view_type           String?   // "sea", "city", "park", "pool"
+  floor_number        Int?
+  total_floors        Int?
+  year_built          Int?
+  // Listing & Marketing
+  listing_type        String?   // "rent", "sale", "both"
+  is_featured         Boolean   @default(false)
+  is_verified         Boolean   @default(false)
+  virtual_tour_url    String?   // 360 virtual tour URL
+  description         String?   @db.Text
+  // Location
+  latitude            Float?
+  longitude           Float?
+  building_id         Int
+  floor_id            Int
+  unit_type_id        Int
+  owned_by            Int?
+  company_id          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  building            Building   @relation(fields: [building_id], references: [id])
+  floor               Floor      @relation(fields: [floor_id], references: [id])
+  unit_type           unitType   @relation(fields: [unit_type_id], references: [id])
+  landlord            Landlord?  @relation(fields: [owned_by], references: [id])
+  company             Company    @relation(fields: [company_id], references: [id])
+  amenities           unitAmenity[]
+  images              UnitImage[]
+  documents           UnitDocument[]
+  rental_contracts    RentalContractunit[]
+  sales_contracts     SalesContractunit[]
+  tickets             Ticket[]
+  approvals           RentalApproval[]
+  viewings            PropertyViewing[]
+  favorites           UnitFavorite[]
+  inspections         PropertyInspection[]
+  valuations          PropertyValuation[]
+  insurance           PropertyInsurance[]
+  maintenance_history PropertyMaintenanceHistory[]
+  notifications       PropertyNotification[] @relation("UnitNotifications")
+  analytics           PropertyAnalytics[] @relation("UnitAnalytics")
+  
+  @@index([building_id])
+  @@index([floor_id])
+  @@index([unit_type_id])
+  @@index([company_id])
+  @@index([status])
+  @@index([ejari_number])
+  @@index([is_featured])
+  @@index([listing_type])
+}
+
+// ==================== UNIT IMAGES ====================
+
+model UnitImage {
+  id            Int       @id @default(autoincrement())
+  unit_id       Int
+  image_url     String
+  image_type    String?   // "main", "interior", "exterior", "amenity", "floor_plan", "virtual_tour"
+  caption       String?
+  display_order Int       @default(0)
+  is_primary    Boolean   @default(false)
+  created_at    DateTime  @default(now())
+  
+  unit          unit      @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+  
+  @@index([unit_id])
+  @@index([is_primary])
+}
+
+// ==================== UNIT DOCUMENTS ====================
+
+model UnitDocument {
+  id            Int       @id @default(autoincrement())
+  unit_id       Int
+  doc_type      String    // "title_deed", "ejari", "dewa_bill", "municipality", "other"
+  document_url  String
+  document_name String?
+  expiry_date   DateTime?
+  created_at    DateTime  @default(now())
+  
+  unit          unit      @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+  
+  @@index([unit_id])
+  @@index([doc_type])
+}
+
+model unitType {
+  id            Int       @id @default(autoincrement())
+  name          String
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  units         unit[]
+  lead_preferences LeadPreferredunitType[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model Amenity {
+  id            Int       @id @default(autoincrement())
+  name          String
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  unit_amenities unitAmenity[]
+  lead_preferences LeadPreferredAmenity[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model unitAmenity {
+  id            Int       @id @default(autoincrement())
+  unit_id      Int
+  amenity_id   Int
+  
+  unit         unit      @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+  amenity      Amenity   @relation(fields: [amenity_id], references: [id], onDelete: Cascade)
+  
+  @@unique([unit_id, amenity_id])
+}
+
+model Parking {
+  id            Int       @id @default(autoincrement())
+  name          String
+  building_id   Int
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  building      Building  @relation(fields: [building_id], references: [id])
+  contracts     ContractParking[]
+  company       Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([building_id])
+  @@index([company_id])
+}
+
+model Vehicle {
+  id            Int       @id @default(autoincrement())
+  vehicle_no    String
+  vehicle_type  String?
+  company_id    Int
+  created_at    DateTime  @default(now())
+  
+  company       Company   @relation(fields: [company_id], references: [id])
+  parkings      ContractParking[]
+  
+  @@index([company_id])
+}
+
+// ==================== CONTRACT MANAGEMENT ====================
+
+model RentalContract {
+  id                  Int       @id @default(autoincrement())
+  contract_no         String    @unique
+  contract_date       DateTime
+  from_date           DateTime
+  to_date             DateTime
+  amount              Float
+  security_amount     Float
+  service_amount      Float
+  payment_terms       String
+  grace_period        String?
+  tentative_move_in   DateTime
+  vat_details         String?
+  payment_method      String
+  preclose_date       DateTime?
+  preclose_reason     String?
+  vat_amount          Float?
+  management_fee      Float?
+  previous_contract_id Int?
+  // Dubai Real Estate - Ejari
+  ejari_registered    Boolean   @default(false)
+  ejari_number        String?
+  ejari_registration_date DateTime?
+  ejari_expiry_date   DateTime?
+  // Commission
+  agent_commission    Float?
+  broker_commission   Float?
+  commission_paid     Boolean   @default(false)
+  tenant_id           Int
+  salesman_id         Int
+  broker_id           Int?      // Real estate broker/agent
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  tenant              Tenant    @relation(fields: [tenant_id], references: [id])
+  salesman            User      @relation("SalesmanRental", fields: [salesman_id], references: [id])
+  broker              Broker?   @relation("BrokerRental", fields: [broker_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation("CreatedRentalContracts", fields: [created_by], references: [id])
+  units               RentalContractunit[]
+  parkings            ContractParking[] @relation("RentalContractParking")
+  receipts            Receipt[] @relation("RentalContractReceipt")
+  handover            Handover? @relation("RentalContractHandover")
+  previous_contract   RentalContract? @relation("ContractRenewals", fields: [previous_contract_id], references: [id])
+  renewed_contracts   RentalContract[] @relation("ContractRenewals")
+  
+  @@index([contract_no])
+  @@index([tenant_id])
+  @@index([company_id])
+  @@index([ejari_number])
+}
+
+model SalesContract {
+  id                  Int       @id @default(autoincrement())
+  contract_no         String    @unique
+  contract_date       DateTime
+  amount              Float
+  service_amount      Float
+  payment_terms       String
+  status              String?
+  // Commission
+  agent_commission    Float?
+  broker_commission   Float?
+  commission_paid     Boolean   @default(false)
+  seller_id           Int
+  buyer_id            Int
+  salesman_id         Int
+  broker_id           Int?      // Real estate broker/agent
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  seller              Landlord  @relation("SellerContracts", fields: [seller_id], references: [id])
+  buyer               Landlord  @relation("BuyerContracts", fields: [buyer_id], references: [id])
+  salesman            User      @relation("SalesmanSales", fields: [salesman_id], references: [id])
+  broker              Broker?   @relation("BrokerSales", fields: [broker_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation("CreatedSalesContracts", fields: [created_by], references: [id])
+  units               SalesContractunit[]
+  parkings            ContractParking[] @relation("SalesContractParking")
+  receipts            Receipt[] @relation("SalesContractReceipt")
+  handover            Handover? @relation("SalesContractHandover")
+  
+  @@index([contract_no])
+  @@index([seller_id])
+  @@index([buyer_id])
+  @@index([company_id])
+}
+
+model RentalContractunit {
+  id                  Int       @id @default(autoincrement())
+  contract_id         Int
+  unit_id             Int
+  
+  contract            RentalContract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+  unit                unit           @relation(fields: [unit_id], references: [id])
+  
+  @@unique([contract_id, unit_id])
+}
+
+model SalesContractunit {
+  id                  Int       @id @default(autoincrement())
+  contract_id         Int
+  unit_id             Int
+  
+  contract            SalesContract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+  unit                unit         @relation(fields: [unit_id], references: [id])
+  
+  @@unique([contract_id, unit_id])
+}
+
+model ContractParking {
+  id                  Int       @id @default(autoincrement())
+  contract_id         Int
+  contract_type       String    // "rental" or "sales"
+  parking_id          Int
+  vehicle_id          Int?
+  
+  rental_contract     RentalContract? @relation("RentalContractParking", fields: [contract_id], references: [id], onDelete: Cascade, map: "ContractParking_rental_contract_id_fkey")
+  sales_contract      SalesContract?  @relation("SalesContractParking", fields: [contract_id], references: [id], onDelete: Cascade, map: "ContractParking_sales_contract_id_fkey")
+  parking             Parking    @relation(fields: [parking_id], references: [id])
+  vehicle             Vehicle?   @relation(fields: [vehicle_id], references: [id])
+  
+  @@index([contract_id])
+  @@index([parking_id])
+}
+
+model Handover {
+  id                  Int       @id @default(autoincrement())
+  contract_id         Int       @unique
+  contract_type       String    // "rental" or "sales"
+  no_of_keys_given    Int?
+  no_of_cards_given   Int?
+  additional_details  String?
+  date                DateTime
+  created_at          DateTime  @default(now())
+  
+  rental_contract     RentalContract? @relation("RentalContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_rental_contract_id_fkey")
+  sales_contract       SalesContract?  @relation("SalesContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_sales_contract_id_fkey")
+  documents           HandoverDocument[]
+}
+
+model HandoverDocument {
+  id                  Int       @id @default(autoincrement())
+  handover_id         Int
+  doc_type_id         Int
+  path                String
+  created_at          DateTime  @default(now())
+  
+  handover            Handover  @relation(fields: [handover_id], references: [id], onDelete: Cascade)
+  doc_type            KycDocType @relation(fields: [doc_type_id], references: [id])
+  
+  @@index([handover_id])
+}
+
+// ==================== PAYMENT & RECEIPT MANAGEMENT ====================
+
+model Receipt {
+  id                  Int       @id @default(autoincrement())
+  receipt_no          String    @unique
+  date                DateTime
+  contract_id         Int
+  contract_type       String    // "rental" or "sales"
+  invoice_id          Int?
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  contract            RentalContract? @relation("RentalContractReceipt", fields: [contract_id], references: [id], map: "Receipt_rental_contract_id_fkey")
+  sales_contract      SalesContract?  @relation("SalesContractReceipt", fields: [contract_id], references: [id], map: "Receipt_sales_contract_id_fkey")
+  company             Company         @relation(fields: [company_id], references: [id])
+  creator             User            @relation(fields: [created_by], references: [id])
+  invoice             Invoice?        @relation(fields: [invoice_id], references: [id])
+  payments            Payment[]
+  
+  @@index([receipt_no])
+  @@index([contract_id])
+  @@index([company_id])
+}
+
+model Payment {
+  id                  Int       @id @default(autoincrement())
+  receipt_id          Int
+  payment_type        String    // "Cheque", "Online_Transfer", "Cash"
+  amount_incl         Float
+  status              String    // "Actual", "Returned"
+  instrument_no       String?
+  description         String?
+  returned_on         DateTime?
+  vat_amount          Float?
+  payment_under_id    Int?
+  created_at          DateTime  @default(now())
+  
+  receipt             Receipt   @relation(fields: [receipt_id], references: [id], onDelete: Cascade)
+  payment_under       PaymentUnder? @relation(fields: [payment_under_id], references: [id])
+  cheque              Cheque?
+  
+  @@index([receipt_id])
+}
+
+model Cheque {
+  id                  Int       @id @default(autoincrement())
+  payment_id          Int       @unique
+  date                DateTime
+  is_deposited        Boolean   @default(false)
+  is_received         Boolean   @default(false)
+  deposited_on        DateTime?
+  cleared_on          DateTime?
+  bank_name           String?
+  created_at          DateTime  @default(now())
+  
+  payment             Payment   @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  
+  @@index([payment_id])
+}
+
+model PaymentUnder {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+  payments            Payment[]
+  
+  @@index([company_id])
+}
+
+model Invoice {
+  id                  Int       @id @default(autoincrement())
+  invoice_no          String    @unique
+  contract_id         Int
+  contract_type       String
+  amount              Float
+  due_date            DateTime
+  status              String    @default("pending")
+  created_at          DateTime  @default(now())
+  
+  receipts            Receipt[]
+  
+  @@index([invoice_no])
+}
+
+// ==================== LEAD/INQUIRY MANAGEMENT ====================
+
+model Lead {
+  id                  Int       @id @default(autoincrement())
+  uuid                String    @unique @default(uuid())
+  name                String
+  email               String
+  mobile_no           String
+  whatsapp_no         String?
+  property_type       String
+  interest_type       String    // "Rent", "Buy"
+  min_price           Float
+  max_price           Float
+  description         String?
+  address             String?
+  status_id           Int?
+  activity_source_id  Int
+  assigned_to         Int?
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  status              LeadStatus? @relation(fields: [status_id], references: [id])
+  activity_source     ActivitySource @relation(fields: [activity_source_id], references: [id])
+  assigned_user       User?     @relation("AssignedLeads", fields: [assigned_to], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation("CreatedLeads", fields: [created_by], references: [id])
+  preferred_areas     LeadPreferredArea[]
+  preferred_unit_types LeadPreferredunitType[]
+  preferred_amenities LeadPreferredAmenity[]
+  followups           LeadFollowup[]
+  viewings            PropertyViewing[]
+  favorites           UnitFavorite[]
+  
+  @@index([uuid])
+  @@index([email])
+  @@index([company_id])
+  @@index([status_id])
+}
+
+model LeadStatus {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  category            String    // "qualified", "unqualified", etc.
+  is_qualified        Boolean   @default(false)
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  leads               Lead[]
+  followups           LeadFollowup[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model ActivitySource {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  leads               Lead[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model LeadFollowup {
+  id                  Int       @id @default(autoincrement())
+  uuid                String    @unique @default(uuid())
+  lead_id             Int
+  status_id           Int
+  type_id             Int
+  date                DateTime
+  remarks             String
+  next_followup_date  DateTime?
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  lead                Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  status              LeadStatus @relation(fields: [status_id], references: [id])
+  followup_type       FollowupType @relation(fields: [type_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  company             Company   @relation("LeadFollowupCompany", fields: [company_id], references: [id])
+  
+  @@index([lead_id])
+  @@index([uuid])
+}
+
+model FollowupType {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  followups           LeadFollowup[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model LeadPreferredArea {
+  id                  Int       @id @default(autoincrement())
+  lead_id             Int
+  area_id             Int
+  
+  lead                Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  area                Area      @relation(fields: [area_id], references: [id])
+  
+  @@unique([lead_id, area_id])
+}
+
+model LeadPreferredunitType {
+  id                  Int       @id @default(autoincrement())
+  lead_id             Int
+  unit_type_id        Int
+  
+  lead                Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  unit_type           unitType  @relation(fields: [unit_type_id], references: [id])
+  
+  @@unique([lead_id, unit_type_id])
+}
+
+model LeadPreferredAmenity {
+  id                  Int       @id @default(autoincrement())
+  lead_id             Int
+  amenity_id          Int
+  
+  lead                Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  amenity             Amenity   @relation(fields: [amenity_id], references: [id])
+  
+  @@unique([lead_id, amenity_id])
+}
+
+// ==================== REQUEST MANAGEMENT ====================
+
+model Request {
+  id                  Int       @id @default(autoincrement())
+  request_no          String    @unique
+  type_id             Int
+  status_id            Int
+  description         String
+  tenant_id           Int?
+  landlord_id         Int?
+  company_id           Int
+  created_by           Int
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  
+  type                 RequestType @relation(fields: [type_id], references: [id])
+  status               RequestStatus @relation(fields: [status_id], references: [id])
+  tenant               Tenant?   @relation(fields: [tenant_id], references: [id])
+  landlord             Landlord? @relation(fields: [landlord_id], references: [id])
+  company              Company   @relation(fields: [company_id], references: [id])
+  creator              User      @relation(fields: [created_by], references: [id])
+  
+  @@index([request_no])
+  @@index([company_id])
+}
+
+model RequestType {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  requests            Request[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model RequestStatus {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  requests            Request[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+// ==================== TICKET/MAINTENANCE MANAGEMENT ====================
+
+model Ticket {
+  id                  Int       @id @default(autoincrement())
+  ticket_no           String    @unique
+  type_id             Int
+  status_id           Int
+  description         String
+  tenant_id           Int?
+  landlord_id         Int?
+  unit_id             Int?
+  company_id          Int
+  assigned_to         Int?
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  type                MaintenanceType @relation(fields: [type_id], references: [id])
+  status              MaintenanceStatus @relation(fields: [status_id], references: [id])
+  tenant              Tenant?   @relation(fields: [tenant_id], references: [id])
+  landlord            Landlord? @relation(fields: [landlord_id], references: [id])
+  unit                unit?     @relation(fields: [unit_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  assigned_user       User?     @relation("AssignedTickets", fields: [assigned_to], references: [id])
+  creator             User      @relation("CreatedTickets", fields: [created_by], references: [id])
+  comments            TicketComment[]
+  followups           TicketFollowup[]
+  
+  @@index([ticket_no])
+  @@index([company_id])
+}
+
+model MaintenanceType {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  tickets             Ticket[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model MaintenanceStatus {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  tickets             Ticket[]
+  followups           TicketFollowup[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model TicketComment {
+  id                  Int       @id @default(autoincrement())
+  ticket_id           Int
+  comment             String
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  ticket              Ticket    @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([ticket_id])
+}
+
+model TicketFollowup {
+  id                  Int       @id @default(autoincrement())
+  ticket_id           Int
+  remarks             String
+  status_id           Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  ticket              Ticket    @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  status              MaintenanceStatus @relation(fields: [status_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([ticket_id])
+}
+
+// ==================== COMPLAINT & SUGGESTION MANAGEMENT ====================
+
+model Complaint {
+  id                  Int       @id @default(autoincrement())
+  complaint_no        String    @unique
+  type                String    // "complaint" or "suggestion"
+  title               String
+  description         String
+  status_id           Int
+  tenant_id           Int?
+  landlord_id         Int?
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  status              ComplaintStatus @relation(fields: [status_id], references: [id])
+  tenant              Tenant?   @relation(fields: [tenant_id], references: [id])
+  landlord            Landlord? @relation(fields: [landlord_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  followups           ComplaintFollowup[]
+  
+  @@index([complaint_no])
+  @@index([company_id])
+}
+
+model ComplaintStatus {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  complaints          Complaint[]
+  followups           ComplaintFollowup[]
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([company_id])
+}
+
+model ComplaintFollowup {
+  id                  Int       @id @default(autoincrement())
+  complaint_id        Int
+  remarks             String
+  status_id           Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  complaint           Complaint @relation(fields: [complaint_id], references: [id], onDelete: Cascade)
+  status              ComplaintStatus @relation(fields: [status_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([complaint_id])
+}
+
+// ==================== ANNOUNCEMENT MANAGEMENT ====================
+
+model Announcement {
+  id                  Int       @id @default(autoincrement())
+  title               String
+  message             String
+  type                String?   // "info", "warning", "success"
+  target_scope        String?   // "all", "admin", "tenant", "landlord"
+  is_active           Boolean   @default(true)
+  start_date          DateTime?
+  end_date            DateTime?
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([company_id])
+  @@index([is_active])
+}
+
+// ==================== RENTAL APPROVAL ====================
+
+model RentalApproval {
+  id                  Int       @id @default(autoincrement())
+  request_no          String    @unique
+  unit_id             Int
+  tenant_id           Int
+  status              String    @default("pending") // "pending", "approved", "rejected"
+  remarks             String?
+  company_id          Int
+  created_by          Int
+  approved_by         Int?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  tenant              Tenant    @relation(fields: [tenant_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  creator             User      @relation("CreatedApprovals", fields: [created_by], references: [id])
+  approver            User?     @relation("ApprovedApprovals", fields: [approved_by], references: [id])
+  
+  @@index([request_no])
+  @@index([company_id])
+  @@index([status])
+}
+
+// ==================== COMPANY MANAGEMENT ====================
+
+model CompanySettings {
+  id                  Int       @id @default(autoincrement())
+  company_id          Int       @unique
+  logo_path           String?
+  smtp_host           String?
+  smtp_port           Int?
+  smtp_user           String?
+  smtp_password       String?
+  smtp_from_email     String?
+  smtp_from_name      String?
+  updated_at          DateTime  @updatedAt
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+}
+
+// ==================== DUBAI REAL ESTATE ADVANCED FEATURES ====================
+
+// Real Estate Broker/Agent Management
+model Broker {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  email               String    @unique
+  phone               String
+  license_number      String?   // RERA license number
+  license_expiry      DateTime?
+  commission_rate     Float?    // Default commission rate
+  company_id          Int
+  is_active           Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  company             Company   @relation(fields: [company_id], references: [id])
+  rental_contracts    RentalContract[] @relation("BrokerRental")
+  sales_contracts     SalesContract[] @relation("BrokerSales")
+  
+  @@index([company_id])
+  @@index([license_number])
+}
+
+// Property Viewing/Appointment Management
+model PropertyViewing {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  lead_id             Int?      // If viewing is from a lead
+  tenant_id            Int?      // If viewing is from existing tenant
+  viewer_name         String
+  viewer_email        String
+  viewer_phone        String
+  viewing_date        DateTime
+  viewing_time        String?   // Time slot
+  status              String    @default("scheduled") // "scheduled", "completed", "cancelled", "no_show"
+  notes               String?   @db.Text
+  feedback            String?   @db.Text
+  rating              Int?      // 1-5 rating
+  company_id          Int
+  assigned_to         Int?      // Agent assigned for viewing
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  lead                Lead?     @relation(fields: [lead_id], references: [id])
+  tenant              Tenant?   @relation(fields: [tenant_id], references: [id])
+  company             Company   @relation(fields: [company_id], references: [id])
+  assigned_agent      User?     @relation("AssignedViewings", fields: [assigned_to], references: [id])
+  creator             User      @relation("CreatedViewings", fields: [created_by], references: [id])
+  
+  @@index([unit_id])
+  @@index([viewing_date])
+  @@index([company_id])
+  @@index([status])
+}
+
+// Property Favorites/Bookmarks
+model UnitFavorite {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  user_id             Int?      // If logged in user
+  lead_id             Int?      // If from lead
+  email               String?   // If guest user
+  notes               String?
+  created_at          DateTime  @default(now())
+  
+  unit                unit      @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+  user                User?     @relation("UserFavorites", fields: [user_id], references: [id], onDelete: Cascade)
+  lead                Lead?     @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  
+  @@unique([unit_id, user_id], name: "unit_id_user_id")
+  @@unique([unit_id, lead_id], name: "unit_id_lead_id")
+  @@index([unit_id])
+  @@index([user_id])
+}
+
+// Property Inspection Reports
+model PropertyInspection {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  contract_id         Int?      // If inspection is part of contract
+  contract_type       String?   // "rental" or "sales"
+  inspection_type     String    // "move_in", "move_out", "routine", "pre_sale"
+  inspection_date     DateTime
+  inspector_name      String
+  inspector_notes     String?   @db.Text
+  condition_rating    Int?      // 1-5 rating
+  photos              String?   // JSON array of photo URLs
+  defects_found       String?   @db.Text
+  recommendations     String?   @db.Text
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  company             Company   @relation("PropertyInspectionCompany", fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([unit_id])
+  @@index([inspection_date])
+  @@index([company_id])
+}
+
+// Property Valuation
+model PropertyValuation {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  valuation_type      String    // "rental", "sale", "both"
+  estimated_rent      Float?
+  estimated_sale      Float?
+  valuation_date      DateTime
+  valuer_name         String
+  valuer_notes        String?   @db.Text
+  market_analysis     String?   @db.Text
+  comparable_units    String?   // JSON array of comparable unit IDs
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  company             Company   @relation("PropertyValuationCompany", fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([unit_id])
+  @@index([valuation_date])
+  @@index([company_id])
+}
+
+// Property Insurance
+model PropertyInsurance {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  insurance_type      String    // "building", "contents", "liability", "comprehensive"
+  insurance_provider  String
+  policy_number       String
+  coverage_amount     Float
+  premium_amount      Float
+  start_date          DateTime
+  end_date            DateTime
+  renewal_date        DateTime?
+  is_active           Boolean   @default(true)
+  documents           String?   // JSON array of document URLs
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  company             Company   @relation("PropertyInsuranceCompany", fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([unit_id])
+  @@index([policy_number])
+  @@index([company_id])
+  @@index([is_active])
+}
+
+// Property Maintenance History
+model PropertyMaintenanceHistory {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  maintenance_type    String    // "preventive", "corrective", "emergency", "upgrade"
+  description         String    @db.Text
+  cost                Float?
+  vendor_name         String?
+  maintenance_date    DateTime
+  next_maintenance_date DateTime?
+  documents           String?   // JSON array of document URLs
+  company_id          Int
+  created_by          Int
+  created_at          DateTime  @default(now())
+  
+  unit                unit      @relation(fields: [unit_id], references: [id])
+  company             Company   @relation("PropertyMaintenanceHistoryCompany", fields: [company_id], references: [id])
+  creator             User      @relation(fields: [created_by], references: [id])
+  
+  @@index([unit_id])
+  @@index([maintenance_date])
+  @@index([company_id])
+}
+
+// Property Notifications/Alerts
+model PropertyNotification {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int?
+  user_id             Int?
+  notification_type   String    // "price_drop", "new_listing", "contract_expiry", "payment_due", "maintenance_due"
+  title               String
+  message             String    @db.Text
+  is_read             Boolean   @default(false)
+  action_url          String?
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  unit                unit?     @relation("UnitNotifications", fields: [unit_id], references: [id], onDelete: Cascade)
+  user                User?     @relation("UserNotifications", fields: [user_id], references: [id], onDelete: Cascade)
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@index([user_id])
+  @@index([is_read])
+  @@index([company_id])
+  @@index([notification_type])
+}
+
+// Property Analytics/Statistics
+model PropertyAnalytics {
+  id                  Int       @id @default(autoincrement())
+  unit_id             Int
+  date                DateTime
+  views_count         Int       @default(0)
+  favorites_count     Int       @default(0)
+  inquiries_count     Int       @default(0)
+  viewings_count      Int       @default(0)
+  offers_count        Int       @default(0)
+  company_id          Int
+  created_at          DateTime  @default(now())
+  
+  unit                unit      @relation("UnitAnalytics", fields: [unit_id], references: [id], onDelete: Cascade)
+  company             Company   @relation(fields: [company_id], references: [id])
+  
+  @@unique([unit_id, date], name: "unit_id_date")
+  @@index([unit_id])
+  @@index([date])
+  @@index([company_id])
+}
+
