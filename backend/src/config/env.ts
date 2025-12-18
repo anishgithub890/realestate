@@ -43,6 +43,7 @@ export const config = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
 
   // Rate Limiting
+  RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED !== 'false', // Default: true, set to 'false' to disable
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
 };
