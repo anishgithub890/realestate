@@ -21,7 +21,7 @@ export const validateUserCreate = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('company_id').isInt({ min: 1 }).withMessage('Company ID is required'),
+  body('company_id').optional().isInt({ min: 1 }).withMessage('Company ID must be a positive integer'),
   body('role_id').optional().isInt({ min: 1 }).withMessage('Role ID must be a positive integer'),
   body('is_admin').optional().isIn(['true', 'false']).withMessage('is_admin must be true or false'),
 ];

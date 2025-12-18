@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, TokenPayload } from '../utils/jwt';
-import { UnauthorizedError, ForbiddenError } from '../utils/errors';
+import { UnauthorizedError } from '../utils/errors';
 import { sendError } from '../utils/response';
 import prisma from '../config/database';
 import { cache } from '../config/redis';
@@ -36,8 +36,12 @@ export const authenticate = async (
     }
 
     // Verify user still exists and is active
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+    // CRITICAL: Always filter by company_id to ensure data isolation
+    const user = await prisma.user.findFirst({
+      where: { 
+        id: payload.userId,
+        company_id: payload.companyId, // Enforce company isolation
+      },
       include: { role: true, company: true },
     });
 
@@ -45,8 +49,9 @@ export const authenticate = async (
       throw new UnauthorizedError('User not found or inactive');
     }
 
+    // Double-check company match (redundant but adds extra security layer)
     if (user.company_id !== payload.companyId) {
-      throw new UnauthorizedError('Company mismatch');
+      throw new UnauthorizedError('Company mismatch - security violation detected');
     }
 
     req.user = {

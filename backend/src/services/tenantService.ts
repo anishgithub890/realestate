@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { NotFoundError, ConflictError } from '../utils/errors';
+import { NotFoundError } from '../utils/errors';
 import { parsePagination, buildOrderBy } from '../utils/pagination';
 
 export class TenantService {
@@ -12,8 +12,8 @@ export class TenantService {
 
     if (filters.search) {
       where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { email: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: filters.search } },
+        { email: { contains: filters.search } },
         { mobile_no: { contains: filters.search } },
       ];
     }

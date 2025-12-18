@@ -11,7 +11,7 @@ export class PropertyService {
     if (filters.area_id) where.area_id = parseInt(filters.area_id);
     if (filters.status) where.status = filters.status;
     if (filters.search) {
-      where.name = { contains: filters.search, mode: 'insensitive' };
+      where.name = { contains: filters.search };
     }
 
     const [buildings, total] = await Promise.all([
@@ -128,7 +128,7 @@ export class PropertyService {
       where.basic_rent = { ...where.basic_rent, lte: parseFloat(filters.max_price) };
     }
     if (filters.search) {
-      where.name = { contains: filters.search, mode: 'insensitive' };
+      where.name = { contains: filters.search };
     }
 
     const [units, total] = await Promise.all([

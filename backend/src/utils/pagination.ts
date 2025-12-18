@@ -10,8 +10,8 @@ export interface PaginationResult {
   take: number;
   page: number;
   limit: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
 }
 
 export const parsePagination = (params: PaginationParams): PaginationResult => {

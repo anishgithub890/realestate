@@ -1,7 +1,7 @@
 import prisma from '../config/database';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, TokenPayload } from '../utils/jwt';
-import { NotFoundError, UnauthorizedError, ConflictError, ValidationError } from '../utils/errors';
+import { NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
 import { cache } from '../config/redis';
 import { config } from '../config/env';
 import { v4 as uuidv4 } from 'uuid';

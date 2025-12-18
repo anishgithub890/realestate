@@ -3,7 +3,6 @@ import { hashPassword } from '../utils/password';
 import { NotFoundError, ConflictError, ValidationError } from '../utils/errors';
 import { parsePagination, buildOrderBy } from '../utils/pagination';
 import { cache } from '../config/redis';
-import { config } from '../config/env';
 
 export class UserService {
   async getUsers(companyId: number, pagination: any, filters: any) {
@@ -15,8 +14,8 @@ export class UserService {
 
     if (filters.search) {
       where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { email: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: filters.search } },
+        { email: { contains: filters.search } },
       ];
     }
 
@@ -33,15 +32,7 @@ export class UserService {
         where,
         skip,
         take,
-        orderBy: buildOrderBy(sortBy, sortOrder),
-        include: {
-          role: {
-            include: {
-              permissions: true,
-            },
-          },
-          company: true,
-        },
+        orderBy: buildOrderBy(sortBy || 'created_at', sortOrder || 'desc'),
         select: {
           id: true,
           name: true,
@@ -87,10 +78,11 @@ export class UserService {
   }
 
   async getUserById(id: number, companyId: number) {
+    // Ensure company isolation - user must belong to the company
     const user = await prisma.user.findFirst({
       where: {
         id,
-        company_id: companyId,
+        company_id: companyId, // Critical: Always filter by company_id
       },
       include: {
         role: {
@@ -109,14 +101,17 @@ export class UserService {
     return user;
   }
 
-  async createUser(data: any, companyId: number, createdBy: number) {
-    // Check if email already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
+  async createUser(data: any, companyId: number, _createdBy: number) {
+    // Check if email already exists within the company
+    const existingUser = await prisma.user.findFirst({
+      where: { 
+        email: data.email,
+        company_id: companyId, // Enforce company isolation
+      },
     });
 
     if (existingUser) {
-      throw new ConflictError('User with this email already exists');
+      throw new ConflictError('User with this email already exists in this company');
     }
 
     // Hash password
@@ -158,14 +153,17 @@ export class UserService {
       throw new NotFoundError('User');
     }
 
-    // Check if email is being changed and if it's already taken
+    // Check if email is being changed and if it's already taken within the company
     if (data.email && data.email !== user.email) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email: data.email },
+      const existingUser = await prisma.user.findFirst({
+        where: { 
+          email: data.email,
+          company_id: companyId, // Enforce company isolation
+        },
       });
 
       if (existingUser) {
-        throw new ConflictError('User with this email already exists');
+        throw new ConflictError('User with this email already exists in this company');
       }
     }
 
@@ -174,6 +172,9 @@ export class UserService {
     if (data.password) {
       updateData.password = await hashPassword(data.password);
     }
+
+    // SECURITY: Prevent company_id from being changed
+    delete updateData.company_id;
 
     // Remove undefined fields
     Object.keys(updateData).forEach((key) => {
@@ -314,9 +315,12 @@ export class UserService {
       },
     });
 
-    // Clear cached permissions for all users with this role
+    // Clear cached permissions for all users with this role in this company
     const usersWithRole = await prisma.user.findMany({
-      where: { role_id: id },
+      where: { 
+        role_id: id,
+        company_id: companyId, // Enforce company isolation
+      },
       select: { id: true },
     });
 
@@ -403,9 +407,12 @@ export class UserService {
       },
     });
 
-    // Clear cached permissions for all users with this role
+    // Clear cached permissions for all users with this role in this company
     const usersWithRole = await prisma.user.findMany({
-      where: { role_id: roleId },
+      where: { 
+        role_id: roleId,
+        company_id: companyId, // Enforce company isolation
+      },
       select: { id: true },
     });
 
