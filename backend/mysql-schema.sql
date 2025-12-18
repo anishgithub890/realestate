@@ -1200,6 +1200,58 @@ CREATE TABLE IF NOT EXISTS `_PermissionToRole` (
     INDEX `_PermissionToRole_B_index`(`B`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- ============================================================================
+-- SAFE MODE: HELPER PROCEDURE FOR FOREIGN KEY CONSTRAINTS
+-- ============================================================================
+-- This procedure safely adds a foreign key constraint only if it doesn't exist
+-- Must be defined before foreign key constraints are added
+-- ============================================================================
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS `AddForeignKeyIfNotExists`$$
+
+CREATE PROCEDURE `AddForeignKeyIfNotExists`(
+    IN p_table_name VARCHAR(64),
+    IN p_constraint_name VARCHAR(64),
+    IN p_column_name VARCHAR(64),
+    IN p_referenced_table VARCHAR(64),
+    IN p_referenced_column VARCHAR(64),
+    IN p_on_delete_action VARCHAR(20),
+    IN p_on_update_action VARCHAR(20)
+)
+BEGIN
+    DECLARE constraint_exists INT DEFAULT 0;
+    DECLARE db_name VARCHAR(64);
+    
+    SET db_name = DATABASE();
+    
+    -- Check if constraint already exists
+    SELECT COUNT(*) INTO constraint_exists
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = db_name
+      AND TABLE_NAME = p_table_name
+      AND CONSTRAINT_NAME = p_constraint_name
+      AND CONSTRAINT_TYPE = 'FOREIGN KEY';
+    
+    -- Add constraint only if it doesn't exist
+    IF constraint_exists = 0 THEN
+        SET @sql = CONCAT(
+            'ALTER TABLE `', p_table_name, '` ',
+            'ADD CONSTRAINT `', p_constraint_name, '` ',
+            'FOREIGN KEY (`', p_column_name, '`) ',
+            'REFERENCES `', p_referenced_table, '`(`', p_referenced_column, '`) ',
+            'ON DELETE ', p_on_delete_action, ' ',
+            'ON UPDATE ', p_on_update_action
+        );
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END$$
+
+DELIMITER ;
+
 -- AddForeignKey
 CALL AddForeignKeyIfNotExists('User', 'User_role_id_fkey', 'role_id', 'Role', 'id', 'SET NULL', 'CASCADE');
 
@@ -1675,57 +1727,6 @@ CALL AddForeignKeyIfNotExists('_PermissionToRole', '_PermissionToRole_B_fkey', '
 -- ============================================================================
 -- END OF SCHEMA DEFINITION
 -- ============================================================================
-
--- ============================================================================
--- SAFE MODE: HELPER PROCEDURE FOR FOREIGN KEY CONSTRAINTS
--- ============================================================================
--- This procedure safely adds a foreign key constraint only if it doesn't exist
--- ============================================================================
-
-DELIMITER $$
-
-DROP PROCEDURE IF EXISTS `AddForeignKeyIfNotExists`$$
-
-CREATE PROCEDURE `AddForeignKeyIfNotExists`(
-    IN p_table_name VARCHAR(64),
-    IN p_constraint_name VARCHAR(64),
-    IN p_column_name VARCHAR(64),
-    IN p_referenced_table VARCHAR(64),
-    IN p_referenced_column VARCHAR(64),
-    IN p_on_delete_action VARCHAR(20),
-    IN p_on_update_action VARCHAR(20)
-)
-BEGIN
-    DECLARE constraint_exists INT DEFAULT 0;
-    DECLARE db_name VARCHAR(64);
-    
-    SET db_name = DATABASE();
-    
-    -- Check if constraint already exists
-    SELECT COUNT(*) INTO constraint_exists
-    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-    WHERE CONSTRAINT_SCHEMA = db_name
-      AND TABLE_NAME = p_table_name
-      AND CONSTRAINT_NAME = p_constraint_name
-      AND CONSTRAINT_TYPE = 'FOREIGN KEY';
-    
-    -- Add constraint only if it doesn't exist
-    IF constraint_exists = 0 THEN
-        SET @sql = CONCAT(
-            'ALTER TABLE `', p_table_name, '` ',
-            'ADD CONSTRAINT `', p_constraint_name, '` ',
-            'FOREIGN KEY (`', p_column_name, '`) ',
-            'REFERENCES `', p_referenced_table, '`(`', p_referenced_column, '`) ',
-            'ON DELETE ', p_on_delete_action, ' ',
-            'ON UPDATE ', p_on_update_action
-        );
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-    END IF;
-END$$
-
-DELIMITER ;
 
 -- ============================================================================
 -- SAFE MODE: MIGRATION STATEMENTS FOR EXISTING DATABASES
