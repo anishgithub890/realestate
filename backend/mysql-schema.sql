@@ -2402,6 +2402,79 @@ PREPARE alterIfNotExists FROM @preparedStatement;
 EXECUTE alterIfNotExists;
 DEALLOCATE PREPARE alterIfNotExists;
 
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `Location` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NULL,
+    `description` TEXT NULL,
+    `parent_id` VARCHAR(191) NULL,
+    `level` ENUM('EMIRATE', 'NEIGHBOURHOOD', 'CLUSTER', 'BUILDING', 'BUILDING_LVL1', 'BUILDING_LVL2') NOT NULL DEFAULT 'EMIRATE',
+    `full_path` VARCHAR(191) NOT NULL,
+    `latitude` DECIMAL(10, 8) NULL,
+    `longitude` DECIMAL(11, 8) NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `sort_order` INTEGER NOT NULL DEFAULT 0,
+    `company_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Location_slug_key`(`slug`),
+    UNIQUE INDEX `Location_full_path_key`(`full_path`),
+    INDEX `Location_company_id_idx`(`company_id`),
+    INDEX `Location_parent_id_idx`(`parent_id`),
+    INDEX `Location_level_idx`(`level`),
+    INDEX `Location_is_active_idx`(`is_active`),
+    INDEX `Location_full_path_idx`(`full_path`),
+    INDEX `Location_slug_idx`(`slug`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Add location_id column to Building table if it doesn't exist
+SET @dbname = DATABASE();
+SET @tablename = 'Building';
+SET @columnname = 'location_id';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `company_id`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add index for location_id in Building table if it doesn't exist
+SET @indexname = 'Building_location_id_idx';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (INDEX_NAME = @indexname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('CREATE INDEX `', @indexname, '` ON `', @tablename, '`(`location_id`)')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Location', 'Location_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Location', 'Location_parent_id_fkey', 'parent_id', 'Location', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Building', 'Building_location_id_fkey', 'location_id', 'Location', 'id', 'SET NULL', 'CASCADE');
+
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -24,6 +24,13 @@ import integrationRoutes from './routes/integrationRoutes';
 import micrositeRoutes from './routes/micrositeRoutes';
 import attendanceRoutes from './routes/attendanceRoutes';
 import kanbanRoutes from './routes/kanbanRoutes';
+import locationRoutes from './routes/locationRoutes';
+import announcementRoutes from './routes/announcementRoutes';
+import rentalApprovalRoutes from './routes/rentalApprovalRoutes';
+import ticketRoutes from './routes/ticketRoutes';
+import complaintRoutes from './routes/complaintRoutes';
+import masterDataRoutes from './routes/masterDataRoutes';
+import requestRoutes from './routes/requestRoutes';
 
 const app = express();
 
@@ -142,6 +149,13 @@ app.use(`${config.API_PREFIX}/integrations`, integrationRoutes);
 app.use(`${config.API_PREFIX}/microsites`, micrositeRoutes);
 app.use(`${config.API_PREFIX}/attendance`, attendanceRoutes);
 app.use(`${config.API_PREFIX}/kanban`, kanbanRoutes);
+app.use(`${config.API_PREFIX}/locations`, locationRoutes);
+app.use(`${config.API_PREFIX}/announcements`, announcementRoutes);
+app.use(`${config.API_PREFIX}/rental-approvals`, rentalApprovalRoutes);
+app.use(`${config.API_PREFIX}/tickets`, ticketRoutes);
+app.use(`${config.API_PREFIX}/complaints`, complaintRoutes);
+app.use(`${config.API_PREFIX}/master-data`, masterDataRoutes);
+app.use(`${config.API_PREFIX}/requests`, requestRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

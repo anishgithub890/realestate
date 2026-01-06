@@ -62,11 +62,11 @@ model User {
   routing_rules_assigned      LeadRoutingRule[]            @relation("RoutingRuleUser")
   attendances                 Attendance[]
   activities                  UserActivity[]
-  kanban_boards_created      KanbanBoard[]               @relation("KanbanBoardCreator")
-  kanban_cards_assigned       KanbanCard[]                @relation("KanbanCardAssignee")
-  kanban_cards_created        KanbanCard[]                @relation("KanbanCardCreator")
-  kanban_card_comments        KanbanCardComment[]         @relation("KanbanCardCommentUser")
-  kanban_card_attachments     KanbanCardAttachment[]      @relation("KanbanCardAttachmentUser")
+  kanban_boards_created       KanbanBoard[]                @relation("KanbanBoardCreator")
+  kanban_cards_assigned       KanbanCard[]                 @relation("KanbanCardAssignee")
+  kanban_cards_created        KanbanCard[]                 @relation("KanbanCardCreator")
+  kanban_card_comments        KanbanCardComment[]          @relation("KanbanCardCommentUser")
+  kanban_card_attachments     KanbanCardAttachment[]       @relation("KanbanCardAttachmentUser")
   company                     Company                      @relation(fields: [company_id], references: [id], onDelete: NoAction)
   role                        Role?                        @relation(fields: [role_id], references: [id])
 
@@ -139,6 +139,7 @@ model Company {
   user_activities      UserActivity[]
   kanban_boards        KanbanBoard[]
   kanban_labels        KanbanLabel[]
+  locations            Location[]
 
   @@index([hosting_id], map: "Company_hosting_id_fkey")
 }
@@ -150,13 +151,13 @@ model Hosting {
 }
 
 model Role {
-  id          Int          @id @default(autoincrement())
-  name        String
-  company_id  Int
-  created_at  DateTime     @default(now())
-  company     Company      @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  users       User[]
-  permissions Permission[] @relation("PermissionToRole")
+  id            Int               @id @default(autoincrement())
+  name          String
+  company_id    Int
+  created_at    DateTime          @default(now())
+  company       Company           @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  users         User[]
+  permissions   Permission[]      @relation("PermissionToRole")
   routing_rules LeadRoutingRule[] @relation("RoutingRuleRole")
 
   @@index([company_id])
@@ -364,15 +365,18 @@ model Building {
   status          String    @default("active")
   area_id         Int
   company_id      Int
+  location_id     String?
   created_at      DateTime  @default(now())
   area            Area      @relation(fields: [area_id], references: [id], onDelete: NoAction)
   company         Company   @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  location        Location? @relation("LocationBuilding", fields: [location_id], references: [id], onDelete: SetNull)
   floors          Floor[]
   parkings        Parking[]
   units           unit[]
 
   @@index([area_id])
   @@index([company_id])
+  @@index([location_id])
 }
 
 model Floor {
@@ -663,15 +667,15 @@ model SalesContractunit {
 }
 
 model ContractParking {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   contract_id     Int
   contract_type   String
   parking_id      Int
   vehicle_id      Int?
-  parking         Parking        @relation(fields: [parking_id], references: [id], onDelete: NoAction)
+  parking         Parking         @relation(fields: [parking_id], references: [id], onDelete: NoAction)
   rental_contract RentalContract? @relation("RentalContractParking", fields: [contract_id], references: [id], onDelete: Cascade, map: "ContractParking_rental_contract_id_fkey")
   sales_contract  SalesContract?  @relation("SalesContractParking", fields: [contract_id], references: [id], onDelete: Cascade, map: "ContractParking_sales_contract_id_fkey")
-  vehicle         Vehicle?       @relation(fields: [vehicle_id], references: [id])
+  vehicle         Vehicle?        @relation(fields: [vehicle_id], references: [id])
 
   @@index([contract_id])
   @@index([parking_id])
@@ -687,8 +691,8 @@ model Handover {
   additional_details String?
   date               DateTime
   created_at         DateTime           @default(now())
-  rental_contract    RentalContract?     @relation("RentalContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_rental_contract_id_fkey")
-  sales_contract     SalesContract?      @relation("SalesContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_sales_contract_id_fkey")
+  rental_contract    RentalContract?    @relation("RentalContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_rental_contract_id_fkey")
+  sales_contract     SalesContract?     @relation("SalesContractHandover", fields: [contract_id], references: [id], onDelete: Cascade, map: "Handover_sales_contract_id_fkey")
   documents          HandoverDocument[]
 }
 
@@ -706,19 +710,19 @@ model HandoverDocument {
 }
 
 model Receipt {
-  id            Int            @id @default(autoincrement())
-  receipt_no    String         @unique
-  date          DateTime
-  contract_id   Int
-  contract_type String
-  invoice_id    Int?
-  company_id    Int
-  created_by    Int
-  created_at    DateTime       @default(now())
-  payments      Payment[]
-  company       Company        @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  creator       User           @relation(fields: [created_by], references: [id], onDelete: NoAction)
-  invoice       Invoice?       @relation(fields: [invoice_id], references: [id])
+  id              Int             @id @default(autoincrement())
+  receipt_no      String          @unique
+  date            DateTime
+  contract_id     Int
+  contract_type   String
+  invoice_id      Int?
+  company_id      Int
+  created_by      Int
+  created_at      DateTime        @default(now())
+  payments        Payment[]
+  company         Company         @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  creator         User            @relation(fields: [created_by], references: [id], onDelete: NoAction)
+  invoice         Invoice?        @relation(fields: [invoice_id], references: [id])
   rental_contract RentalContract? @relation("RentalContractReceipt", fields: [contract_id], references: [id], onDelete: NoAction, map: "Receipt_rental_contract_id_fkey")
   sales_contract  SalesContract?  @relation("SalesContractReceipt", fields: [contract_id], references: [id], onDelete: NoAction, map: "Receipt_sales_contract_id_fkey")
 
@@ -1407,20 +1411,20 @@ model PropertyAnalytics {
 }
 
 model LeadRoutingRule {
-  id             Int      @id @default(autoincrement())
-  company_id     Int
-  rule_name      String
-  priority       Int      @default(0)
-  is_active      Boolean  @default(true)
-  conditions     Json
-  assignment_type String
+  id               Int      @id @default(autoincrement())
+  company_id       Int
+  rule_name        String
+  priority         Int      @default(0)
+  is_active        Boolean  @default(true)
+  conditions       Json
+  assignment_type  String
   assigned_user_id Int?
   assigned_role_id Int?
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  company        Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  assigned_user  User?    @relation("RoutingRuleUser", fields: [assigned_user_id], references: [id])
-  assigned_role  Role?    @relation("RoutingRuleRole", fields: [assigned_role_id], references: [id])
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  company          Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  assigned_user    User?    @relation("RoutingRuleUser", fields: [assigned_user_id], references: [id])
+  assigned_role    Role?    @relation("RoutingRuleRole", fields: [assigned_role_id], references: [id])
 
   @@index([company_id])
   @@index([is_active])
@@ -1444,20 +1448,20 @@ model LeadPipeline {
 }
 
 model AutomationRule {
-  id                Int      @id @default(autoincrement())
-  company_id        Int
-  name              String
-  trigger_type      String
+  id                 Int              @id @default(autoincrement())
+  company_id         Int
+  name               String
+  trigger_type       String
   trigger_conditions Json
-  action_type       String
-  template_id       Int?
-  schedule_delay    Int?
-  schedule_unit     String?
-  is_active         Boolean  @default(true)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-  company           Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  template          MessageTemplate? @relation(fields: [template_id], references: [id])
+  action_type        String
+  template_id        Int?
+  schedule_delay     Int?
+  schedule_unit      String?
+  is_active          Boolean          @default(true)
+  created_at         DateTime         @default(now())
+  updated_at         DateTime         @updatedAt
+  company            Company          @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  template           MessageTemplate? @relation(fields: [template_id], references: [id])
 
   @@index([company_id])
   @@index([is_active])
@@ -1465,17 +1469,17 @@ model AutomationRule {
 }
 
 model MessageTemplate {
-  id          Int      @id @default(autoincrement())
-  company_id  Int
-  type        String
-  name        String
-  subject     String?
-  body        String   @db.Text
-  variables   Json
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  company     Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  id               Int              @id @default(autoincrement())
+  company_id       Int
+  type             String
+  name             String
+  subject          String?
+  body             String           @db.Text
+  variables        Json
+  is_active        Boolean          @default(true)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  company          Company          @relation(fields: [company_id], references: [id], onDelete: NoAction)
   automation_rules AutomationRule[]
 
   @@index([company_id])
@@ -1484,23 +1488,23 @@ model MessageTemplate {
 }
 
 model Microsite {
-  id            Int      @id @default(autoincrement())
-  unit_id       Int
-  company_id    Int
-  slug          String   @unique
-  template_id   Int?
-  seo_title     String?
-  seo_description String? @db.Text
-  seo_keywords  String?
-  custom_css    String?  @db.Text
-  custom_js     String?  @db.Text
-  is_published  Boolean  @default(false)
-  published_at  DateTime?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  company       Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  unit          unit     @relation(fields: [unit_id], references: [id], onDelete: Cascade)
-  template      MicrositeTemplate? @relation(fields: [template_id], references: [id])
+  id              Int                @id @default(autoincrement())
+  unit_id         Int
+  company_id      Int
+  slug            String             @unique
+  template_id     Int?
+  seo_title       String?
+  seo_description String?            @db.Text
+  seo_keywords    String?
+  custom_css      String?            @db.Text
+  custom_js       String?            @db.Text
+  is_published    Boolean            @default(false)
+  published_at    DateTime?
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+  company         Company            @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  unit            unit               @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+  template        MicrositeTemplate? @relation(fields: [template_id], references: [id])
 
   @@unique([unit_id, company_id])
   @@index([company_id])
@@ -1510,19 +1514,19 @@ model Microsite {
 }
 
 model MicrositeTemplate {
-  id          Int      @id @default(autoincrement())
-  company_id  Int
-  name        String
-  description String?  @db.Text
-  template_html String @db.Text
-  template_css  String? @db.Text
-  template_js   String? @db.Text
-  is_default  Boolean  @default(false)
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  company     Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  microsites  Microsite[]
+  id            Int         @id @default(autoincrement())
+  company_id    Int
+  name          String
+  description   String?     @db.Text
+  template_html String      @db.Text
+  template_css  String?     @db.Text
+  template_js   String?     @db.Text
+  is_default    Boolean     @default(false)
+  is_active     Boolean     @default(true)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  company       Company     @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  microsites    Microsite[]
 
   @@index([company_id])
   @@index([is_active])
@@ -1530,22 +1534,22 @@ model MicrositeTemplate {
 }
 
 model Attendance {
-  id                  Int      @id @default(autoincrement())
+  id                  Int       @id @default(autoincrement())
   user_id             Int
   company_id          Int
-  date                DateTime @db.Date
+  date                DateTime  @db.Date
   check_in_time       DateTime?
   check_out_time      DateTime?
   check_in_latitude   Float?
   check_in_longitude  Float?
   check_out_latitude  Float?
   check_out_longitude Float?
-  status              String   @default("present")
-  notes               String?  @db.Text
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-  company             Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  status              String    @default("present")
+  notes               String?   @db.Text
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  company             Company   @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  user                User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, date])
   @@index([company_id])
@@ -1555,17 +1559,17 @@ model Attendance {
 }
 
 model UserActivity {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  company_id      Int
-  date            DateTime @db.Date
-  activity_type   String
-  description     String   @db.Text
+  id               Int      @id @default(autoincrement())
+  user_id          Int
+  company_id       Int
+  date             DateTime @db.Date
+  activity_type    String
+  description      String   @db.Text
   duration_minutes Int?
-  metadata        Json?
-  created_at      DateTime @default(now())
-  company         Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  metadata         Json?
+  created_at       DateTime @default(now())
+  company          Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([company_id])
   @@index([user_id])
@@ -1574,21 +1578,21 @@ model UserActivity {
 }
 
 model KanbanBoard {
-  id              Int      @id @default(autoincrement())
-  company_id      Int
-  name            String
-  description     String?  @db.Text
-  board_type      String
-  is_template     Boolean  @default(false)
-  is_active       Boolean  @default(true)
-  created_by      Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  company         Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  creator         User     @relation("KanbanBoardCreator", fields: [created_by], references: [id], onDelete: NoAction)
-  columns         KanbanColumn[]
-  cards           KanbanCard[]
-  labels          KanbanLabel[]
+  id          Int            @id @default(autoincrement())
+  company_id  Int
+  name        String
+  description String?        @db.Text
+  board_type  String
+  is_template Boolean        @default(false)
+  is_active   Boolean        @default(true)
+  created_by  Int
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  company     Company        @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  creator     User           @relation("KanbanBoardCreator", fields: [created_by], references: [id], onDelete: NoAction)
+  columns     KanbanColumn[]
+  cards       KanbanCard[]
+  labels      KanbanLabel[]
 
   @@index([company_id])
   @@index([board_type])
@@ -1597,46 +1601,46 @@ model KanbanBoard {
 }
 
 model KanbanColumn {
-  id          Int      @id @default(autoincrement())
-  board_id    Int
-  name        String
-  position    Int
-  color       String?
-  is_done     Boolean  @default(false)
-  wip_limit   Int?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  board       KanbanBoard @relation(fields: [board_id], references: [id], onDelete: Cascade)
-  cards       KanbanCard[]
+  id         Int          @id @default(autoincrement())
+  board_id   Int
+  name       String
+  position   Int
+  color      String?
+  is_done    Boolean      @default(false)
+  wip_limit  Int?
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  board      KanbanBoard  @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  cards      KanbanCard[]
 
   @@unique([board_id, position])
   @@index([board_id])
 }
 
 model KanbanCard {
-  id              Int      @id @default(autoincrement())
-  board_id        Int
-  column_id       Int
-  title           String
-  description     String?  @db.Text
-  card_type       String
-  entity_id       Int?
-  entity_type     String?
-  assigned_to     Int?
-  priority        String   @default("medium")
-  due_date        DateTime?
-  position        Int
-  is_archived     Boolean  @default(false)
-  created_by      Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  board           KanbanBoard @relation(fields: [board_id], references: [id], onDelete: Cascade)
-  column          KanbanColumn @relation(fields: [column_id], references: [id], onDelete: Cascade)
-  assignee        User?    @relation("KanbanCardAssignee", fields: [assigned_to], references: [id])
-  creator         User     @relation("KanbanCardCreator", fields: [created_by], references: [id], onDelete: NoAction)
-  comments        KanbanCardComment[]
-  attachments     KanbanCardAttachment[]
-  card_labels     KanbanCardLabel[]
+  id          Int                    @id @default(autoincrement())
+  board_id    Int
+  column_id   Int
+  title       String
+  description String?                @db.Text
+  card_type   String
+  entity_id   Int?
+  entity_type String?
+  assigned_to Int?
+  priority    String                 @default("medium")
+  due_date    DateTime?
+  position    Int
+  is_archived Boolean                @default(false)
+  created_by  Int
+  created_at  DateTime               @default(now())
+  updated_at  DateTime               @updatedAt
+  board       KanbanBoard            @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  column      KanbanColumn           @relation(fields: [column_id], references: [id], onDelete: Cascade)
+  assignee    User?                  @relation("KanbanCardAssignee", fields: [assigned_to], references: [id])
+  creator     User                   @relation("KanbanCardCreator", fields: [created_by], references: [id], onDelete: NoAction)
+  comments    KanbanCardComment[]
+  attachments KanbanCardAttachment[]
+  card_labels KanbanCardLabel[]
 
   @@index([board_id])
   @@index([column_id])
@@ -1649,43 +1653,43 @@ model KanbanCard {
 }
 
 model KanbanCardComment {
-  id          Int      @id @default(autoincrement())
-  card_id     Int
-  user_id     Int
-  comment     String   @db.Text
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  card        KanbanCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
-  user        User     @relation("KanbanCardCommentUser", fields: [user_id], references: [id], onDelete: Cascade)
+  id         Int        @id @default(autoincrement())
+  card_id    Int
+  user_id    Int
+  comment    String     @db.Text
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  card       KanbanCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  user       User       @relation("KanbanCardCommentUser", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([card_id])
   @@index([user_id])
 }
 
 model KanbanCardAttachment {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   card_id     Int
   file_name   String
   file_url    String
   file_type   String?
   file_size   Int?
   uploaded_by Int
-  created_at  DateTime @default(now())
+  created_at  DateTime   @default(now())
   card        KanbanCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
-  uploader    User     @relation("KanbanCardAttachmentUser", fields: [uploaded_by], references: [id], onDelete: NoAction)
+  uploader    User       @relation("KanbanCardAttachmentUser", fields: [uploaded_by], references: [id], onDelete: NoAction)
 
   @@index([card_id])
 }
 
 model KanbanLabel {
-  id          Int      @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   board_id    Int
   company_id  Int
   name        String
   color       String
-  created_at  DateTime @default(now())
-  board       KanbanBoard? @relation(fields: [board_id], references: [id], onDelete: Cascade)
-  company     Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  created_at  DateTime          @default(now())
+  board       KanbanBoard?      @relation(fields: [board_id], references: [id], onDelete: Cascade)
+  company     Company           @relation(fields: [company_id], references: [id], onDelete: NoAction)
   card_labels KanbanCardLabel[]
 
   @@index([board_id])
@@ -1693,12 +1697,12 @@ model KanbanLabel {
 }
 
 model KanbanCardLabel {
-  id          Int      @id @default(autoincrement())
-  card_id     Int
-  label_id    Int
-  created_at  DateTime @default(now())
-  card        KanbanCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
-  label       KanbanLabel @relation(fields: [label_id], references: [id], onDelete: Cascade)
+  id         Int         @id @default(autoincrement())
+  card_id    Int
+  label_id   Int
+  created_at DateTime    @default(now())
+  card       KanbanCard  @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  label      KanbanLabel @relation(fields: [label_id], references: [id], onDelete: Cascade)
 
   @@unique([card_id, label_id])
   @@index([card_id])
@@ -1706,20 +1710,20 @@ model KanbanCardLabel {
 }
 
 model AdCampaign {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   company_id    Int
   campaign_name String
   source        String
   start_date    DateTime
   end_date      DateTime?
   budget        Float?
-  spent         Float   @default(0)
-  leads_count   Int     @default(0)
-  conversions   Int     @default(0)
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-  company       Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  spent         Float     @default(0)
+  leads_count   Int       @default(0)
+  conversions   Int       @default(0)
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  company       Company   @relation(fields: [company_id], references: [id], onDelete: NoAction)
 
   @@index([company_id])
   @@index([source])
@@ -1728,20 +1732,20 @@ model AdCampaign {
 }
 
 model Integration {
-  id            Int       @id @default(autoincrement())
-  company_id    Int
+  id               Int       @id @default(autoincrement())
+  company_id       Int
   integration_type String
-  api_key       String?   @db.Text
-  api_secret    String?   @db.Text
-  access_token  String?   @db.Text
-  refresh_token String?   @db.Text
-  config        Json?
-  is_active     Boolean   @default(true)
-  last_sync_at  DateTime?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  company       Company   @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  webhooks      Webhook[]
+  api_key          String?   @db.Text
+  api_secret       String?   @db.Text
+  access_token     String?   @db.Text
+  refresh_token    String?   @db.Text
+  config           Json?
+  is_active        Boolean   @default(true)
+  last_sync_at     DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  company          Company   @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  webhooks         Webhook[]
 
   @@unique([company_id, integration_type])
   @@index([company_id])
@@ -1750,21 +1754,59 @@ model Integration {
 }
 
 model Webhook {
-  id               Int      @id @default(autoincrement())
-  company_id       Int
-  integration_id   Int?
-  event_type       String
-  url              String
-  secret           String?
-  is_active        Boolean  @default(true)
+  id                Int          @id @default(autoincrement())
+  company_id        Int
+  integration_id    Int?
+  event_type        String
+  url               String
+  secret            String?
+  is_active         Boolean      @default(true)
   last_triggered_at DateTime?
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-  company          Company  @relation(fields: [company_id], references: [id], onDelete: NoAction)
-  integration      Integration? @relation(fields: [integration_id], references: [id])
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  company           Company      @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  integration       Integration? @relation(fields: [integration_id], references: [id])
 
   @@index([company_id])
   @@index([integration_id])
   @@index([event_type])
   @@index([is_active])
+}
+
+enum LocationLevel {
+  EMIRATE
+  NEIGHBOURHOOD
+  CLUSTER
+  BUILDING
+  BUILDING_LVL1
+  BUILDING_LVL2
+}
+
+model Location {
+  id          String        @id @default(uuid())
+  name        String
+  slug        String?       @unique
+  description String?       @db.Text
+  parent_id   String?
+  level       LocationLevel @default(EMIRATE)
+  full_path   String        @unique
+  latitude    Decimal?      @db.Decimal(10, 8)
+  longitude   Decimal?      @db.Decimal(11, 8)
+  is_active   Boolean       @default(true)
+  sort_order  Int           @default(0)
+  company_id  Int
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  company     Company       @relation(fields: [company_id], references: [id], onDelete: NoAction)
+  parent      Location?     @relation("LocationHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
+  children    Location[]    @relation("LocationHierarchy")
+  buildings   Building[]    @relation("LocationBuilding")
+
+  @@index([company_id])
+  @@index([parent_id])
+  @@index([level])
+  @@index([is_active])
+  @@index([full_path])
+  @@index([slug])
+  @@map("location")
 }

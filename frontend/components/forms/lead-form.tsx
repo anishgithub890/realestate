@@ -40,9 +40,10 @@ interface LeadFormProps {
   onOpenChange: (open: boolean) => void;
   lead?: any;
   mode: 'create' | 'edit';
+  onSuccess?: () => void;
 }
 
-export function LeadForm({ open, onOpenChange, lead, mode }: LeadFormProps) {
+export function LeadForm({ open, onOpenChange, lead, mode, onSuccess }: LeadFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
@@ -95,6 +96,7 @@ export function LeadForm({ open, onOpenChange, lead, mode }: LeadFormProps) {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       onOpenChange(false);
       reset();
+      onSuccess?.();
     } catch (error: any) {
       toast({
         title: 'Error',

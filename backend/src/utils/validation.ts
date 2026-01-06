@@ -149,3 +149,27 @@ export const validateKanbanCardUpdate = [
   body('is_archived').optional().isBoolean().withMessage('is_archived must be a boolean'),
 ];
 
+export const validateLocationCreate = [
+  body('name').notEmpty().withMessage('Location name is required'),
+  body('level').isIn(['EMIRATE', 'NEIGHBOURHOOD', 'CLUSTER', 'BUILDING', 'BUILDING_LVL1', 'BUILDING_LVL2']).withMessage('Invalid location level'),
+  body('slug').optional().isString().withMessage('Slug must be a string'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('parent_id').optional().isString().withMessage('Parent ID must be a valid UUID'),
+  body('latitude').optional().isFloat().withMessage('Latitude must be a valid number'),
+  body('longitude').optional().isFloat().withMessage('Longitude must be a valid number'),
+  body('is_active').optional().isBoolean().withMessage('is_active must be a boolean'),
+  body('sort_order').optional().isInt({ min: 0 }).withMessage('Sort order must be a non-negative integer'),
+];
+
+export const validateLocationUpdate = [
+  body('name').optional().notEmpty().withMessage('Location name cannot be empty'),
+  body('level').optional().isIn(['EMIRATE', 'NEIGHBOURHOOD', 'CLUSTER', 'BUILDING', 'BUILDING_LVL1', 'BUILDING_LVL2']).withMessage('Invalid location level'),
+  body('slug').optional().isString().withMessage('Slug must be a string'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('parent_id').optional({ nullable: true }).isString().withMessage('Parent ID must be a valid UUID'),
+  body('latitude').optional({ nullable: true }).isFloat().withMessage('Latitude must be a valid number'),
+  body('longitude').optional({ nullable: true }).isFloat().withMessage('Longitude must be a valid number'),
+  body('is_active').optional().isBoolean().withMessage('is_active must be a boolean'),
+  body('sort_order').optional().isInt({ min: 0 }).withMessage('Sort order must be a non-negative integer'),
+];
+
