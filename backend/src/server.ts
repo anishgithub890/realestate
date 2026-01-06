@@ -16,6 +16,14 @@ import propertyViewingRoutes from './routes/propertyViewingRoutes';
 import propertyAdvancedRoutes from './routes/propertyAdvancedRoutes';
 import contractRoutes from './routes/contractRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import leadRoutes from './routes/leadRoutes';
+import routingRoutes from './routes/routingRoutes';
+import automationRoutes from './routes/automationRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import integrationRoutes from './routes/integrationRoutes';
+import micrositeRoutes from './routes/micrositeRoutes';
+import attendanceRoutes from './routes/attendanceRoutes';
+import kanbanRoutes from './routes/kanbanRoutes';
 
 const app = express();
 
@@ -126,6 +134,14 @@ app.use(`${config.API_PREFIX}/viewings`, propertyViewingRoutes);
 app.use(`${config.API_PREFIX}`, propertyAdvancedRoutes);
 app.use(`${config.API_PREFIX}`, contractRoutes);
 app.use(`${config.API_PREFIX}/payments`, paymentRoutes);
+app.use(`${config.API_PREFIX}/leads`, leadRoutes);
+app.use(`${config.API_PREFIX}/routing`, routingRoutes);
+app.use(`${config.API_PREFIX}/automation`, automationRoutes);
+app.use(`${config.API_PREFIX}/analytics`, analyticsRoutes);
+app.use(`${config.API_PREFIX}/integrations`, integrationRoutes);
+app.use(`${config.API_PREFIX}/microsites`, micrositeRoutes);
+app.use(`${config.API_PREFIX}/attendance`, attendanceRoutes);
+app.use(`${config.API_PREFIX}/kanban`, kanbanRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

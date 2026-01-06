@@ -11,6 +11,13 @@ export {
   validateUserUpdate,
   validatePaymentCreate,
   validatePaymentUpdate,
+  validateLeadCreate,
+  validateLeadUpdate,
+  validateKanbanBoardCreate,
+  validateKanbanBoardUpdate,
+  validateKanbanColumnCreate,
+  validateKanbanCardCreate,
+  validateKanbanCardUpdate,
 } from '../utils/validation';
 
 export const validate = (validations: ValidationChain[]) => {

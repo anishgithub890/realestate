@@ -105,6 +105,10 @@ class EmailService {
 
     await this.sendEmail(email, 'New Lead Assigned', html);
   }
+
+  async sendLeadEmail(email: string, subject: string, body: string) {
+    await this.sendEmail(email, subject, body);
+  }
 }
 
 export default new EmailService();

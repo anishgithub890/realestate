@@ -1,4 +1,4 @@
-import { body, query, param, ValidationChain } from 'express-validator';
+import { body, query, param } from 'express-validator';
 
 export const validatePagination = [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
@@ -57,5 +57,95 @@ export const validatePaymentUpdate = [
   body('vat_amount').optional().isFloat({ min: 0 }).withMessage('VAT amount must be a positive number'),
   body('payment_under_id').optional().isInt({ min: 1 }).withMessage('Payment under ID must be a positive integer'),
   body('cheque').optional().isObject().withMessage('Cheque must be an object'),
+];
+
+export const validateLeadCreate = [
+  body('name').notEmpty().withMessage('Name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('mobile_no').notEmpty().withMessage('Mobile number is required'),
+  body('whatsapp_no').optional().isString().withMessage('WhatsApp number must be a string'),
+  body('property_type').notEmpty().withMessage('Property type is required'),
+  body('interest_type').notEmpty().withMessage('Interest type is required'),
+  body('min_price').isFloat({ min: 0 }).withMessage('Min price must be a positive number'),
+  body('max_price').isFloat({ min: 0 }).withMessage('Max price must be a positive number'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('address').optional().isString().withMessage('Address must be a string'),
+  body('activity_source_id').isInt({ min: 1 }).withMessage('Activity source ID is required'),
+  body('assigned_to').optional().isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
+  body('status_id').optional().isInt({ min: 1 }).withMessage('Status ID must be a positive integer'),
+  body('preferred_area_ids').optional().isArray().withMessage('Preferred area IDs must be an array'),
+  body('preferred_area_ids.*').optional().isInt({ min: 1 }).withMessage('Each area ID must be a positive integer'),
+  body('preferred_unit_type_ids').optional().isArray().withMessage('Preferred unit type IDs must be an array'),
+  body('preferred_unit_type_ids.*').optional().isInt({ min: 1 }).withMessage('Each unit type ID must be a positive integer'),
+  body('preferred_amenity_ids').optional().isArray().withMessage('Preferred amenity IDs must be an array'),
+  body('preferred_amenity_ids.*').optional().isInt({ min: 1 }).withMessage('Each amenity ID must be a positive integer'),
+];
+
+export const validateLeadUpdate = [
+  body('name').optional().notEmpty().withMessage('Name cannot be empty'),
+  body('email').optional().isEmail().withMessage('Valid email is required'),
+  body('mobile_no').optional().notEmpty().withMessage('Mobile number cannot be empty'),
+  body('whatsapp_no').optional().isString().withMessage('WhatsApp number must be a string'),
+  body('property_type').optional().notEmpty().withMessage('Property type cannot be empty'),
+  body('interest_type').optional().notEmpty().withMessage('Interest type cannot be empty'),
+  body('min_price').optional().isFloat({ min: 0 }).withMessage('Min price must be a positive number'),
+  body('max_price').optional().isFloat({ min: 0 }).withMessage('Max price must be a positive number'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('address').optional().isString().withMessage('Address must be a string'),
+  body('activity_source_id').optional().isInt({ min: 1 }).withMessage('Activity source ID must be a positive integer'),
+  body('assigned_to').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
+  body('status_id').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Status ID must be a positive integer'),
+  body('preferred_area_ids').optional().isArray().withMessage('Preferred area IDs must be an array'),
+  body('preferred_unit_type_ids').optional().isArray().withMessage('Preferred unit type IDs must be an array'),
+  body('preferred_amenity_ids').optional().isArray().withMessage('Preferred amenity IDs must be an array'),
+];
+
+export const validateKanbanBoardCreate = [
+  body('name').notEmpty().withMessage('Board name is required'),
+  body('board_type').isIn(['leads', 'properties', 'deals', 'contracts', 'maintenance', 'custom']).withMessage('Invalid board type'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('is_template').optional().isBoolean().withMessage('is_template must be a boolean'),
+  body('is_active').optional().isBoolean().withMessage('is_active must be a boolean'),
+];
+
+export const validateKanbanBoardUpdate = [
+  body('name').optional().notEmpty().withMessage('Board name cannot be empty'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('is_active').optional().isBoolean().withMessage('is_active must be a boolean'),
+  body('is_template').optional().isBoolean().withMessage('is_template must be a boolean'),
+];
+
+export const validateKanbanColumnCreate = [
+  body('name').notEmpty().withMessage('Column name is required'),
+  body('position').optional().isInt({ min: 0 }).withMessage('Position must be a non-negative integer'),
+  body('color').optional().isString().withMessage('Color must be a string'),
+  body('is_done').optional().isBoolean().withMessage('is_done must be a boolean'),
+  body('wip_limit').optional().isInt({ min: 1 }).withMessage('WIP limit must be a positive integer'),
+];
+
+export const validateKanbanCardCreate = [
+  body('column_id').isInt({ min: 1 }).withMessage('Column ID is required'),
+  body('title').notEmpty().withMessage('Card title is required'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('card_type').optional().isString().withMessage('Card type must be a string'),
+  body('entity_id').optional().isInt({ min: 1 }).withMessage('Entity ID must be a positive integer'),
+  body('entity_type').optional().isIn(['lead', 'property', 'unit', 'contract']).withMessage('Invalid entity type'),
+  body('assigned_to').optional().isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
+  body('priority').optional().isIn(['low', 'medium', 'high', 'urgent']).withMessage('Invalid priority'),
+  body('due_date').optional().isISO8601().withMessage('Due date must be a valid ISO 8601 date'),
+  body('position').optional().isInt({ min: 0 }).withMessage('Position must be a non-negative integer'),
+  body('label_ids').optional().isArray().withMessage('Label IDs must be an array'),
+  body('label_ids.*').optional().isInt({ min: 1 }).withMessage('Each label ID must be a positive integer'),
+];
+
+export const validateKanbanCardUpdate = [
+  body('title').optional().notEmpty().withMessage('Card title cannot be empty'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('column_id').optional().isInt({ min: 1 }).withMessage('Column ID must be a positive integer'),
+  body('assigned_to').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
+  body('priority').optional().isIn(['low', 'medium', 'high', 'urgent']).withMessage('Invalid priority'),
+  body('due_date').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Due date must be a valid ISO 8601 date'),
+  body('position').optional().isInt({ min: 0 }).withMessage('Position must be a non-negative integer'),
+  body('is_archived').optional().isBoolean().withMessage('is_archived must be a boolean'),
 ];
 
