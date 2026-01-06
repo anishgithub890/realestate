@@ -38,6 +38,23 @@ export class ContractService {
             select: { id: true, name: true, email: true },
           },
           broker: true,
+          previous_contract: {
+            select: {
+              id: true,
+              contract_no: true,
+              from_date: true,
+              to_date: true,
+            },
+          },
+          renewed_contracts: {
+            select: {
+              id: true,
+              contract_no: true,
+              from_date: true,
+              to_date: true,
+            },
+            orderBy: { created_at: 'asc' },
+          },
           units: {
             include: {
               unit: {
@@ -67,6 +84,26 @@ export class ContractService {
         broker: true,
         creator: {
           select: { id: true, name: true, email: true },
+        },
+        previous_contract: {
+          select: {
+            id: true,
+            contract_no: true,
+            from_date: true,
+            to_date: true,
+            amount: true,
+          },
+        },
+        renewed_contracts: {
+          select: {
+            id: true,
+            contract_no: true,
+            from_date: true,
+            to_date: true,
+            amount: true,
+            created_at: true,
+          },
+          orderBy: { created_at: 'asc' },
         },
         units: {
           include: {

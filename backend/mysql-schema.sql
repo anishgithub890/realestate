@@ -685,6 +685,13 @@ CREATE TABLE IF NOT EXISTS `Lead` (
     `assigned_to` INTEGER NULL,
     `company_id` INTEGER NOT NULL,
     `created_by` INTEGER NOT NULL,
+    `utm_source` VARCHAR(191) NULL,
+    `utm_medium` VARCHAR(191) NULL,
+    `utm_campaign` VARCHAR(191) NULL,
+    `utm_term` VARCHAR(191) NULL,
+    `utm_content` VARCHAR(191) NULL,
+    `referrer_url` VARCHAR(191) NULL,
+    `landing_page` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Lead_uuid_key`(`uuid`),
@@ -692,6 +699,8 @@ CREATE TABLE IF NOT EXISTS `Lead` (
     INDEX `Lead_email_idx`(`email`),
     INDEX `Lead_company_id_idx`(`company_id`),
     INDEX `Lead_status_id_idx`(`status_id`),
+    INDEX `Lead_utm_source_idx`(`utm_source`),
+    INDEX `Lead_utm_campaign_idx`(`utm_campaign`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -1188,6 +1197,361 @@ CREATE TABLE IF NOT EXISTS `PropertyAnalytics` (
     INDEX `PropertyAnalytics_date_idx`(`date`),
     INDEX `PropertyAnalytics_company_id_idx`(`company_id`),
     UNIQUE INDEX `PropertyAnalytics_unit_id_date_key`(`unit_id`, `date`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `LeadRoutingRule` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `rule_name` VARCHAR(191) NOT NULL,
+    `priority` INTEGER NOT NULL DEFAULT 0,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `conditions` JSON NOT NULL,
+    `assignment_type` VARCHAR(191) NOT NULL,
+    `assigned_user_id` INTEGER NULL,
+    `assigned_role_id` INTEGER NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `LeadRoutingRule_company_id_idx`(`company_id`),
+    INDEX `LeadRoutingRule_is_active_idx`(`is_active`),
+    INDEX `LeadRoutingRule_priority_idx`(`priority`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `LeadPipeline` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `stages` JSON NOT NULL,
+    `is_default` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `LeadPipeline_company_id_idx`(`company_id`),
+    INDEX `LeadPipeline_is_active_idx`(`is_active`),
+    INDEX `LeadPipeline_is_default_idx`(`is_default`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `AutomationRule` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `trigger_type` VARCHAR(191) NOT NULL,
+    `trigger_conditions` JSON NOT NULL,
+    `action_type` VARCHAR(191) NOT NULL,
+    `template_id` INTEGER NULL,
+    `schedule_delay` INTEGER NULL,
+    `schedule_unit` VARCHAR(191) NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `AutomationRule_company_id_idx`(`company_id`),
+    INDEX `AutomationRule_is_active_idx`(`is_active`),
+    INDEX `AutomationRule_trigger_type_idx`(`trigger_type`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `MessageTemplate` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `type` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `subject` VARCHAR(191) NULL,
+    `body` TEXT NOT NULL,
+    `variables` JSON NOT NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `MessageTemplate_company_id_idx`(`company_id`),
+    INDEX `MessageTemplate_type_idx`(`type`),
+    INDEX `MessageTemplate_is_active_idx`(`is_active`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `Microsite` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `unit_id` INTEGER NOT NULL,
+    `company_id` INTEGER NOT NULL,
+    `slug` VARCHAR(191) NOT NULL,
+    `template_id` INTEGER NULL,
+    `seo_title` VARCHAR(191) NULL,
+    `seo_description` TEXT NULL,
+    `seo_keywords` VARCHAR(191) NULL,
+    `custom_css` TEXT NULL,
+    `custom_js` TEXT NULL,
+    `is_published` BOOLEAN NOT NULL DEFAULT false,
+    `published_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Microsite_slug_key`(`slug`),
+    UNIQUE INDEX `Microsite_unit_id_company_id_key`(`unit_id`, `company_id`),
+    INDEX `Microsite_company_id_idx`(`company_id`),
+    INDEX `Microsite_unit_id_idx`(`unit_id`),
+    INDEX `Microsite_slug_idx`(`slug`),
+    INDEX `Microsite_is_published_idx`(`is_published`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `MicrositeTemplate` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `template_html` TEXT NOT NULL,
+    `template_css` TEXT NULL,
+    `template_js` TEXT NULL,
+    `is_default` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `MicrositeTemplate_company_id_idx`(`company_id`),
+    INDEX `MicrositeTemplate_is_active_idx`(`is_active`),
+    INDEX `MicrositeTemplate_is_default_idx`(`is_default`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `Attendance` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `company_id` INTEGER NOT NULL,
+    `date` DATE NOT NULL,
+    `check_in_time` DATETIME(3) NULL,
+    `check_out_time` DATETIME(3) NULL,
+    `check_in_latitude` DOUBLE NULL,
+    `check_in_longitude` DOUBLE NULL,
+    `check_out_latitude` DOUBLE NULL,
+    `check_out_longitude` DOUBLE NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'present',
+    `notes` TEXT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Attendance_user_id_date_key`(`user_id`, `date`),
+    INDEX `Attendance_company_id_idx`(`company_id`),
+    INDEX `Attendance_user_id_idx`(`user_id`),
+    INDEX `Attendance_date_idx`(`date`),
+    INDEX `Attendance_status_idx`(`status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `UserActivity` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `company_id` INTEGER NOT NULL,
+    `date` DATE NOT NULL,
+    `activity_type` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
+    `duration_minutes` INTEGER NULL,
+    `metadata` JSON NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `UserActivity_company_id_idx`(`company_id`),
+    INDEX `UserActivity_user_id_idx`(`user_id`),
+    INDEX `UserActivity_date_idx`(`date`),
+    INDEX `UserActivity_activity_type_idx`(`activity_type`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanBoard` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `board_type` VARCHAR(191) NOT NULL,
+    `is_template` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_by` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `KanbanBoard_company_id_idx`(`company_id`),
+    INDEX `KanbanBoard_board_type_idx`(`board_type`),
+    INDEX `KanbanBoard_is_active_idx`(`is_active`),
+    INDEX `KanbanBoard_is_template_idx`(`is_template`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanColumn` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `board_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `position` INTEGER NOT NULL,
+    `color` VARCHAR(191) NULL,
+    `is_done` BOOLEAN NOT NULL DEFAULT false,
+    `wip_limit` INTEGER NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `KanbanColumn_board_id_position_key`(`board_id`, `position`),
+    INDEX `KanbanColumn_board_id_idx`(`board_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanCard` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `board_id` INTEGER NOT NULL,
+    `column_id` INTEGER NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `card_type` VARCHAR(191) NOT NULL,
+    `entity_id` INTEGER NULL,
+    `entity_type` VARCHAR(191) NULL,
+    `assigned_to` INTEGER NULL,
+    `priority` VARCHAR(191) NOT NULL DEFAULT 'medium',
+    `due_date` DATETIME(3) NULL,
+    `position` INTEGER NOT NULL,
+    `is_archived` BOOLEAN NOT NULL DEFAULT false,
+    `created_by` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `KanbanCard_board_id_idx`(`board_id`),
+    INDEX `KanbanCard_column_id_idx`(`column_id`),
+    INDEX `KanbanCard_card_type_idx`(`card_type`),
+    INDEX `KanbanCard_entity_id_entity_type_idx`(`entity_id`, `entity_type`),
+    INDEX `KanbanCard_assigned_to_idx`(`assigned_to`),
+    INDEX `KanbanCard_priority_idx`(`priority`),
+    INDEX `KanbanCard_due_date_idx`(`due_date`),
+    INDEX `KanbanCard_is_archived_idx`(`is_archived`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanCardComment` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `card_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `comment` TEXT NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `KanbanCardComment_card_id_idx`(`card_id`),
+    INDEX `KanbanCardComment_user_id_idx`(`user_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanCardAttachment` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `card_id` INTEGER NOT NULL,
+    `file_name` VARCHAR(191) NOT NULL,
+    `file_url` VARCHAR(191) NOT NULL,
+    `file_type` VARCHAR(191) NULL,
+    `file_size` INTEGER NULL,
+    `uploaded_by` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `KanbanCardAttachment_card_id_idx`(`card_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanLabel` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `board_id` INTEGER NULL,
+    `company_id` INTEGER NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `color` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `KanbanLabel_board_id_idx`(`board_id`),
+    INDEX `KanbanLabel_company_id_idx`(`company_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `KanbanCardLabel` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `card_id` INTEGER NOT NULL,
+    `label_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `KanbanCardLabel_card_id_label_id_key`(`card_id`, `label_id`),
+    INDEX `KanbanCardLabel_card_id_idx`(`card_id`),
+    INDEX `KanbanCardLabel_label_id_idx`(`label_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `AdCampaign` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `campaign_name` VARCHAR(191) NOT NULL,
+    `source` VARCHAR(191) NOT NULL,
+    `start_date` DATETIME(3) NOT NULL,
+    `end_date` DATETIME(3) NULL,
+    `budget` DOUBLE NULL,
+    `spent` DOUBLE NOT NULL DEFAULT 0,
+    `leads_count` INTEGER NOT NULL DEFAULT 0,
+    `conversions` INTEGER NOT NULL DEFAULT 0,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `AdCampaign_company_id_idx`(`company_id`),
+    INDEX `AdCampaign_source_idx`(`source`),
+    INDEX `AdCampaign_is_active_idx`(`is_active`),
+    INDEX `AdCampaign_start_date_idx`(`start_date`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `Integration` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `integration_type` VARCHAR(191) NOT NULL,
+    `api_key` TEXT NULL,
+    `api_secret` TEXT NULL,
+    `access_token` TEXT NULL,
+    `refresh_token` TEXT NULL,
+    `config` JSON NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `last_sync_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Integration_company_id_integration_type_key`(`company_id`, `integration_type`),
+    INDEX `Integration_company_id_idx`(`company_id`),
+    INDEX `Integration_integration_type_idx`(`integration_type`),
+    INDEX `Integration_is_active_idx`(`is_active`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS `Webhook` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `company_id` INTEGER NOT NULL,
+    `integration_id` INTEGER NULL,
+    `event_type` VARCHAR(191) NOT NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `secret` VARCHAR(191) NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `last_triggered_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `Webhook_company_id_idx`(`company_id`),
+    INDEX `Webhook_integration_id_idx`(`integration_id`),
+    INDEX `Webhook_event_type_idx`(`event_type`),
+    INDEX `Webhook_is_active_idx`(`is_active`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -1723,6 +2087,108 @@ CALL AddForeignKeyIfNotExists('_PermissionToRole', '_PermissionToRole_A_fkey', '
 -- AddForeignKey
 CALL AddForeignKeyIfNotExists('_PermissionToRole', '_PermissionToRole_B_fkey', 'B', 'Role', 'id', 'CASCADE', 'CASCADE');
 
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('LeadRoutingRule', 'LeadRoutingRule_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('LeadRoutingRule', 'LeadRoutingRule_assigned_user_id_fkey', 'assigned_user_id', 'User', 'id', 'SET NULL', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('LeadRoutingRule', 'LeadRoutingRule_assigned_role_id_fkey', 'assigned_role_id', 'Role', 'id', 'SET NULL', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('LeadPipeline', 'LeadPipeline_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('AutomationRule', 'AutomationRule_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('AutomationRule', 'AutomationRule_template_id_fkey', 'template_id', 'MessageTemplate', 'id', 'SET NULL', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('MessageTemplate', 'MessageTemplate_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Microsite', 'Microsite_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Microsite', 'Microsite_unit_id_fkey', 'unit_id', 'unit', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Microsite', 'Microsite_template_id_fkey', 'template_id', 'MicrositeTemplate', 'id', 'SET NULL', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('MicrositeTemplate', 'MicrositeTemplate_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Attendance', 'Attendance_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Attendance', 'Attendance_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('UserActivity', 'UserActivity_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('UserActivity', 'UserActivity_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanBoard', 'KanbanBoard_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanBoard', 'KanbanBoard_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanColumn', 'KanbanColumn_board_id_fkey', 'board_id', 'KanbanBoard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCard', 'KanbanCard_board_id_fkey', 'board_id', 'KanbanBoard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCard', 'KanbanCard_column_id_fkey', 'column_id', 'KanbanColumn', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCard', 'KanbanCard_assigned_to_fkey', 'assigned_to', 'User', 'id', 'SET NULL', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCard', 'KanbanCard_created_by_fkey', 'created_by', 'User', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardComment', 'KanbanCardComment_card_id_fkey', 'card_id', 'KanbanCard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardComment', 'KanbanCardComment_user_id_fkey', 'user_id', 'User', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardAttachment', 'KanbanCardAttachment_card_id_fkey', 'card_id', 'KanbanCard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardAttachment', 'KanbanCardAttachment_uploaded_by_fkey', 'uploaded_by', 'User', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanLabel', 'KanbanLabel_board_id_fkey', 'board_id', 'KanbanBoard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanLabel', 'KanbanLabel_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardLabel', 'KanbanCardLabel_card_id_fkey', 'card_id', 'KanbanCard', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('KanbanCardLabel', 'KanbanCardLabel_label_id_fkey', 'label_id', 'KanbanLabel', 'id', 'CASCADE', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('AdCampaign', 'AdCampaign_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Integration', 'Integration_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Webhook', 'Webhook_company_id_fkey', 'company_id', 'Company', 'id', 'RESTRICT', 'CASCADE');
+
+-- AddForeignKey
+CALL AddForeignKeyIfNotExists('Webhook', 'Webhook_integration_id_fkey', 'integration_id', 'Integration', 'id', 'SET NULL', 'CASCADE');
+
 
 -- ============================================================================
 -- END OF SCHEMA DEFINITION
@@ -1770,6 +2236,167 @@ SET @preparedStatement = (SELECT IF(
   ) > 0,
   'SELECT 1', -- Column exists, do nothing
   CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NOT NULL DEFAULT ''true'' AFTER `address`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add UTM tracking columns to Lead table if they don't exist
+SET @dbname = DATABASE();
+SET @tablename = 'Lead';
+
+-- Add utm_source column
+SET @columnname = 'utm_source';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `created_by`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add utm_medium column
+SET @columnname = 'utm_medium';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `utm_source`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add utm_campaign column
+SET @columnname = 'utm_campaign';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `utm_medium`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add utm_term column
+SET @columnname = 'utm_term';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `utm_campaign`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add utm_content column
+SET @columnname = 'utm_content';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `utm_term`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add referrer_url column
+SET @columnname = 'referrer_url';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `utm_content`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add landing_page column
+SET @columnname = 'landing_page';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (COLUMN_NAME = @columnname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE `', @tablename, '` ADD COLUMN `', @columnname, '` VARCHAR(191) NULL AFTER `referrer_url`')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add indexes for UTM fields if they don't exist
+SET @dbname = DATABASE();
+SET @tablename = 'Lead';
+
+-- Add index for utm_source if it doesn't exist
+SET @indexname = 'Lead_utm_source_idx';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (INDEX_NAME = @indexname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('CREATE INDEX `', @indexname, '` ON `', @tablename, '`(`utm_source`)')
+));
+PREPARE alterIfNotExists FROM @preparedStatement;
+EXECUTE alterIfNotExists;
+DEALLOCATE PREPARE alterIfNotExists;
+
+-- Add index for utm_campaign if it doesn't exist
+SET @indexname = 'Lead_utm_campaign_idx';
+SET @preparedStatement = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE
+      (TABLE_SCHEMA = @dbname)
+      AND (TABLE_NAME = @tablename)
+      AND (INDEX_NAME = @indexname)
+  ) > 0,
+  'SELECT 1',
+  CONCAT('CREATE INDEX `', @indexname, '` ON `', @tablename, '`(`utm_campaign`)')
 ));
 PREPARE alterIfNotExists FROM @preparedStatement;
 EXECUTE alterIfNotExists;

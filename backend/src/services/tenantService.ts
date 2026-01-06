@@ -198,6 +198,23 @@ export class TenantService {
     const contracts = await prisma.rentalContract.findMany({
       where: { tenant_id: tenantId, company_id: companyId },
       include: {
+        previous_contract: {
+          select: {
+            id: true,
+            contract_no: true,
+            from_date: true,
+            to_date: true,
+          },
+        },
+        renewed_contracts: {
+          select: {
+            id: true,
+            contract_no: true,
+            from_date: true,
+            to_date: true,
+          },
+          orderBy: { created_at: 'asc' },
+        },
         units: {
           include: {
             unit: {
