@@ -14,6 +14,7 @@ import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { TicketForm } from '@/components/forms/ticket-form';
 
 interface Ticket {
   id: number;
@@ -48,6 +49,9 @@ interface Ticket {
 
 export default function TicketsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<{ id: number; ticket_no: string } | null>(null);
@@ -60,6 +64,18 @@ export default function TicketsPage() {
 
   const tickets: Ticket[] = (data as any)?.data || [];
   const pagination = (data as any)?.pagination;
+
+  const handleCreate = () => {
+    setSelectedTicket(null);
+    setFormMode('create');
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setFormMode('edit');
+    setIsFormOpen(true);
+  };
 
   const handleDeleteClick = (ticket: Ticket) => {
     setTicketToDelete({ id: ticket.id, ticket_no: ticket.ticket_no });
@@ -215,11 +231,9 @@ export default function TicketsPage() {
           variant?: 'default' | 'destructive';
         }> = [
           {
-            label: 'View Ticket',
-            icon: ActionIcons.View,
-            onClick: () => {
-              // TODO: Implement view ticket dialog
-            },
+            label: 'Edit Ticket',
+            icon: ActionIcons.Edit,
+            onClick: () => handleEdit(ticket),
           },
           {
             label: 'Delete Ticket',
@@ -301,11 +315,9 @@ export default function TicketsPage() {
             variant="outline"
             size="sm"
             className="flex-1"
-            onClick={() => {
-              // TODO: Implement view ticket
-            }}
+            onClick={() => handleEdit(ticket)}
           >
-            View
+            Edit
           </Button>
           <Button
             variant="outline"
@@ -327,7 +339,7 @@ export default function TicketsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Tickets</h1>
           <p className="text-gray-600 mt-2">Manage maintenance tickets</p>
         </div>
-        <Button>
+        <Button onClick={handleCreate}>
           <Plus className="w-4 h-4 mr-2" />
           Create Ticket
         </Button>
@@ -364,6 +376,18 @@ export default function TicketsPage() {
         defaultView="table"
         storageKey="tickets-view-mode"
         gridCols={3}
+      />
+
+      {/* Ticket Form Dialog */}
+      <TicketForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        ticket={selectedTicket || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -8,11 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Plus, Globe, Eye, Edit, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { MicrositeForm } from '@/components/forms/microsite-form';
 
 export default function MicrositesPage() {
   const { toast } = useToast();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedMicrosite, setSelectedMicrosite] = useState<any>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
-  const { data, isLoading } = useQuery<any>({
+  const { data, isLoading, refetch } = useQuery<any>({
     queryKey: ['microsites'],
     queryFn: () => api.get('/microsites'),
   });
@@ -31,7 +35,13 @@ export default function MicrositesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Microsites</h1>
           <p className="text-gray-600 mt-2">Create and manage property microsites</p>
         </div>
-        <Button>
+        <Button
+          onClick={() => {
+            setSelectedMicrosite(null);
+            setFormMode('create');
+            setIsFormOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Create Microsite
         </Button>
@@ -89,7 +99,16 @@ export default function MicrositesPage() {
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          setSelectedMicrosite(microsite);
+                          setFormMode('edit');
+                          setIsFormOpen(true);
+                        }}
+                      >
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
@@ -101,6 +120,18 @@ export default function MicrositesPage() {
           )}
         </div>
       )}
+
+      {/* Microsite Form Dialog */}
+      <MicrositeForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        microsite={selectedMicrosite || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
+      />
     </div>
   );
 }

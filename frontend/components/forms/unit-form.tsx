@@ -123,9 +123,9 @@ export function UnitForm({ open, onOpenChange, unit, mode, onSuccess }: UnitForm
       setValue('building_id', unit.building_id?.toString());
       setValue('floor_id', unit.floor_id?.toString());
       setValue('unit_type_id', unit.unit_type_id?.toString());
-      setValue('owned_by', unit.owned_by?.toString());
-      setValue('furnished_type', unit.furnished_type || '');
-      setValue('view_type', unit.view_type || '');
+      setValue('owned_by', unit.owned_by?.toString() || 'none');
+      setValue('furnished_type', unit.furnished_type || 'none');
+      setValue('view_type', unit.view_type || 'none');
       setValue('floor_number', unit.floor_number?.toString());
       setValue('total_floors', unit.total_floors?.toString());
       setValue('year_built', unit.year_built?.toString());
@@ -152,7 +152,10 @@ export function UnitForm({ open, onOpenChange, unit, mode, onSuccess }: UnitForm
         building_id: parseInt(data.building_id),
         floor_id: parseInt(data.floor_id),
         unit_type_id: parseInt(data.unit_type_id),
-        owned_by: data.owned_by ? parseInt(data.owned_by) : null,
+        owned_by: data.owned_by && data.owned_by !== 'none' ? parseInt(data.owned_by) : null,
+        furnished_type: data.furnished_type && data.furnished_type !== 'none' ? data.furnished_type : null,
+        view_type: data.view_type && data.view_type !== 'none' ? data.view_type : null,
+        listing_type: data.listing_type && data.listing_type !== 'none' ? data.listing_type : null,
         floor_number: data.floor_number ? parseInt(data.floor_number) : null,
         total_floors: data.total_floors ? parseInt(data.total_floors) : null,
         year_built: data.year_built ? parseInt(data.year_built) : null,
@@ -430,14 +433,14 @@ export function UnitForm({ open, onOpenChange, unit, mode, onSuccess }: UnitForm
             <div>
               <Label htmlFor="owned_by">Landlord</Label>
               <Select
-                value={watch('owned_by')}
+                value={watch('owned_by') || 'none'}
                 onValueChange={(value) => setValue('owned_by', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select landlord (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {landlords.map((landlord: any) => (
                     <SelectItem key={landlord.id} value={landlord.id.toString()}>
                       {landlord.name}
@@ -450,14 +453,14 @@ export function UnitForm({ open, onOpenChange, unit, mode, onSuccess }: UnitForm
             <div>
               <Label htmlFor="furnished_type">Furnished Type</Label>
               <Select
-                value={watch('furnished_type')}
+                value={watch('furnished_type') || 'none'}
                 onValueChange={(value) => setValue('furnished_type', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select furnished type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   <SelectItem value="furnished">Furnished</SelectItem>
                   <SelectItem value="semi-furnished">Semi-Furnished</SelectItem>
                   <SelectItem value="unfurnished">Unfurnished</SelectItem>
@@ -475,7 +478,7 @@ export function UnitForm({ open, onOpenChange, unit, mode, onSuccess }: UnitForm
                   <SelectValue placeholder="Select listing type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   <SelectItem value="rent">For Rent</SelectItem>
                   <SelectItem value="sale">For Sale</SelectItem>
                   <SelectItem value="both">Both</SelectItem>

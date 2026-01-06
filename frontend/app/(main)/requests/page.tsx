@@ -14,6 +14,7 @@ import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { RequestForm } from '@/components/forms/request-form';
 
 interface Request {
   id: number;
@@ -40,6 +41,9 @@ interface Request {
 
 export default function RequestsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [requestToDelete, setRequestToDelete] = useState<{ id: number; request_no: string } | null>(null);
@@ -52,6 +56,18 @@ export default function RequestsPage() {
 
   const requests: Request[] = (data as any)?.data || [];
   const pagination = (data as any)?.pagination;
+
+  const handleCreate = () => {
+    setSelectedRequest(null);
+    setFormMode('create');
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (request: Request) => {
+    setSelectedRequest(request);
+    setFormMode('edit');
+    setIsFormOpen(true);
+  };
 
   const handleDeleteClick = (request: Request) => {
     setRequestToDelete({ id: request.id, request_no: request.request_no });
@@ -175,11 +191,9 @@ export default function RequestsPage() {
           variant?: 'default' | 'destructive';
         }> = [
           {
-            label: 'View Request',
-            icon: ActionIcons.View,
-            onClick: () => {
-              // TODO: Implement view request dialog
-            },
+            label: 'Edit Request',
+            icon: ActionIcons.Edit,
+            onClick: () => handleEdit(request),
           },
           {
             label: 'Delete Request',
@@ -243,11 +257,9 @@ export default function RequestsPage() {
             variant="outline"
             size="sm"
             className="flex-1"
-            onClick={() => {
-              // TODO: Implement view request
-            }}
+            onClick={() => handleEdit(request)}
           >
-            View
+            Edit
           </Button>
           <Button
             variant="outline"
@@ -269,7 +281,7 @@ export default function RequestsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Requests</h1>
           <p className="text-gray-600 mt-2">Manage tenant and landlord requests</p>
         </div>
-        <Button>
+        <Button onClick={handleCreate}>
           <Plus className="w-4 h-4 mr-2" />
           New Request
         </Button>
@@ -306,6 +318,18 @@ export default function RequestsPage() {
         defaultView="table"
         storageKey="requests-view-mode"
         gridCols={3}
+      />
+
+      {/* Request Form Dialog */}
+      <RequestForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        request={selectedRequest || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -6,8 +6,12 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Plug, Webhook, Settings, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Plug, Webhook, Settings, CheckCircle2, XCircle, Edit, Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { WebhookForm } from '@/components/forms/webhook-form';
+import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Table,
   TableBody,
@@ -19,6 +23,13 @@ import {
 
 export default function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState<'integrations' | 'webhooks'>('integrations');
+  const [isWebhookFormOpen, setIsWebhookFormOpen] = useState(false);
+  const [selectedWebhook, setSelectedWebhook] = useState<any>(null);
+  const [webhookFormMode, setWebhookFormMode] = useState<'create' | 'edit'>('create');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [webhookToDelete, setWebhookToDelete] = useState<{ id: number; url: string } | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch integrations
   const { data: integrationsData, isLoading: integrationsLoading } = useQuery<any>({
@@ -35,6 +46,49 @@ export default function IntegrationsPage() {
   const integrations = integrationsData?.data || [];
   const webhooks = webhooksData?.data || [];
 
+  const handleCreateWebhook = () => {
+    setSelectedWebhook(null);
+    setWebhookFormMode('create');
+    setIsWebhookFormOpen(true);
+  };
+
+  const handleEditWebhook = (webhook: any) => {
+    setSelectedWebhook(webhook);
+    setWebhookFormMode('edit');
+    setIsWebhookFormOpen(true);
+  };
+
+  const handleDeleteWebhook = (webhook: any) => {
+    setWebhookToDelete({ id: webhook.id, url: webhook.url });
+    setDeleteDialogOpen(true);
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/integrations/webhooks/${id}`),
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Webhook deleted successfully',
+      });
+      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
+      setDeleteDialogOpen(false);
+      setWebhookToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.error || 'Failed to delete webhook',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteConfirm = () => {
+    if (webhookToDelete) {
+      deleteMutation.mutate(webhookToDelete.id);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -42,7 +96,10 @@ export default function IntegrationsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Integrations & Webhooks</h1>
           <p className="text-gray-600 mt-2">Connect with external services and automate workflows</p>
         </div>
-        <Button>
+        <Button
+          onClick={activeTab === 'webhooks' ? handleCreateWebhook : undefined}
+          disabled={activeTab === 'integrations'}
+        >
           <Plus className="w-4 h-4 mr-2" />
           {activeTab === 'integrations' ? 'Add Integration' : 'Create Webhook'}
         </Button>
@@ -144,7 +201,7 @@ export default function IntegrationsPage() {
                             : 'Never'}
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Configure Integration">
                             <Settings className="w-4 h-4" />
                           </Button>
                         </TableCell>
@@ -216,6 +273,27 @@ export default function IntegrationsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Webhook Form */}
+      <WebhookForm
+        open={isWebhookFormOpen}
+        onOpenChange={setIsWebhookFormOpen}
+        webhook={selectedWebhook || undefined}
+        mode={webhookFormMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['webhooks'] });
+          setIsWebhookFormOpen(false);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Webhook"
+        description={`Are you sure you want to delete webhook "${webhookToDelete?.url}"? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

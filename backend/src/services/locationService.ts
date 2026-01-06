@@ -219,15 +219,17 @@ export class LocationService {
     }
 
     const fullPath = await this.generateFullPath(data.name, data.parent_id || null, companyId);
-    const slug = data.slug || this.generateSlug(data.name);
+    // Always auto-generate unique slug (users cannot provide slugs manually)
+    let slug = this.generateSlug(data.name);
+    let counter = 1;
+    const baseSlug = slug;
 
-    // Check if slug already exists
-    const existingSlug = await prisma.location.findFirst({
+    // Ensure slug is unique
+    while (await prisma.location.findFirst({
       where: { slug, company_id: companyId },
-    });
-
-    if (existingSlug) {
-      throw new ValidationError('Location with this slug already exists');
+    })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
     }
 
     // Check if full_path already exists
@@ -287,18 +289,8 @@ export class LocationService {
       fullPath = await this.generateFullPath(newName, newParentId, companyId);
     }
 
-    // If slug changes, validate uniqueness
-    let slug = location.slug;
-    if (data.slug && data.slug !== location.slug) {
-      const existingSlug = await prisma.location.findFirst({
-        where: { slug: data.slug, company_id: companyId, id: { not: id } },
-      });
-
-      if (existingSlug) {
-        throw new ValidationError('Location with this slug already exists');
-      }
-      slug = data.slug;
-    }
+    // Slug cannot be changed after creation (it's auto-generated and unique)
+    const slug = location.slug;
 
     // Validate level hierarchy if parent or level changes
     if (data.parent_id !== undefined || data.level) {

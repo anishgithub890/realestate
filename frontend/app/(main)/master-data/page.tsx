@@ -26,7 +26,9 @@ const masterDataCategories = [
       { name: 'Countries', href: '/master-data/countries', icon: Globe },
       { name: 'States', href: '/master-data/states', icon: MapPin },
       { name: 'Areas', href: '/master-data/areas', icon: Building2 },
+      { name: 'Locations', href: '/locations', icon: MapPin },
     ],
+    description: 'Locations system handles hierarchical geographic data (Emirates → Neighborhoods → Clusters → Buildings)',
   },
   {
     title: 'Property Data',
@@ -95,7 +97,9 @@ export default function MasterDataPage() {
                   <CategoryIcon className="w-5 h-5" />
                   {category.title}
                 </CardTitle>
-                <CardDescription>Manage {category.title.toLowerCase()}</CardDescription>
+                <CardDescription>
+                  {category.description || `Manage ${category.title.toLowerCase()}`}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">

@@ -234,17 +234,8 @@ export class MicrositeService {
       }
     }
 
-    // Generate slug if not provided
-    const slug = data.slug || await this.generateSlug(data.unit_id, companyId);
-
-    // Check if slug already exists
-    const existing = await prisma.microsite.findUnique({
-      where: { slug },
-    });
-
-    if (existing) {
-      throw new ValidationError('Slug already exists');
-    }
+    // Always auto-generate unique slug (users cannot provide slugs manually)
+    const slug = await this.generateSlug(data.unit_id, companyId);
 
     const microsite = await prisma.microsite.create({
       data: {
@@ -308,20 +299,9 @@ export class MicrositeService {
       }
     }
 
-    // Check slug uniqueness if changing
-    if (data.slug && data.slug !== microsite.slug) {
-      const existing = await prisma.microsite.findUnique({
-        where: { slug: data.slug },
-      });
-
-      if (existing) {
-        throw new ValidationError('Slug already exists');
-      }
-    }
-
+    // Slug cannot be changed after creation (it's auto-generated and unique)
+    // Remove slug from update data if provided
     const updateData: any = {};
-
-    if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.template_id !== undefined) updateData.template_id = data.template_id;
     if (data.seo_title !== undefined) updateData.seo_title = data.seo_title;
     if (data.seo_description !== undefined) updateData.seo_description = data.seo_description;

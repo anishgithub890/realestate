@@ -14,6 +14,7 @@ import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { ComplaintForm } from '@/components/forms/complaint-form';
 
 interface Complaint {
   id: number;
@@ -38,6 +39,9 @@ interface Complaint {
 
 export default function ComplaintsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [complaintToDelete, setComplaintToDelete] = useState<{ id: number; complaint_no: string } | null>(null);
@@ -50,6 +54,18 @@ export default function ComplaintsPage() {
 
   const complaints: Complaint[] = (data as any)?.data || [];
   const pagination = (data as any)?.pagination;
+
+  const handleCreate = () => {
+    setSelectedComplaint(null);
+    setFormMode('create');
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (complaint: Complaint) => {
+    setSelectedComplaint(complaint);
+    setFormMode('edit');
+    setIsFormOpen(true);
+  };
 
   const handleDeleteClick = (complaint: Complaint) => {
     setComplaintToDelete({ id: complaint.id, complaint_no: complaint.complaint_no });
@@ -172,11 +188,9 @@ export default function ComplaintsPage() {
           variant?: 'default' | 'destructive';
         }> = [
           {
-            label: 'View Complaint',
-            icon: ActionIcons.View,
-            onClick: () => {
-              // TODO: Implement view complaint dialog
-            },
+            label: 'Edit Complaint',
+            icon: ActionIcons.Edit,
+            onClick: () => handleEdit(complaint),
           },
           {
             label: 'Delete Complaint',
@@ -246,11 +260,9 @@ export default function ComplaintsPage() {
             variant="outline"
             size="sm"
             className="flex-1"
-            onClick={() => {
-              // TODO: Implement view complaint
-            }}
+            onClick={() => handleEdit(complaint)}
           >
-            View
+            Edit
           </Button>
           <Button
             variant="outline"
@@ -272,7 +284,7 @@ export default function ComplaintsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Complaints & Suggestions</h1>
           <p className="text-gray-600 mt-2">Manage tenant and landlord complaints</p>
         </div>
-        <Button>
+        <Button onClick={handleCreate}>
           <Plus className="w-4 h-4 mr-2" />
           New Complaint
         </Button>
@@ -309,6 +321,18 @@ export default function ComplaintsPage() {
         defaultView="table"
         storageKey="complaints-view-mode"
         gridCols={3}
+      />
+
+      {/* Complaint Form Dialog */}
+      <ComplaintForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        complaint={selectedComplaint || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -6,8 +6,13 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Zap, Mail, MessageSquare } from 'lucide-react';
+import { Plus, Zap, Mail, MessageSquare, Edit, Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AutomationRuleForm } from '@/components/forms/automation-rule-form';
+import { MessageTemplateForm } from '@/components/forms/message-template-form';
+import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Table,
   TableBody,
@@ -19,6 +24,16 @@ import {
 
 export default function AutomationPage() {
   const [activeTab, setActiveTab] = useState<'rules' | 'templates'>('rules');
+  const [isRuleFormOpen, setIsRuleFormOpen] = useState(false);
+  const [isTemplateFormOpen, setIsTemplateFormOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<any>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [ruleFormMode, setRuleFormMode] = useState<'create' | 'edit'>('create');
+  const [templateFormMode, setTemplateFormMode] = useState<'create' | 'edit'>('create');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: number; name: string; type: 'rule' | 'template' } | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch automation rules
   const { data: rulesData, isLoading: rulesLoading } = useQuery<any>({
@@ -35,6 +50,73 @@ export default function AutomationPage() {
   const rules = rulesData?.data || [];
   const templates = templatesData?.data || [];
 
+  const handleCreateRule = () => {
+    setSelectedRule(null);
+    setRuleFormMode('create');
+    setIsRuleFormOpen(true);
+  };
+
+  const handleEditRule = (rule: any) => {
+    setSelectedRule(rule);
+    setRuleFormMode('edit');
+    setIsRuleFormOpen(true);
+  };
+
+  const handleDeleteRule = (rule: any) => {
+    setItemToDelete({ id: rule.id, name: rule.name, type: 'rule' });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCreateTemplate = () => {
+    setSelectedTemplate(null);
+    setTemplateFormMode('create');
+    setIsTemplateFormOpen(true);
+  };
+
+  const handleEditTemplate = (template: any) => {
+    setSelectedTemplate(template);
+    setTemplateFormMode('edit');
+    setIsTemplateFormOpen(true);
+  };
+
+  const handleDeleteTemplate = (template: any) => {
+    setItemToDelete({ id: template.id, name: template.name, type: 'template' });
+    setDeleteDialogOpen(true);
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ id, type }: { id: number; type: 'rule' | 'template' }) => {
+      if (type === 'rule') {
+        return api.delete(`/automation/rules/${id}`);
+      } else {
+        return api.delete(`/automation/templates/${id}`);
+      }
+    },
+    onSuccess: (_, variables) => {
+      toast({
+        title: 'Success',
+        description: `${variables.type === 'rule' ? 'Automation rule' : 'Message template'} deleted successfully`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['automation-rules'] });
+      queryClient.invalidateQueries({ queryKey: ['message-templates'] });
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.error || 'Failed to delete item',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      deleteMutation.mutate({ id: itemToDelete.id, type: itemToDelete.type });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -42,7 +124,9 @@ export default function AutomationPage() {
           <h1 className="text-3xl font-bold text-gray-900">Automation</h1>
           <p className="text-gray-600 mt-2">Automated follow-ups and workflows</p>
         </div>
-        <Button>
+        <Button
+          onClick={activeTab === 'rules' ? handleCreateRule : handleCreateTemplate}
+        >
           <Plus className="w-4 h-4 mr-2" />
           {activeTab === 'rules' ? 'Create Rule' : 'Create Template'}
         </Button>
@@ -112,7 +196,22 @@ export default function AutomationPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">Edit</Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditRule(rule)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRule(rule)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -162,6 +261,26 @@ export default function AutomationPage() {
                           <Badge variant={template.is_active ? 'default' : 'secondary'}>
                             {template.is_active ? 'Active' : 'Inactive'}
                           </Badge>
+                          <div className="flex items-center gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditTemplate(template)}
+                              className="flex-1"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteTemplate(template)}
+                              className="flex-1 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -172,6 +291,39 @@ export default function AutomationPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Automation Rule Form */}
+      <AutomationRuleForm
+        open={isRuleFormOpen}
+        onOpenChange={setIsRuleFormOpen}
+        rule={selectedRule || undefined}
+        mode={ruleFormMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['automation-rules'] });
+          setIsRuleFormOpen(false);
+        }}
+      />
+
+      {/* Message Template Form */}
+      <MessageTemplateForm
+        open={isTemplateFormOpen}
+        onOpenChange={setIsTemplateFormOpen}
+        template={selectedTemplate || undefined}
+        mode={templateFormMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['message-templates'] });
+          setIsTemplateFormOpen(false);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={`Delete ${itemToDelete?.type === 'rule' ? 'Automation Rule' : 'Message Template'}`}
+        description={`Are you sure you want to delete "${itemToDelete?.name}"? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

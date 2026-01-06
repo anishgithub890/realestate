@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
+import { BrokerForm } from '@/components/forms/broker-form';
 
 interface Broker {
   id: number;
@@ -286,6 +287,18 @@ export default function BrokersPage() {
         defaultView="table"
         storageKey="brokers-view-mode"
         gridCols={3}
+      />
+
+      {/* Broker Form Dialog */}
+      <BrokerForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        broker={selectedBroker || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -6,9 +6,12 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Settings, GitBranch, Users, Target } from 'lucide-react';
+import { Plus, Settings, GitBranch, Users, Target, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RoutingRuleForm } from '@/components/forms/routing-rule-form';
+import { PipelineForm } from '@/components/forms/pipeline-form';
+import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import {
   Table,
   TableBody,
@@ -20,6 +23,14 @@ import {
 
 export default function RoutingPage() {
   const [activeTab, setActiveTab] = useState<'rules' | 'pipelines'>('rules');
+  const [isRuleFormOpen, setIsRuleFormOpen] = useState(false);
+  const [isPipelineFormOpen, setIsPipelineFormOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<any>(null);
+  const [selectedPipeline, setSelectedPipeline] = useState<any>(null);
+  const [ruleFormMode, setRuleFormMode] = useState<'create' | 'edit'>('create');
+  const [pipelineFormMode, setPipelineFormMode] = useState<'create' | 'edit'>('create');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: number; name: string; type: 'rule' | 'pipeline' } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,6 +49,70 @@ export default function RoutingPage() {
   const rules = rulesData?.data || [];
   const pipelines = pipelinesData?.data || [];
 
+  const handleCreateRule = () => {
+    setSelectedRule(null);
+    setRuleFormMode('create');
+    setIsRuleFormOpen(true);
+  };
+
+  const handleEditRule = (rule: any) => {
+    setSelectedRule(rule);
+    setRuleFormMode('edit');
+    setIsRuleFormOpen(true);
+  };
+
+  const handleDeleteRule = (rule: any) => {
+    setItemToDelete({ id: rule.id, name: rule.rule_name, type: 'rule' });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCreatePipeline = () => {
+    setSelectedPipeline(null);
+    setPipelineFormMode('create');
+    setIsPipelineFormOpen(true);
+  };
+
+  const handleEditPipeline = (pipeline: any) => {
+    setSelectedPipeline(pipeline);
+    setPipelineFormMode('edit');
+    setIsPipelineFormOpen(true);
+  };
+
+  const handleDeletePipeline = (pipeline: any) => {
+    setItemToDelete({ id: pipeline.id, name: pipeline.name, type: 'pipeline' });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      if (itemToDelete.type === 'rule') {
+        await api.delete(`/routing/rules/${itemToDelete.id}`);
+        toast({
+          title: 'Success',
+          description: 'Routing rule deleted successfully',
+        });
+      } else {
+        await api.delete(`/routing/pipelines/${itemToDelete.id}`);
+        toast({
+          title: 'Success',
+          description: 'Pipeline deleted successfully',
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['routing-rules'] });
+      queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.error || 'Failed to delete item',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -45,7 +120,9 @@ export default function RoutingPage() {
           <h1 className="text-3xl font-bold text-gray-900">Lead Routing & Pipelines</h1>
           <p className="text-gray-600 mt-2">Configure smart lead routing and sales pipelines</p>
         </div>
-        <Button>
+        <Button
+          onClick={activeTab === 'rules' ? handleCreateRule : handleCreatePipeline}
+        >
           <Plus className="w-4 h-4 mr-2" />
           {activeTab === 'rules' ? 'Create Rule' : 'Create Pipeline'}
         </Button>
@@ -113,9 +190,22 @@ export default function RoutingPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
-                            <Settings className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditRule(rule)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRule(rule)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -156,13 +246,42 @@ export default function RoutingPage() {
                       <CardContent>
                         <div className="space-y-2">
                           <div className="text-sm text-muted-foreground">
-                            Stages: {typeof pipeline.stages === 'object' 
-                              ? Object.keys(pipeline.stages).length 
-                              : 'N/A'}
+                            Stages:{' '}
+                            {(() => {
+                              try {
+                                const stages =
+                                  typeof pipeline.stages === 'string'
+                                    ? JSON.parse(pipeline.stages)
+                                    : pipeline.stages;
+                                return Array.isArray(stages) ? stages.length : 'N/A';
+                              } catch {
+                                return 'N/A';
+                              }
+                            })()}
                           </div>
                           <Badge variant={pipeline.is_active ? 'default' : 'secondary'}>
                             {pipeline.is_active ? 'Active' : 'Inactive'}
                           </Badge>
+                          <div className="flex items-center gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditPipeline(pipeline)}
+                              className="flex-1"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeletePipeline(pipeline)}
+                              className="flex-1 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -173,6 +292,39 @@ export default function RoutingPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Routing Rule Form */}
+      <RoutingRuleForm
+        open={isRuleFormOpen}
+        onOpenChange={setIsRuleFormOpen}
+        rule={selectedRule || undefined}
+        mode={ruleFormMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['routing-rules'] });
+          setIsRuleFormOpen(false);
+        }}
+      />
+
+      {/* Pipeline Form */}
+      <PipelineForm
+        open={isPipelineFormOpen}
+        onOpenChange={setIsPipelineFormOpen}
+        pipeline={selectedPipeline || undefined}
+        mode={pipelineFormMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+          setIsPipelineFormOpen(false);
+        }}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={`Delete ${itemToDelete?.type === 'rule' ? 'Routing Rule' : 'Pipeline'}`}
+        description={`Are you sure you want to delete "${itemToDelete?.name}"? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

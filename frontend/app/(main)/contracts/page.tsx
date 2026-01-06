@@ -33,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { ContractRenewalDialog } from '@/components/contracts/contract-renewal-dialog';
 import { ContractHierarchy } from '@/components/contracts/contract-hierarchy';
 import { useToast } from '@/components/ui/use-toast';
+import { ContractForm } from '@/components/forms/contract-form';
 
 export default function ContractsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +41,8 @@ export default function ContractsPage() {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [renewalDialogOpen, setRenewalDialogOpen] = useState(false);
   const [hierarchyDialogOpen, setHierarchyDialogOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const { toast } = useToast();
 
   const { data, isLoading, refetch } = useQuery<any>({
@@ -93,7 +96,13 @@ export default function ContractsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Contracts</h1>
           <p className="text-gray-600 mt-2">Manage rental and sales contracts</p>
         </div>
-        <Button>
+        <Button
+          onClick={() => {
+            setSelectedContract(null);
+            setFormMode('create');
+            setIsFormOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Contract
         </Button>
@@ -228,7 +237,16 @@ export default function ContractsPage() {
                               )}
                             </>
                           )}
-                          <Button variant="ghost" size="sm" title="View Details">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedContract(contract);
+                              setFormMode('edit');
+                              setIsFormOpen(true);
+                            }}
+                            title="Edit Contract"
+                          >
                             <FileText className="w-4 h-4" />
                           </Button>
                         </div>
@@ -251,6 +269,19 @@ export default function ContractsPage() {
           onSuccess={handleRenewalSuccess}
         />
       )}
+
+      {/* Contract Form Dialog */}
+      <ContractForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        contract={selectedContract || undefined}
+        mode={formMode}
+        contractType={contractType}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
+      />
 
       {/* Hierarchy Dialog */}
       {selectedContract && (

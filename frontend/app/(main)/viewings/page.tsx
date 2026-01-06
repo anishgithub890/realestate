@@ -14,6 +14,7 @@ import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { ViewingForm } from '@/components/forms/viewing-form';
 
 interface Viewing {
   id: number;
@@ -295,6 +296,18 @@ export default function ViewingsPage() {
         defaultView="table"
         storageKey="viewings-view-mode"
         gridCols={3}
+      />
+
+      {/* Viewing Form Dialog */}
+      <ViewingForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        viewing={selectedViewing || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          refetch();
+          setIsFormOpen(false);
+        }}
       />
 
       {/* Delete Confirmation Dialog */}
