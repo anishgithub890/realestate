@@ -139,124 +139,128 @@ export default function ContractsPage() {
         {isLoading ? (
           <div className="p-8 text-center">Loading...</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Contract No</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Tenant/Buyer</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Renewals</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contracts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    No contracts found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                contracts.map((contract: any) => {
-                  const expired = isContractExpired(contract.to_date);
-                  const active = isContractActive(contract.from_date, contract.to_date);
-                  const renewalCount = contract.renewed_contracts?.length || 0;
-                  const hasPrevious = !!contract.previous_contract;
-
-                  return (
-                    <TableRow key={contract.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {contract.contract_no}
-                          {hasPrevious && (
-                            <Badge variant="outline" className="text-xs">
-                              Renewal
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(contract.contract_date), 'MMM dd, yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        {contractType === 'rental'
-                          ? contract.tenant?.name
-                          : contract.buyer?.name}
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{format(new Date(contract.from_date), 'MMM dd, yyyy')}</div>
-                          <div className="text-muted-foreground">
-                            to {format(new Date(contract.to_date), 'MMM dd, yyyy')}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>AED {contract.amount?.toLocaleString()}</TableCell>
-                      <TableCell>
-                        {expired ? (
-                          <Badge variant="secondary">Expired</Badge>
-                        ) : active ? (
-                          <Badge variant="default">Active</Badge>
-                        ) : (
-                          <Badge variant="outline">Upcoming</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {renewalCount > 0 ? (
-                          <Badge variant="outline">{renewalCount} renewal(s)</Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {contractType === 'rental' && (
-                            <>
-                              {expired && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRenew(contract)}
-                                  title="Renew Contract"
-                                >
-                                  <RefreshCw className="w-4 h-4" />
-                                </Button>
-                              )}
-                              {(hasPrevious || renewalCount > 0) && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleViewHistory(contract)}
-                                  title="View Contract History"
-                                >
-                                  <History className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedContract(contract);
-                              setFormMode('edit');
-                              setIsFormOpen(true);
-                            }}
-                            title="Edit Contract"
-                          >
-                            <FileText className="w-4 h-4" />
-                          </Button>
-                        </div>
+          <div className="overflow-x-auto -mx-6 sm:mx-0">
+            <div className="inline-block min-w-full align-middle px-6 sm:px-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contract No</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Tenant/Buyer</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Renewals</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contracts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                        No contracts found
                       </TableCell>
                     </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                  ) : (
+                    contracts.map((contract: any) => {
+                      const expired = isContractExpired(contract.to_date);
+                      const active = isContractActive(contract.from_date, contract.to_date);
+                      const renewalCount = contract.renewed_contracts?.length || 0;
+                      const hasPrevious = !!contract.previous_contract;
+
+                      return (
+                        <TableRow key={contract.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {contract.contract_no}
+                              {hasPrevious && (
+                                <Badge variant="outline" className="text-xs">
+                                  Renewal
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {format(new Date(contract.contract_date), 'MMM dd, yyyy')}
+                          </TableCell>
+                          <TableCell>
+                            {contractType === 'rental'
+                              ? contract.tenant?.name
+                              : contract.buyer?.name}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <div>{format(new Date(contract.from_date), 'MMM dd, yyyy')}</div>
+                              <div className="text-muted-foreground">
+                                to {format(new Date(contract.to_date), 'MMM dd, yyyy')}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>AED {contract.amount?.toLocaleString()}</TableCell>
+                          <TableCell>
+                            {expired ? (
+                              <Badge variant="secondary">Expired</Badge>
+                            ) : active ? (
+                              <Badge variant="default">Active</Badge>
+                            ) : (
+                              <Badge variant="outline">Upcoming</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {renewalCount > 0 ? (
+                              <Badge variant="outline">{renewalCount} renewal(s)</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {contractType === 'rental' && (
+                                <>
+                                  {expired && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRenew(contract)}
+                                      title="Renew Contract"
+                                    >
+                                      <RefreshCw className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  {(hasPrevious || renewalCount > 0) && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleViewHistory(contract)}
+                                      title="View Contract History"
+                                    >
+                                      <History className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedContract(contract);
+                                  setFormMode('edit');
+                                  setIsFormOpen(true);
+                                }}
+                                title="Edit Contract"
+                              >
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         )}
       </Card>
 

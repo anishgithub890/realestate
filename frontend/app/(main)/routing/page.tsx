@@ -156,61 +156,65 @@ export default function RoutingPage() {
                   No routing rules found. Create your first rule to get started.
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Rule Name</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Assignment Type</TableHead>
-                      <TableHead>Conditions</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rules.map((rule: any) => (
-                      <TableRow key={rule.id}>
-                        <TableCell className="font-medium">{rule.rule_name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Priority {rule.priority}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{rule.assignment_type}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {typeof rule.conditions === 'object' 
-                              ? JSON.stringify(rule.conditions).slice(0, 50) + '...'
-                              : 'N/A'}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={rule.is_active ? 'default' : 'secondary'}>
-                            {rule.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditRule(rule)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteRule(rule)}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto -mx-6 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle px-6 sm:px-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Rule Name</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Assignment Type</TableHead>
+                          <TableHead>Conditions</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {rules.map((rule: any) => (
+                          <TableRow key={rule.id}>
+                            <TableCell className="font-medium">{rule.rule_name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">Priority {rule.priority}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{rule.assignment_type}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm text-muted-foreground">
+                                {typeof rule.conditions === 'object' 
+                                  ? JSON.stringify(rule.conditions).slice(0, 50) + '...'
+                                  : 'N/A'}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={rule.is_active ? 'default' : 'secondary'}>
+                                {rule.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditRule(rule)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteRule(rule)}
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>

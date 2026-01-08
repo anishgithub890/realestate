@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
+import { Container } from '@/components/ui/container';
 
 interface Building {
   id: number;
@@ -271,15 +272,16 @@ export default function BuildingsPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <Container className="py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Buildings</h1>
-          <p className="text-gray-600 mt-2">Manage buildings and their properties</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Buildings</h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">Manage buildings and their properties</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button size="sm" className="text-xs sm:text-sm" onClick={handleCreate}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Building
+          <span className="hidden sm:inline">Add Building</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
@@ -295,26 +297,28 @@ export default function BuildingsPage() {
         </div>
       </div>
 
-      <DataView
-        data={buildings}
-        columns={columns}
-        renderGridItem={renderGridItem}
-        isLoading={isLoading}
-        error={error}
-        emptyMessage="No buildings found"
-        pagination={
-          pagination
-            ? {
-                currentPage: pagination.page || currentPage,
-                totalPages: Math.ceil((pagination.total || 0) / (pagination.limit || 20)),
-                onPageChange: setCurrentPage,
-              }
-            : undefined
-        }
-        defaultView="table"
-        storageKey="buildings-view-mode"
-        gridCols={3}
-      />
+      <div className="w-full overflow-hidden">
+        <DataView
+          data={buildings}
+          columns={columns}
+          renderGridItem={renderGridItem}
+          isLoading={isLoading}
+          error={error}
+          emptyMessage="No buildings found"
+          pagination={
+            pagination
+              ? {
+                  currentPage: pagination.page || currentPage,
+                  totalPages: Math.ceil((pagination.total || 0) / (pagination.limit || 20)),
+                  onPageChange: setCurrentPage,
+                }
+              : undefined
+          }
+          defaultView="table"
+          storageKey="buildings-view-mode"
+          gridCols={3}
+        />
+      </div>
 
       <BuildingForm
         open={isFormOpen}
@@ -334,7 +338,7 @@ export default function BuildingsPage() {
         description={`Are you sure you want to delete "${buildingToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </Container>
   );
 }
 

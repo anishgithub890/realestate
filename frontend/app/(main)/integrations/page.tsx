@@ -165,50 +165,54 @@ export default function IntegrationsPage() {
                 <CardTitle>Active Integrations</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Sync</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {integrations.map((integration: any) => (
-                      <TableRow key={integration.id}>
-                        <TableCell className="font-medium">
-                          {integration.integration_type}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={integration.is_active ? 'default' : 'secondary'}>
-                            {integration.is_active ? (
-                              <>
-                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Inactive
-                              </>
-                            )}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {integration.last_sync_at
-                            ? new Date(integration.last_sync_at).toLocaleString()
-                            : 'Never'}
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" title="Configure Integration">
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto -mx-6 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle px-6 sm:px-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Last Sync</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {integrations.map((integration: any) => (
+                          <TableRow key={integration.id}>
+                            <TableCell className="font-medium">
+                              {integration.integration_type}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={integration.is_active ? 'default' : 'secondary'}>
+                                {integration.is_active ? (
+                                  <>
+                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                    Active
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Inactive
+                                  </>
+                                )}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {integration.last_sync_at
+                                ? new Date(integration.last_sync_at).toLocaleString()
+                                : 'Never'}
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" title="Configure Integration">
+                                <Settings className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -230,44 +234,48 @@ export default function IntegrationsPage() {
                   No webhooks configured. Create your first webhook to get started.
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Event Type</TableHead>
-                      <TableHead>URL</TableHead>
-                      <TableHead>Last Triggered</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {webhooks.map((webhook: any) => (
-                      <TableRow key={webhook.id}>
-                        <TableCell>
-                          <Badge variant="outline">{webhook.event_type}</Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {webhook.url}
-                        </TableCell>
-                        <TableCell>
-                          {webhook.last_triggered_at
-                            ? new Date(webhook.last_triggered_at).toLocaleString()
-                            : 'Never'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={webhook.is_active ? 'default' : 'secondary'}>
-                            {webhook.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm">
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto -mx-6 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle px-6 sm:px-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Event Type</TableHead>
+                          <TableHead>URL</TableHead>
+                          <TableHead>Last Triggered</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {webhooks.map((webhook: any) => (
+                          <TableRow key={webhook.id}>
+                            <TableCell>
+                              <Badge variant="outline">{webhook.event_type}</Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {webhook.url}
+                            </TableCell>
+                            <TableCell>
+                              {webhook.last_triggered_at
+                                ? new Date(webhook.last_triggered_at).toLocaleString()
+                                : 'Never'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={webhook.is_active ? 'default' : 'secondary'}>
+                                {webhook.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm">
+                                <Settings className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>

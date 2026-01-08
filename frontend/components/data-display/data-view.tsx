@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { ViewSwitcher, ViewMode } from './view-switcher';
 import { DataTable } from './data-table';
 import { DataGrid } from './data-grid';
@@ -92,7 +93,7 @@ export function DataView<T extends { id: number | string }>({
   };
 
   return (
-    <div className={className}>
+    <div className={cn("w-full min-w-0", className)}>
       {showViewSwitcher && (
         <div className="mb-4 flex justify-end">
           <ViewSwitcher view={view} onViewChange={handleViewChange} />
