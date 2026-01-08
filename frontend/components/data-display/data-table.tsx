@@ -155,7 +155,7 @@ export function DataTable<T extends { id: number | string }>({
   return (
     <div className={cn("w-full min-w-0", className)}>
       <div className="rounded-md border overflow-hidden min-w-0">
-        <div className="relative overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
+        <div className="relative overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
           <Table>
           <TableHeader>
             <TableRow>
@@ -164,8 +164,18 @@ export function DataTable<T extends { id: number | string }>({
                 const isSortable = column.sortable !== false;
                 const isSorted = sortColumn === sortKey;
 
+                const isActionsColumn = String(column.key).toLowerCase() === 'actions' || 
+                                       String(column.header).toLowerCase() === 'actions';
+                
                 return (
-                  <TableHead key={String(column.key)} className={column.className}>
+                  <TableHead 
+                    key={String(column.key)} 
+                    className={cn(
+                      column.className,
+                      'sticky top-0 z-10 bg-white dark:bg-gray-950',
+                      isActionsColumn && 'right-0 z-20 shadow-[inset_-1px_0_0_0_rgb(229,231,235)]'
+                    )}
+                  >
                     {isSortable ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -242,13 +252,24 @@ export function DataTable<T extends { id: number | string }>({
             ) : (
               sortedData.map((item) => (
                 <TableRow key={item.id}>
-                  {columns.map((column) => (
-                    <TableCell key={String(column.key)} className={column.className}>
-                      {column.render
-                        ? column.render(item)
-                        : String(item[column.key as keyof T] ?? '')}
-                    </TableCell>
-                  ))}
+                  {columns.map((column) => {
+                    const isActionsColumn = String(column.key).toLowerCase() === 'actions' || 
+                                           String(column.header).toLowerCase() === 'actions';
+                    
+                    return (
+                      <TableCell 
+                        key={String(column.key)} 
+                        className={cn(
+                          column.className,
+                          isActionsColumn && 'sticky right-0 z-10 bg-white dark:bg-gray-950 shadow-[inset_-1px_0_0_0_rgb(229,231,235)]'
+                        )}
+                      >
+                        {column.render
+                          ? column.render(item)
+                          : String(item[column.key as keyof T] ?? '')}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             )}
