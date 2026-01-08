@@ -93,7 +93,7 @@ export function DataView<T extends { id: number | string }>({
   };
 
   return (
-    <div className={cn("w-full min-w-0", className)}>
+    <div className={cn("w-full min-w-0 max-w-full", className)}>
       {showViewSwitcher && (
         <div className="mb-4 flex justify-end">
           <ViewSwitcher view={view} onViewChange={handleViewChange} />

@@ -73,7 +73,7 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
         <div
           ref={ref}
           className={cn(
-            'mx-auto box-border min-w-0',
+            'mx-auto box-border min-w-0 max-w-full',
             maxWidthClasses[maxWidth],
             paddingClasses,
             className
@@ -87,11 +87,13 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
       <div
         ref={ref}
         className={cn(
-          'mx-auto box-border transition-all duration-300 ease-linear min-w-0',
-          // Base width for mobile (full width, no sidebar consideration)
-          'w-full',
-          // Small devices (tablets in portrait) - full width
-          'sm:w-full',
+          'mx-auto box-border transition-all duration-300 ease-linear',
+          // Base width for mobile - ensure it doesn't overflow viewport
+          'w-full max-w-full min-w-0',
+          // Small devices (tablets in portrait) with sidebar state - override max-w-full
+          isSidebarExpanded 
+            ? 'sm:max-w-[580px]' // Sidebar expanded: ~240px sidebar + content
+            : 'sm:max-w-[600px]', // Sidebar collapsed: further reduced to prevent overflow
           // Medium devices with sidebar state
           isSidebarExpanded 
             ? 'md:max-w-[650px]' // Sidebar expanded: ~240px sidebar + content

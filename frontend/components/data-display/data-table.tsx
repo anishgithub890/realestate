@@ -153,10 +153,18 @@ export function DataTable<T extends { id: number | string }>({
   }
 
   return (
-    <div className={cn("w-full min-w-0", className)}>
-      <div className="rounded-md border overflow-hidden min-w-0">
-        <div className="relative overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
-          <Table>
+    <div className={cn("w-full min-w-0 max-w-full", className)}>
+      <div className="rounded-md border overflow-hidden min-w-0 w-full max-w-full">
+        <div 
+          className="relative w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-300px)]" 
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            overflowX: 'auto',
+            overflowY: 'auto'
+          }}
+        >
+          <div style={{ minWidth: '100%' }}>
+            <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => {
@@ -182,11 +190,11 @@ export function DataTable<T extends { id: number | string }>({
                           <Button
                             variant="ghost"
                             className={cn(
-                              'h-8 px-2 lg:px-3 -ml-3 hover:bg-gray-100',
+                              'h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3 -ml-2 sm:-ml-3 hover:bg-gray-100 text-xs sm:text-sm md:text-base',
                               isSorted && 'bg-gray-50'
                             )}
                           >
-                            <span className="mr-2">{column.header}</span>
+                            <span className="mr-1 sm:mr-2">{column.header}</span>
                             {getSortIcon(String(column.key), column)}
                           </Button>
                         </DropdownMenuTrigger>
@@ -275,6 +283,7 @@ export function DataTable<T extends { id: number | string }>({
             )}
           </TableBody>
         </Table>
+          </div>
         </div>
       </div>
 

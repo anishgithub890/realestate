@@ -124,14 +124,14 @@ export default function LocationsPage() {
       header: 'Location Name',
       sortable: true,
       render: (location) => (
-        <div className="flex items-center gap-1 sm:gap-2 min-w-[150px]">
-          <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 min-w-[120px] sm:min-w-[150px] md:min-w-[180px]">
+          <div className="flex h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
+            <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-xs sm:text-sm truncate">{location.name}</div>
+            <div className="font-medium text-xs sm:text-sm md:text-base truncate">{location.name}</div>
             {location.slug && (
-              <div className="text-xs text-muted-foreground truncate">/{location.slug}</div>
+              <div className="text-xs sm:text-xs md:text-sm text-muted-foreground truncate">/{location.slug}</div>
             )}
           </div>
         </div>
@@ -142,9 +142,8 @@ export default function LocationsPage() {
       header: 'Level',
       sortable: true,
       render: (location) => (
-        <Badge variant="outline" className={`text-xs ${levelColors[location.level] || 'bg-gray-100 text-gray-800'}`}>
-          <span className="hidden sm:inline">{location.level.replace(/_/g, ' ')}</span>
-          <span className="sm:hidden">{location.level.split('_')[0]}</span>
+        <Badge variant="outline" className={`text-xs sm:text-xs md:text-sm ${levelColors[location.level] || 'bg-gray-100 text-gray-800'}`}>
+          {location.level.replace(/_/g, ' ')}
         </Badge>
       ),
     },
@@ -152,9 +151,8 @@ export default function LocationsPage() {
       key: 'full_path',
       header: 'Full Path',
       sortable: true,
-      className: 'hidden md:table-cell',
       render: (location) => (
-        <div className="text-xs sm:text-sm text-muted-foreground max-w-xs sm:max-w-md truncate" title={location.full_path}>
+        <div className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-xs sm:max-w-md md:max-w-lg truncate" title={location.full_path}>
           {location.full_path}
         </div>
       ),
@@ -164,18 +162,17 @@ export default function LocationsPage() {
       header: 'Parent',
       sortable: true,
       sortKey: 'parent.name',
-      className: 'hidden lg:table-cell',
       render: (location) => (
         <div>
           {location.parent ? (
-            <div>
-              <span className="text-xs sm:text-sm">{location.parent.name}</span>
-              <Badge variant="outline" className="ml-2 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span className="text-xs sm:text-sm md:text-base">{location.parent.name}</span>
+              <Badge variant="outline" className="text-xs sm:text-xs md:text-sm w-fit">
                 {location.parent.level}
               </Badge>
             </div>
           ) : (
-            <span className="text-xs sm:text-sm text-muted-foreground">Root</span>
+            <span className="text-xs sm:text-sm md:text-base text-muted-foreground">Root</span>
           )}
         </div>
       ),
@@ -184,9 +181,8 @@ export default function LocationsPage() {
       key: 'coordinates',
       header: 'Coordinates',
       sortable: false,
-      className: 'hidden xl:table-cell',
       render: (location) => (
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs sm:text-xs md:text-sm text-muted-foreground">
           {location.latitude && location.longitude ? (
             <>
               {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
@@ -201,7 +197,6 @@ export default function LocationsPage() {
       key: 'children',
       header: 'Children',
       sortable: false,
-      className: 'hidden sm:table-cell',
       render: (location) => (
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">
           <Badge variant="secondary" className="text-xs">
@@ -220,11 +215,11 @@ export default function LocationsPage() {
       render: (location) => (
         <Badge
           variant={location.is_active ? 'default' : 'destructive'}
-          className={
+          className={`text-xs sm:text-xs md:text-sm ${
             location.is_active
               ? 'bg-green-100 text-green-800 hover:bg-green-100'
               : 'bg-red-100 text-red-800 hover:bg-red-100'
-          }
+          }`}
         >
           {location.is_active ? 'Active' : 'Inactive'}
         </Badge>
@@ -332,39 +327,39 @@ export default function LocationsPage() {
   );
 
   return (
-    <Container className="py-4 sm:py-6 space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Locations</h1>
-          <p className="text-gray-600 mt-2 text-sm sm:text-base">Manage location hierarchy (Emirate → Neighbourhood → Cluster → Building)</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Locations</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Manage location hierarchy (Emirate → Neighbourhood → Cluster → Building)</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={() => setBulkUploadOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap shrink-0">
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setBulkUploadOpen(true)}>
+            <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Bulk Upload</span>
             <span className="sm:hidden">Upload</span>
           </Button>
-          <Button size="sm" className="text-xs sm:text-sm" onClick={handleCreate}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={handleCreate}>
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Add Location</span>
             <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="relative flex-1 min-w-0 max-w-full sm:max-w-md">
+          <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <Input
             placeholder="Search locations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
           />
         </div>
       </div>
 
-      <div className="w-full min-w-0 overflow-x-auto">
+      <div className="w-full min-w-0 max-w-full">
         <DataView
           data={locations}
           columns={columns}
