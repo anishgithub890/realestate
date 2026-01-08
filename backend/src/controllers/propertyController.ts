@@ -135,11 +135,54 @@ export class PropertyController {
     }
   }
 
+  async getAllFloors(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+      const result = await propertyService.getAllFloors(req.user.companyId, req.query, req.query);
+      sendPaginated(res, result.items, result.pagination);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
   async createFloor(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
       const floor = await propertyService.createFloor(req.body, req.user.companyId);
       sendSuccess(res, floor, 'Floor created successfully', 201);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  async getFloorById(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+      const id = parseInt(req.params.id);
+      const floor = await propertyService.getFloorById(id, req.user.companyId);
+      sendSuccess(res, floor);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  async updateFloor(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+      const id = parseInt(req.params.id);
+      const floor = await propertyService.updateFloor(id, req.body, req.user.companyId);
+      sendSuccess(res, floor, 'Floor updated successfully');
+    } catch (error: any) {
+      next(error);
+    }
+  }
+
+  async deleteFloor(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+      const id = parseInt(req.params.id);
+      const result = await propertyService.deleteFloor(id, req.user.companyId);
+      sendSuccess(res, result, 'Floor deleted successfully');
     } catch (error: any) {
       next(error);
     }

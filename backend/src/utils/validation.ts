@@ -11,6 +11,38 @@ export const validateId = [
   param('id').isInt({ min: 1 }).withMessage('ID must be a positive integer'),
 ];
 
+export const validateBuildingId = [
+  param('buildingId').isInt({ min: 1 }).withMessage('Building ID must be a positive integer'),
+];
+
+export const validateBuildingCreate = [
+  body('name').notEmpty().withMessage('Building name is required'),
+  body('area_id').isInt({ min: 1 }).withMessage('Area ID is required and must be a positive integer'),
+  body('completion_date').optional().isISO8601().withMessage('Completion date must be a valid date'),
+  body('is_exempt').optional().isIn(['true', 'false']).withMessage('is_exempt must be true or false'),
+  body('status').optional().isIn(['active', 'inactive', 'under_construction']).withMessage('Status must be active, inactive, or under_construction'),
+  body('location_id').optional().isString().withMessage('Location ID must be a string'),
+];
+
+export const validateBuildingUpdate = [
+  body('name').optional().notEmpty().withMessage('Building name cannot be empty'),
+  body('area_id').optional().isInt({ min: 1 }).withMessage('Area ID must be a positive integer'),
+  body('completion_date').optional().isISO8601().withMessage('Completion date must be a valid date'),
+  body('is_exempt').optional().isIn(['true', 'false']).withMessage('is_exempt must be true or false'),
+  body('status').optional().isIn(['active', 'inactive', 'under_construction']).withMessage('Status must be active, inactive, or under_construction'),
+  body('location_id').optional().isString().withMessage('Location ID must be a string'),
+];
+
+export const validateFloorCreate = [
+  body('name').notEmpty().withMessage('Floor name is required'),
+  body('building_id').isInt({ min: 1 }).withMessage('Building ID is required and must be a positive integer'),
+];
+
+export const validateFloorUpdate = [
+  body('name').optional().notEmpty().withMessage('Floor name cannot be empty'),
+  body('building_id').optional().isInt({ min: 1 }).withMessage('Building ID must be a positive integer'),
+];
+
 export const validateLogin = [
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').notEmpty().withMessage('Password is required'),

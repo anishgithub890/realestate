@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { LeadController } from '../controllers/leadController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validator';
+import { uploadSingle } from '../middleware/upload';
 import {
   validatePagination,
   validateId,
@@ -69,6 +70,13 @@ router.post(
   validateId,
   validate,
   leadController.assignLead.bind(leadController)
+);
+
+// Bulk upload leads from CSV
+router.post(
+  '/bulk-upload',
+  uploadSingle('file'),
+  leadController.bulkUploadLeadsFromCsv.bind(leadController)
 );
 
 export default router;

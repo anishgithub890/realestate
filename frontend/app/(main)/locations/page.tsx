@@ -5,8 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, MapPin, Edit, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Plus, MapPin, Edit, Trash2, ChevronRight, ChevronDown, Upload } from 'lucide-react';
 import { LocationForm } from '@/components/forms/location-form';
+import { BulkUploadDialog } from '@/components/locations/bulk-upload-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { DataView } from '@/components/data-display/data-view';
 import type { Column } from '@/components/data-display/data-table';
@@ -47,11 +48,12 @@ export default function LocationsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<{ id: string; name: string } | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const { toast } = useToast();
 
   const { data, isLoading, error, refetch } = useQuery<any>({
     queryKey: ['locations', searchTerm, currentPage],
-    queryFn: () => api.get('/locations', { search: searchTerm, page: currentPage, limit: 20 }),
+    queryFn: () => api.get('/locations', { search: searchTerm, page: currentPage, limit: 100 }),
   });
 
   // Backend returns: { success: true, data: [...locations...], pagination: {...} }
@@ -330,10 +332,16 @@ export default function LocationsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Locations</h1>
           <p className="text-gray-600 mt-2">Manage location hierarchy (Emirate → Neighbourhood → Cluster → Building)</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Location
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setBulkUploadOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+          <Button onClick={handleCreate}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Location
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -359,7 +367,7 @@ export default function LocationsPage() {
           pagination
             ? {
                 currentPage: pagination.page || currentPage,
-                totalPages: Math.ceil((pagination.total || 0) / (pagination.limit || 20)),
+                totalPages: Math.ceil((pagination.total || 0) / (pagination.limit || 100)),
                 onPageChange: setCurrentPage,
               }
             : undefined
@@ -388,6 +396,15 @@ export default function LocationsPage() {
         title="Delete Location"
         description={`Are you sure you want to delete "${locationToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadOpen}
+        onOpenChange={setBulkUploadOpen}
+        onSuccess={() => {
+          refetch();
+        }}
       />
     </div>
   );

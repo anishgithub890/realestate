@@ -34,6 +34,8 @@ const masterDataCategories = [
     title: 'Property Data',
     icon: Building2,
     items: [
+      { name: 'Buildings', href: '/master-data/buildings', icon: Building2 },
+      { name: 'Floors', href: '/master-data/floors', icon: Building2 },
       { name: 'Unit Types', href: '/master-data/unit-types', icon: Building2 },
       { name: 'Amenities', href: '/master-data/amenities', icon: Settings },
     ],

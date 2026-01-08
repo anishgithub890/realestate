@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
 import { parsePagination, buildOrderBy } from '../utils/pagination';
 
 export class PropertyService {
@@ -70,6 +70,19 @@ export class PropertyService {
   }
 
   async createBuilding(data: any, companyId: number) {
+    // Check if building name already exists in the same company and area
+    const existingBuilding = await prisma.building.findFirst({
+      where: {
+        name: data.name,
+        area_id: data.area_id,
+        company_id: companyId,
+      },
+    });
+
+    if (existingBuilding) {
+      throw new ValidationError(`Building with name "${data.name}" already exists in this area`);
+    }
+
     return prisma.building.create({
       data: {
         name: data.name,
@@ -91,6 +104,22 @@ export class PropertyService {
     });
 
     if (!building) throw new NotFoundError('Building');
+
+    // Check if building name already exists in the same company and area (excluding current building)
+    if (data.name && (data.name !== building.name || data.area_id !== building.area_id)) {
+      const existingBuilding = await prisma.building.findFirst({
+        where: {
+          name: data.name,
+          area_id: data.area_id || building.area_id,
+          company_id: companyId,
+          id: { not: id },
+        },
+      });
+
+      if (existingBuilding) {
+        throw new ValidationError(`Building with name "${data.name}" already exists in this area`);
+      }
+    }
 
     const updateData: any = { ...data };
     if (data.completion_date) updateData.completion_date = new Date(data.completion_date);
@@ -217,6 +246,19 @@ export class PropertyService {
   }
 
   async createUnit(data: any, companyId: number) {
+    // Check if unit name already exists in the same building
+    const existingUnit = await prisma.unit.findFirst({
+      where: {
+        name: data.name,
+        building_id: data.building_id,
+        company_id: companyId,
+      },
+    });
+
+    if (existingUnit) {
+      throw new ValidationError(`Unit with name "${data.name}" already exists in this building`);
+    }
+
     const unit = await prisma.unit.create({
       data: {
         name: data.name,
@@ -260,6 +302,23 @@ export class PropertyService {
     });
 
     if (!unit) throw new NotFoundError('Unit');
+
+    // Check if unit name already exists in the same building (excluding current unit)
+    const targetBuildingId = data.building_id || unit.building_id;
+    if (data.name && (data.name !== unit.name || targetBuildingId !== unit.building_id)) {
+      const existingUnit = await prisma.unit.findFirst({
+        where: {
+          name: data.name,
+          building_id: targetBuildingId,
+          company_id: companyId,
+          id: { not: id },
+        },
+      });
+
+      if (existingUnit) {
+        throw new ValidationError(`Unit with name "${data.name}" already exists in this building`);
+      }
+    }
 
     const updateData: any = { ...data };
     if (data.basic_rent) updateData.basic_rent = parseFloat(data.basic_rent);
@@ -324,6 +383,53 @@ export class PropertyService {
     });
   }
 
+  async getAllFloors(companyId: number, pagination: any, filters: any) {
+    const { skip, take, page, limit, sortBy, sortOrder } = parsePagination(pagination);
+    
+    const where: any = {
+      building: {
+        company_id: companyId,
+      },
+    };
+
+    if (filters.building_id) {
+      where.building_id = parseInt(filters.building_id);
+    }
+
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search } },
+        { building: { name: { contains: filters.search } } },
+      ];
+    }
+
+    const [floors, total] = await Promise.all([
+      prisma.floor.findMany({
+        where,
+        skip,
+        take,
+        orderBy: buildOrderBy(sortBy || 'name', sortOrder || 'asc'),
+        include: {
+          building: {
+            include: {
+              area: {
+                include: {
+                  state: {
+                    include: { country: true },
+                  },
+                },
+              },
+            },
+          },
+          _count: { select: { units: true } },
+        },
+      }),
+      prisma.floor.count({ where }),
+    ]);
+
+    return { items: floors, pagination: { page, limit, total } };
+  }
+
   async createFloor(data: any, companyId: number) {
     const building = await prisma.building.findFirst({
       where: { id: data.building_id, company_id: companyId },
@@ -331,12 +437,126 @@ export class PropertyService {
 
     if (!building) throw new NotFoundError('Building');
 
+    // Check if floor name already exists in the same building
+    const existingFloor = await prisma.floor.findFirst({
+      where: {
+        name: data.name,
+        building_id: data.building_id,
+      },
+    });
+
+    if (existingFloor) {
+      throw new ValidationError(`Floor with name "${data.name}" already exists in this building`);
+    }
+
     return prisma.floor.create({
       data: {
         name: data.name,
         building_id: data.building_id,
       },
+      include: {
+        building: true,
+        _count: { select: { units: true } },
+      },
     });
+  }
+
+  async getFloorById(id: number, companyId: number) {
+    const floor = await prisma.floor.findFirst({
+      where: { id },
+      include: {
+        building: true,
+        _count: { select: { units: true } },
+      },
+    });
+
+    if (!floor) throw new NotFoundError('Floor');
+    
+    // Verify the building belongs to the company
+    if (floor.building.company_id !== companyId) {
+      throw new NotFoundError('Floor');
+    }
+    
+    return floor;
+  }
+
+  async updateFloor(id: number, data: any, companyId: number) {
+    const floor = await prisma.floor.findFirst({
+      where: { id },
+      include: {
+        building: true,
+      },
+    });
+
+    if (!floor) throw new NotFoundError('Floor');
+    
+    // Verify the building belongs to the company
+    if (floor.building.company_id !== companyId) {
+      throw new NotFoundError('Floor');
+    }
+
+    // If building_id is being updated, verify the new building belongs to the company
+    const targetBuildingId = data.building_id || floor.building_id;
+    if (data.building_id && data.building_id !== floor.building_id) {
+      const newBuilding = await prisma.building.findFirst({
+        where: { id: data.building_id, company_id: companyId },
+      });
+      if (!newBuilding) throw new NotFoundError('Building');
+    }
+
+    // Check if floor name already exists in the same building (excluding current floor)
+    if (data.name && (data.name !== floor.name || targetBuildingId !== floor.building_id)) {
+      const existingFloor = await prisma.floor.findFirst({
+        where: {
+          name: data.name,
+          building_id: targetBuildingId,
+          id: { not: id },
+        },
+      });
+
+      if (existingFloor) {
+        throw new ValidationError(`Floor with name "${data.name}" already exists in this building`);
+      }
+    }
+
+    return prisma.floor.update({
+      where: { id },
+      data: {
+        name: data.name,
+        building_id: data.building_id,
+      },
+      include: {
+        building: true,
+        _count: { select: { units: true } },
+      },
+    });
+  }
+
+  async deleteFloor(id: number, companyId: number) {
+    const floor = await prisma.floor.findFirst({
+      where: { id },
+      include: {
+        building: true,
+        _count: { select: { units: true } },
+      },
+    });
+
+    if (!floor) throw new NotFoundError('Floor');
+    
+    // Verify the building belongs to the company
+    if (floor.building.company_id !== companyId) {
+      throw new NotFoundError('Floor');
+    }
+
+    if (floor._count.units > 0) {
+      throw new Error('Cannot delete floor with existing units');
+    }
+
+    await prisma.floor.delete({
+      where: { id },
+    });
+
+    return { message: 'Floor deleted successfully' };
   }
 
   // Unit Type Management

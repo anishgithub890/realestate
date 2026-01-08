@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { PropertyController } from '../controllers/propertyController';
 import { authenticate } from '../middleware/auth';
-import { validate, validateId } from '../middleware/validator';
+import { validate } from '../middleware/validator';
+import { validatePagination, validateId, validateBuildingCreate, validateBuildingUpdate, validateBuildingId, validateFloorCreate, validateFloorUpdate } from '../utils/validation';
 
 const router = Router();
 const propertyController = new PropertyController();
@@ -9,10 +10,10 @@ const propertyController = new PropertyController();
 router.use(authenticate);
 
 // Building routes
-router.get('/buildings', propertyController.getBuildings.bind(propertyController));
+router.get('/buildings', validatePagination, validate([]), propertyController.getBuildings.bind(propertyController));
 router.get('/buildings/:id', validate(validateId), propertyController.getBuildingById.bind(propertyController));
-router.post('/buildings', propertyController.createBuilding.bind(propertyController));
-router.put('/buildings/:id', validate(validateId), propertyController.updateBuilding.bind(propertyController));
+router.post('/buildings', validate(validateBuildingCreate), propertyController.createBuilding.bind(propertyController));
+router.put('/buildings/:id', validate([...validateId, ...validateBuildingUpdate]), propertyController.updateBuilding.bind(propertyController));
 router.delete('/buildings/:id', validate(validateId), propertyController.deleteBuilding.bind(propertyController));
 
 // Unit routes
@@ -24,8 +25,12 @@ router.put('/units/:id', validate(validateId), propertyController.updateUnit.bin
 router.delete('/units/:id', validate(validateId), propertyController.deleteUnit.bind(propertyController));
 
 // Floor routes
-router.get('/buildings/:buildingId/floors', validate(validateId), propertyController.getFloors.bind(propertyController));
-router.post('/floors', propertyController.createFloor.bind(propertyController));
+router.get('/floors', validatePagination, validate([]), propertyController.getAllFloors.bind(propertyController));
+router.get('/buildings/:buildingId/floors', validate(validateBuildingId), propertyController.getFloors.bind(propertyController));
+router.get('/floors/:id', validate(validateId), propertyController.getFloorById.bind(propertyController));
+router.post('/floors', validate(validateFloorCreate), propertyController.createFloor.bind(propertyController));
+router.put('/floors/:id', validate([...validateId, ...validateFloorUpdate]), propertyController.updateFloor.bind(propertyController));
+router.delete('/floors/:id', validate(validateId), propertyController.deleteFloor.bind(propertyController));
 
 // Unit Type routes
 router.get('/unit-types', propertyController.getUnitTypes.bind(propertyController));

@@ -18,6 +18,11 @@ export {
   validateKanbanColumnCreate,
   validateKanbanCardCreate,
   validateKanbanCardUpdate,
+  validateBuildingCreate,
+  validateBuildingUpdate,
+  validateBuildingId,
+  validateFloorCreate,
+  validateFloorUpdate,
 } from '../utils/validation';
 
 export const validate = (validations: ValidationChain[]) => {
