@@ -11,6 +11,10 @@ export const validateId = [
   param('id').isInt({ min: 1 }).withMessage('ID must be a positive integer'),
 ];
 
+export const validateLocationId = [
+  param('id').isUUID().withMessage('Location ID must be a valid UUID'),
+];
+
 export const validateBuildingId = [
   param('buildingId').isInt({ min: 1 }).withMessage('Building ID must be a positive integer'),
 ];
@@ -197,7 +201,7 @@ export const validateLocationUpdate = [
   body('name').optional().notEmpty().withMessage('Location name cannot be empty'),
   body('level').optional().isIn(['EMIRATE', 'NEIGHBOURHOOD', 'CLUSTER', 'BUILDING', 'BUILDING_LVL1', 'BUILDING_LVL2']).withMessage('Invalid location level'),
   body('slug').optional().isString().withMessage('Slug must be a string'),
-  body('description').optional().isString().withMessage('Description must be a string'),
+  body('description').optional({ nullable: true }).isString().withMessage('Description must be a string'),
   body('parent_id').optional({ nullable: true }).isString().withMessage('Parent ID must be a valid UUID'),
   body('latitude').optional({ nullable: true }).isFloat().withMessage('Latitude must be a valid number'),
   body('longitude').optional({ nullable: true }).isFloat().withMessage('Longitude must be a valid number'),

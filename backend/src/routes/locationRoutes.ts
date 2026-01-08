@@ -3,7 +3,7 @@ import { LocationController } from '../controllers/locationController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validator';
 import { uploadSingle } from '../middleware/upload';
-import { validatePagination, validateId, validateLocationCreate, validateLocationUpdate } from '../utils/validation';
+import { validatePagination, validateLocationId, validateLocationCreate, validateLocationUpdate } from '../utils/validation';
 
 const router = Router();
 const locationController = new LocationController();
@@ -28,7 +28,7 @@ router.get(
 // Get locations by level
 router.get(
   '/level/:level',
-  validate(validateId),
+  validate([]), // Level is a string, not an ID
   locationController.getLocationsByLevel.bind(locationController)
 );
 
@@ -42,14 +42,14 @@ router.post(
 // Get location path (breadcrumb)
 router.get(
   '/:id/path',
-  validate(validateId),
+  validate(validateLocationId),
   locationController.getLocationPath.bind(locationController)
 );
 
 // Get location by ID
 router.get(
   '/:id',
-  validate(validateId),
+  validate(validateLocationId),
   locationController.getLocationById.bind(locationController)
 );
 
@@ -63,14 +63,14 @@ router.post(
 // Update location
 router.put(
   '/:id',
-  validate([...validateId, ...validateLocationUpdate]),
+  validate([...validateLocationId, ...validateLocationUpdate]),
   locationController.updateLocation.bind(locationController)
 );
 
 // Delete location
 router.delete(
   '/:id',
-  validate(validateId),
+  validate(validateLocationId),
   locationController.deleteLocation.bind(locationController)
 );
 

@@ -326,20 +326,29 @@ export class LocationService {
       }
     }
 
+    // Build update data object, explicitly handling null values
+    const updateData: any = {};
+    
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.level !== undefined) updateData.level = data.level;
+    if (data.is_active !== undefined) updateData.is_active = data.is_active;
+    if (data.sort_order !== undefined) updateData.sort_order = parseInt(data.sort_order);
+    if (data.latitude !== undefined) updateData.latitude = data.latitude !== null ? parseFloat(data.latitude) : null;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude !== null ? parseFloat(data.longitude) : null;
+    
+    // Explicitly handle parent_id - allow null to clear parent
+    if (data.parent_id !== undefined) {
+      updateData.parent_id = data.parent_id === null || data.parent_id === '' ? null : data.parent_id;
+    }
+    
+    // Always update slug and full_path
+    updateData.slug = slug;
+    updateData.full_path = fullPath;
+
     const updated = await prisma.location.update({
       where: { id },
-      data: {
-        name: data.name,
-        slug,
-        description: data.description,
-        parent_id: data.parent_id !== undefined ? data.parent_id : undefined,
-        level: data.level,
-        full_path: fullPath,
-        latitude: data.latitude !== undefined ? parseFloat(data.latitude) : undefined,
-        longitude: data.longitude !== undefined ? parseFloat(data.longitude) : undefined,
-        is_active: data.is_active !== undefined ? data.is_active : undefined,
-        sort_order: data.sort_order !== undefined ? parseInt(data.sort_order) : undefined,
-      },
+      data: updateData,
       include: {
         parent: true,
         _count: {
