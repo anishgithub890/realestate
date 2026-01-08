@@ -155,7 +155,7 @@ export function DataTable<T extends { id: number | string }>({
   return (
     <div className={cn("w-full min-w-0", className)}>
       <div className="rounded-md border overflow-hidden min-w-0">
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
           <Table>
           <TableHeader>
             <TableRow>
