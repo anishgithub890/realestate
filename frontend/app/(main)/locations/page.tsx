@@ -288,7 +288,7 @@ export default function LocationsPage() {
 
           {location.latitude && location.longitude && (
             <div className="text-xs text-muted-foreground">
-              📍 {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+              📍 {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}
             </div>
           )}
 

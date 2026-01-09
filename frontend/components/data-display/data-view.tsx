@@ -58,6 +58,29 @@ const saveViewMode = (storageKey: string | undefined, view: ViewMode): void => {
   }
 };
 
+// Hook to detect screen size
+const useIsSmallScreen = (): boolean => {
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // Tailwind's sm breakpoint is 640px
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+
+    // Check on mount
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  return isSmallScreen;
+};
+
 export function DataView<T extends { id: number | string }>({
   data,
   columns,
@@ -73,34 +96,58 @@ export function DataView<T extends { id: number | string }>({
   storageKey,
   className,
 }: DataViewProps<T>) {
+  const isSmallScreen = useIsSmallScreen();
+  
   // Initialize view mode from localStorage if storageKey is provided
-  const [view, setView] = useState<ViewMode>(() => 
-    getStoredViewMode(storageKey, defaultView)
-  );
+  // On small screens, always use grid view
+  const [view, setView] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return 'grid';
+    }
+    return getStoredViewMode(storageKey, defaultView);
+  });
 
-  // Save to localStorage whenever view changes
+  // Force grid view on small screens
   useEffect(() => {
-    if (storageKey) {
+    if (isSmallScreen) {
+      setView('grid');
+    } else {
+      // Restore from localStorage when not on small screen
+      const storedView = getStoredViewMode(storageKey, defaultView);
+      setView(storedView);
+    }
+  }, [isSmallScreen, storageKey, defaultView]);
+
+  // Save to localStorage whenever view changes (only if not on small screen)
+  useEffect(() => {
+    if (storageKey && !isSmallScreen) {
       saveViewMode(storageKey, view);
     }
-  }, [view, storageKey]);
+  }, [view, storageKey, isSmallScreen]);
 
   const handleViewChange = (newView: ViewMode) => {
+    // Don't allow view change on small screens
+    if (isSmallScreen) {
+      return;
+    }
     setView(newView);
     if (storageKey) {
       saveViewMode(storageKey, newView);
     }
   };
 
+  // Determine effective view (always grid on small screens)
+  const effectiveView = isSmallScreen ? 'grid' : view;
+
   return (
     <div className={cn("w-full min-w-0 max-w-full", className)}>
       {showViewSwitcher && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 hidden sm:flex justify-end">
           <ViewSwitcher view={view} onViewChange={handleViewChange} />
         </div>
       )}
 
-      {view === 'table' ? (
+      {effectiveView === 'table' ? (
         <DataTable
           data={data}
           columns={columns}
