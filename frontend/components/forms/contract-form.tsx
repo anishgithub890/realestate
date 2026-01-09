@@ -350,7 +350,7 @@ export function ContractForm({
 
           <TabsContent value="rental" className="space-y-4">
             <form onSubmit={rentalForm.handleSubmit(onRentalSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="contract_date">Contract Date *</Label>
                   <Input
@@ -386,7 +386,7 @@ export function ContractForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="from_date">From Date *</Label>
                   <Input
@@ -472,7 +472,7 @@ export function ContractForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="tenant_id">Tenant *</Label>
                   <Select
@@ -530,7 +530,7 @@ export function ContractForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="payment_terms">Payment Terms *</Label>
                   <Input
@@ -730,7 +730,7 @@ export function ContractForm({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="amount">Sale Amount *</Label>
                   <Input
@@ -764,7 +764,7 @@ export function ContractForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="seller_id">Seller *</Label>
                   <Select
@@ -818,7 +818,7 @@ export function ContractForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="salesman_id">Salesman *</Label>
                   <Select

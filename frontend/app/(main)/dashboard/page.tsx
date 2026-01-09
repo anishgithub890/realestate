@@ -8,6 +8,7 @@ import { RootState } from '@/store';
 import { authService } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Container } from '@/components/ui/container';
 import { 
   Building2, 
   FileText, 
@@ -111,10 +112,10 @@ export default function DashboardPage() {
   const ticketsCount = ticketsData?.pagination?.total || 0;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back, {user.name}!</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="mb-2 sm:mb-4 md:mb-6">
+        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Welcome back, {user.name}!</p>
       </div>
 
       {/* Main Statistics Cards */}
@@ -310,6 +311,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </Container>
   );
 }

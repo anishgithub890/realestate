@@ -118,7 +118,7 @@ export function LeadForm({ open, onOpenChange, lead, mode, onSuccess }: LeadForm
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input id="name" {...register('name')} />
@@ -136,7 +136,7 @@ export function LeadForm({ open, onOpenChange, lead, mode, onSuccess }: LeadForm
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="mobile_no">Mobile No *</Label>
               <Input id="mobile_no" {...register('mobile_no')} />
@@ -151,7 +151,7 @@ export function LeadForm({ open, onOpenChange, lead, mode, onSuccess }: LeadForm
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="property_type">Property Type *</Label>
               <Input id="property_type" {...register('property_type')} />
@@ -176,7 +176,7 @@ export function LeadForm({ open, onOpenChange, lead, mode, onSuccess }: LeadForm
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="min_price">Min Price (AED) *</Label>
               <Input

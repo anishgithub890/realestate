@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { StatusToggleDialog } from '@/components/data-display/status-toggle-dialog';
+import { Container } from '@/components/ui/container';
 
 interface User {
   id: number;
@@ -312,22 +313,23 @@ export default function UsersPage() {
   );
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-          <p className="text-gray-600 mt-2">Manage system users</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2 sm:mb-4 md:mb-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Users</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Manage system users</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
+        <Button onClick={handleCreate} size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 shrink-0">
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Add User</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
+        <div className="p-2 sm:p-3 md:p-4 border-b">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <Input
               placeholder="Search users..."
               value={searchTerm}
@@ -335,12 +337,12 @@ export default function UsersPage() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1); // Reset to first page on search
               }}
-              className="pl-10"
+              className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
             />
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-2 sm:p-3 md:p-4">
           <DataView
             data={users}
             columns={columns}
@@ -391,6 +393,6 @@ export default function UsersPage() {
         isActive={userToToggle?.is_active === 'true'}
         itemName={userToToggle?.name || ''}
       />
-    </div>
+    </Container>
   );
 }

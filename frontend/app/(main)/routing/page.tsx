@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RoutingRuleForm } from '@/components/forms/routing-rule-form';
 import { PipelineForm } from '@/components/forms/pipeline-form';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
+import { Container } from '@/components/ui/container';
 import {
   Table,
   TableBody,
@@ -114,17 +115,20 @@ export default function RoutingPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lead Routing & Pipelines</h1>
-          <p className="text-gray-600 mt-2">Configure smart lead routing and sales pipelines</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Lead Routing & Pipelines</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Configure smart lead routing and sales pipelines</p>
         </div>
         <Button
           onClick={activeTab === 'rules' ? handleCreateRule : handleCreatePipeline}
+          size="sm"
+          className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 shrink-0"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          {activeTab === 'rules' ? 'Create Rule' : 'Create Pipeline'}
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">{activeTab === 'rules' ? 'Create Rule' : 'Create Pipeline'}</span>
+          <span className="sm:hidden">{activeTab === 'rules' ? 'Create' : 'Create'}</span>
         </Button>
       </div>
 
@@ -329,7 +333,7 @@ export default function RoutingPage() {
         description={`Are you sure you want to delete "${itemToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </Container>
   );
 }
 

@@ -204,7 +204,7 @@ export function AutomationRuleForm({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="trigger_type">Trigger Type *</Label>
               <Select
@@ -275,7 +275,7 @@ export function AutomationRuleForm({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="schedule_delay">Schedule Delay</Label>
               <Input

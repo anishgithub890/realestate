@@ -127,7 +127,7 @@ export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFor
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input id="name" {...register('name')} />
@@ -145,7 +145,7 @@ export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFor
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone_no">Phone</Label>
               <Input id="phone_no" {...register('phone_no')} />
@@ -160,7 +160,7 @@ export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFor
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="emirates_id">Emirates ID *</Label>
               <Input id="emirates_id" {...register('emirates_id')} />
@@ -175,7 +175,7 @@ export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFor
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="nationality">Nationality</Label>
               <Input id="nationality" {...register('nationality')} />
@@ -187,7 +187,7 @@ export function LandlordForm({ open, onOpenChange, landlord, mode }: LandlordFor
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="passport_no">Passport No</Label>
               <Input id="passport_no" {...register('passport_no')} />

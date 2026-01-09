@@ -139,7 +139,7 @@ export function BrokerForm({ open, onOpenChange, broker, mode, onSuccess }: Brok
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Name *</Label>
               <Input
@@ -166,7 +166,7 @@ export function BrokerForm({ open, onOpenChange, broker, mode, onSuccess }: Brok
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="phone">Phone *</Label>
               <Input
@@ -189,7 +189,7 @@ export function BrokerForm({ open, onOpenChange, broker, mode, onSuccess }: Brok
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="license_expiry">License Expiry</Label>
               <Input

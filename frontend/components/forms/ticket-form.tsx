@@ -180,7 +180,7 @@ export function TicketForm({ open, onOpenChange, ticket, mode, onSuccess }: Tick
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type_id">Maintenance Type *</Label>
               <Select
@@ -239,7 +239,7 @@ export function TicketForm({ open, onOpenChange, ticket, mode, onSuccess }: Tick
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="tenant_id">Tenant</Label>
               <Select
@@ -281,7 +281,7 @@ export function TicketForm({ open, onOpenChange, ticket, mode, onSuccess }: Tick
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="unit_id">Property Unit</Label>
               <Select

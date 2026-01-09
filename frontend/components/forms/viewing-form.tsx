@@ -207,7 +207,7 @@ export function ViewingForm({ open, onOpenChange, viewing, mode, onSuccess }: Vi
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="viewer_name">Viewer Name *</Label>
               <Input
@@ -234,7 +234,7 @@ export function ViewingForm({ open, onOpenChange, viewing, mode, onSuccess }: Vi
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="viewer_phone">Viewer Phone *</Label>
               <Input
@@ -269,7 +269,7 @@ export function ViewingForm({ open, onOpenChange, viewing, mode, onSuccess }: Vi
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="viewing_date">Viewing Date *</Label>
               <Input
@@ -297,7 +297,7 @@ export function ViewingForm({ open, onOpenChange, viewing, mode, onSuccess }: Vi
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="tenant_id">Tenant</Label>
               <Select

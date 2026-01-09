@@ -174,7 +174,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="receipt_id">Receipt ID *</Label>
               <Input
@@ -207,7 +207,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount_incl">Amount (Incl. VAT) *</Label>
               <Input
@@ -240,7 +240,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="instrument_no">Instrument No</Label>
               <Input id="instrument_no" {...register('instrument_no')} />
@@ -293,7 +293,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
           {showChequeFields && (
             <div className="border-t pt-4 space-y-4">
               <h3 className="font-semibold">Cheque Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cheque.date">Cheque Date</Label>
                   <Input
@@ -307,7 +307,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
                   <Input id="cheque.bank_name" {...register('cheque.bank_name')} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -327,7 +327,7 @@ export function PaymentForm({ open, onOpenChange, payment, mode }: PaymentFormPr
                   <Label htmlFor="cheque.is_deposited">Is Deposited</Label>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cheque.deposited_on">Deposited On</Label>
                   <Input

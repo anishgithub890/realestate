@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActionsMenu, ActionIcons } from '@/components/data-display/actions-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
 import { Card, CardContent } from '@/components/ui/card';
+import { Container } from '@/components/ui/container';
 import {
   Select,
   SelectContent,
@@ -389,30 +390,31 @@ export default function LeadsPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
-          <p className="text-gray-600 mt-2">Manage property inquiries and leads</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Manage property inquiries and leads</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Lead
+        <Button onClick={handleCreate} size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 shrink-0">
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Add Lead</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
+        <div className="relative flex-1 min-w-0 max-w-full sm:max-w-md">
+          <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <Input
             placeholder="Search leads..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] h-8 sm:h-10 text-xs sm:text-sm">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -467,6 +469,6 @@ export default function LeadsPage() {
         description={`Are you sure you want to delete lead "${leadToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </Container>
   );
 }
