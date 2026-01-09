@@ -144,6 +144,53 @@ INSERT IGNORE INTO `Area` (`id`, `name`, `state_id`, `company_id`, `created_at`)
 (6, 'Al Barsha', 1, 1, NOW());
 
 -- ============================================================================
+-- LOCATIONS - HIERARCHICAL DATA - COMPANY 1
+-- ============================================================================
+-- Hierarchy: EMIRATE → NEIGHBOURHOOD → CLUSTER → BUILDING
+
+-- EMIRATES (Top Level)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440001', 'Dubai', 'dubai', 'Dubai Emirate', NULL, 'EMIRATE', 'Dubai', 25.2048, 55.2708, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440002', 'Abu Dhabi', 'abu-dhabi', 'Abu Dhabi Emirate', NULL, 'EMIRATE', 'Abu Dhabi', 24.4539, 54.3773, true, 2, 1, NOW(), NOW());
+
+-- NEIGHBOURHOODS (Parent: EMIRATE)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440011', 'Downtown Dubai', 'downtown-dubai', 'Downtown Dubai neighbourhood', '550e8400-e29b-41d4-a716-446655440001', 'NEIGHBOURHOOD', 'Dubai > Downtown Dubai', 25.1972, 55.2744, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440012', 'Dubai Marina', 'dubai-marina', 'Dubai Marina neighbourhood', '550e8400-e29b-41d4-a716-446655440001', 'NEIGHBOURHOOD', 'Dubai > Dubai Marina', 25.0764, 55.1392, true, 2, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440013', 'Business Bay', 'business-bay', 'Business Bay neighbourhood', '550e8400-e29b-41d4-a716-446655440001', 'NEIGHBOURHOOD', 'Dubai > Business Bay', 25.1867, 55.2644, true, 3, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440014', 'Jumeirah', 'jumeirah', 'Jumeirah neighbourhood', '550e8400-e29b-41d4-a716-446655440001', 'NEIGHBOURHOOD', 'Dubai > Jumeirah', 25.1972, 55.2244, true, 4, 1, NOW(), NOW());
+
+-- CLUSTERS (Parent: NEIGHBOURHOOD)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440021', 'Burj Khalifa Area', 'burj-khalifa-area', 'Area around Burj Khalifa', '550e8400-e29b-41d4-a716-446655440011', 'CLUSTER', 'Dubai > Downtown Dubai > Burj Khalifa Area', 25.1972, 55.2744, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440022', 'Marina Walk', 'marina-walk', 'Marina Walk cluster', '550e8400-e29b-41d4-a716-446655440012', 'CLUSTER', 'Dubai > Dubai Marina > Marina Walk', 25.0764, 55.1392, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440023', 'Bay Avenue', 'bay-avenue', 'Bay Avenue cluster', '550e8400-e29b-41d4-a716-446655440013', 'CLUSTER', 'Dubai > Business Bay > Bay Avenue', 25.1867, 55.2644, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440024', 'Jumeirah Beach', 'jumeirah-beach', 'Jumeirah Beach cluster', '550e8400-e29b-41d4-a716-446655440014', 'CLUSTER', 'Dubai > Jumeirah > Jumeirah Beach', 25.1972, 55.2244, true, 1, 1, NOW(), NOW());
+
+-- BUILDINGS (Parent: CLUSTER) - Linked to existing Building records
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440031', 'Burj Khalifa Residences', 'burj-khalifa-residences', 'Burj Khalifa Residences building', '550e8400-e29b-41d4-a716-446655440021', 'BUILDING', 'Dubai > Downtown Dubai > Burj Khalifa Area > Burj Khalifa Residences', 25.1972, 55.2744, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440032', 'Marina Heights Tower', 'marina-heights-tower', 'Marina Heights Tower building', '550e8400-e29b-41d4-a716-446655440022', 'BUILDING', 'Dubai > Dubai Marina > Marina Walk > Marina Heights Tower', 25.0764, 55.1392, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440033', 'Business Bay Tower', 'business-bay-tower', 'Business Bay Tower building', '550e8400-e29b-41d4-a716-446655440023', 'BUILDING', 'Dubai > Business Bay > Bay Avenue > Business Bay Tower', 25.1867, 55.2644, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440034', 'Jumeirah Beach Residences', 'jumeirah-beach-residences', 'Jumeirah Beach Residences building', '550e8400-e29b-41d4-a716-446655440024', 'BUILDING', 'Dubai > Jumeirah > Jumeirah Beach > Jumeirah Beach Residences', 25.1972, 55.2244, true, 1, 1, NOW(), NOW());
+
+-- BUILDING_LVL1 (Parent: BUILDING) - Optional sub-levels
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440041', 'Tower A', 'tower-a', 'Tower A section', '550e8400-e29b-41d4-a716-446655440031', 'BUILDING_LVL1', 'Dubai > Downtown Dubai > Burj Khalifa Area > Burj Khalifa Residences > Tower A', 25.1972, 55.2744, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440042', 'Tower B', 'tower-b', 'Tower B section', '550e8400-e29b-41d4-a716-446655440031', 'BUILDING_LVL1', 'Dubai > Downtown Dubai > Burj Khalifa Area > Burj Khalifa Residences > Tower B', 25.1972, 55.2744, true, 2, 1, NOW(), NOW());
+
+-- BUILDING_LVL2 (Parent: BUILDING_LVL1) - Optional sub-sub-levels
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440051', 'Block 1', 'block-1', 'Block 1 of Tower A', '550e8400-e29b-41d4-a716-446655440041', 'BUILDING_LVL2', 'Dubai > Downtown Dubai > Burj Khalifa Area > Burj Khalifa Residences > Tower A > Block 1', 25.1972, 55.2744, true, 1, 1, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440052', 'Block 2', 'block-2', 'Block 2 of Tower A', '550e8400-e29b-41d4-a716-446655440041', 'BUILDING_LVL2', 'Dubai > Downtown Dubai > Burj Khalifa Area > Burj Khalifa Residences > Tower A > Block 2', 25.1972, 55.2744, true, 2, 1, NOW(), NOW());
+
+-- Link existing Buildings to Locations
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440031' WHERE `id` = 1 AND `company_id` = 1;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440032' WHERE `id` = 2 AND `company_id` = 1;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440033' WHERE `id` = 3 AND `company_id` = 1;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440034' WHERE `id` = 4 AND `company_id` = 1;
+
+-- ============================================================================
 -- MASTER DATA - LOCATIONS - COMPANY 2
 -- ============================================================================
 
@@ -160,6 +207,53 @@ INSERT IGNORE INTO `Area` (`id`, `name`, `state_id`, `company_id`, `created_at`)
 (103, 'Saadiyat Island', 101, 2, NOW()),
 (104, 'Al Qasimia', 102, 2, NOW()),
 (105, 'Al Majaz', 102, 2, NOW());
+
+-- ============================================================================
+-- LOCATIONS - HIERARCHICAL DATA - COMPANY 2
+-- ============================================================================
+-- Hierarchy: EMIRATE → NEIGHBOURHOOD → CLUSTER → BUILDING
+
+-- EMIRATES (Top Level)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440101', 'Abu Dhabi', 'abu-dhabi', 'Abu Dhabi Emirate', NULL, 'EMIRATE', 'Abu Dhabi', 24.4539, 54.3773, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440102', 'Sharjah', 'sharjah', 'Sharjah Emirate', NULL, 'EMIRATE', 'Sharjah', 25.3573, 55.4033, true, 2, 2, NOW(), NOW());
+
+-- NEIGHBOURHOODS (Parent: EMIRATE)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440111', 'Al Reem Island', 'al-reem-island', 'Al Reem Island neighbourhood', '550e8400-e29b-41d4-a716-446655440101', 'NEIGHBOURHOOD', 'Abu Dhabi > Al Reem Island', 24.5200, 54.4200, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440112', 'Yas Island', 'yas-island', 'Yas Island neighbourhood', '550e8400-e29b-41d4-a716-446655440101', 'NEIGHBOURHOOD', 'Abu Dhabi > Yas Island', 24.5300, 54.6000, true, 2, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440113', 'Saadiyat Island', 'saadiyat-island', 'Saadiyat Island neighbourhood', '550e8400-e29b-41d4-a716-446655440101', 'NEIGHBOURHOOD', 'Abu Dhabi > Saadiyat Island', 24.5400, 54.4300, true, 3, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440114', 'Al Qasimia', 'al-qasimia', 'Al Qasimia neighbourhood', '550e8400-e29b-41d4-a716-446655440102', 'NEIGHBOURHOOD', 'Sharjah > Al Qasimia', 25.3600, 55.3900, true, 1, 2, NOW(), NOW());
+
+-- CLUSTERS (Parent: NEIGHBOURHOOD)
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440121', 'Al Reem Central', 'al-reem-central', 'Al Reem Central cluster', '550e8400-e29b-41d4-a716-446655440111', 'CLUSTER', 'Abu Dhabi > Al Reem Island > Al Reem Central', 24.5200, 54.4200, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440122', 'Yas Marina', 'yas-marina', 'Yas Marina cluster', '550e8400-e29b-41d4-a716-446655440112', 'CLUSTER', 'Abu Dhabi > Yas Island > Yas Marina', 24.5300, 54.6000, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440123', 'Saadiyat Beach', 'saadiyat-beach', 'Saadiyat Beach cluster', '550e8400-e29b-41d4-a716-446655440113', 'CLUSTER', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach', 24.5400, 54.4300, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440124', 'Al Qasimia Heights', 'al-qasimia-heights', 'Al Qasimia Heights cluster', '550e8400-e29b-41d4-a716-446655440114', 'CLUSTER', 'Sharjah > Al Qasimia > Al Qasimia Heights', 25.3600, 55.3900, true, 1, 2, NOW(), NOW());
+
+-- BUILDINGS (Parent: CLUSTER) - Linked to existing Building records
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440131', 'Al Reem Tower', 'al-reem-tower', 'Al Reem Tower building', '550e8400-e29b-41d4-a716-446655440121', 'BUILDING', 'Abu Dhabi > Al Reem Island > Al Reem Central > Al Reem Tower', 24.5200, 54.4200, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440132', 'Yas Island Residences', 'yas-island-residences', 'Yas Island Residences building', '550e8400-e29b-41d4-a716-446655440122', 'BUILDING', 'Abu Dhabi > Yas Island > Yas Marina > Yas Island Residences', 24.5300, 54.6000, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440133', 'Saadiyat Luxury Villas', 'saadiyat-luxury-villas', 'Saadiyat Luxury Villas building', '550e8400-e29b-41d4-a716-446655440123', 'BUILDING', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach > Saadiyat Luxury Villas', 24.5400, 54.4300, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440134', 'Al Qasimia Heights', 'al-qasimia-heights-building', 'Al Qasimia Heights building', '550e8400-e29b-41d4-a716-446655440124', 'BUILDING', 'Sharjah > Al Qasimia > Al Qasimia Heights > Al Qasimia Heights', 25.3600, 55.3900, true, 1, 2, NOW(), NOW());
+
+-- BUILDING_LVL1 (Parent: BUILDING) - Optional sub-levels
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440141', 'Villa Complex A', 'villa-complex-a', 'Villa Complex A section', '550e8400-e29b-41d4-a716-446655440133', 'BUILDING_LVL1', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach > Saadiyat Luxury Villas > Villa Complex A', 24.5400, 54.4300, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440142', 'Villa Complex B', 'villa-complex-b', 'Villa Complex B section', '550e8400-e29b-41d4-a716-446655440133', 'BUILDING_LVL1', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach > Saadiyat Luxury Villas > Villa Complex B', 24.5400, 54.4300, true, 2, 2, NOW(), NOW());
+
+-- BUILDING_LVL2 (Parent: BUILDING_LVL1) - Optional sub-sub-levels
+INSERT IGNORE INTO `location` (`id`, `name`, `slug`, `description`, `parent_id`, `level`, `full_path`, `latitude`, `longitude`, `is_active`, `sort_order`, `company_id`, `created_at`, `updated_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440151', 'Block A1', 'block-a1', 'Block A1 of Villa Complex A', '550e8400-e29b-41d4-a716-446655440141', 'BUILDING_LVL2', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach > Saadiyat Luxury Villas > Villa Complex A > Block A1', 24.5400, 54.4300, true, 1, 2, NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440152', 'Block A2', 'block-a2', 'Block A2 of Villa Complex A', '550e8400-e29b-41d4-a716-446655440141', 'BUILDING_LVL2', 'Abu Dhabi > Saadiyat Island > Saadiyat Beach > Saadiyat Luxury Villas > Villa Complex A > Block A2', 24.5400, 54.4300, true, 2, 2, NOW(), NOW());
+
+-- Link existing Buildings to Locations
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440131' WHERE `id` = 101 AND `company_id` = 2;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440132' WHERE `id` = 102 AND `company_id` = 2;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440133' WHERE `id` = 103 AND `company_id` = 2;
+UPDATE `Building` SET `location_id` = '550e8400-e29b-41d4-a716-446655440134' WHERE `id` = 104 AND `company_id` = 2;
 
 -- ============================================================================
 -- UNIT TYPES & AMENITIES - COMPANY 1
@@ -655,6 +749,813 @@ INSERT IGNORE INTO `CompanySettings` (`id`, `company_id`, `logo_path`, `smtp_hos
 (1, 1, '/uploads/logo.png', 'smtp.gmail.com', 587, 'noreply@realestate.com', 'password123', 'noreply@realestate.com', 'Dubai Real Estate Management', NOW()),
 (2, 2, '/uploads/logo-premium.png', 'smtp.gmail.com', 587, 'noreply@premiumproperties.com', 'password123', 'noreply@premiumproperties.com', 'Premium Properties LLC', NOW());
 
+-- ============================================================================
+-- SESSIONS & OAUTH - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Session` (`id`, `user_id`, `session_token`, `ip_address`, `user_agent`, `device_type`, `device_name`, `is_active`, `expires_at`, `last_activity`, `created_at`) VALUES
+(1, 1, 'session_token_001', '192.168.1.100', 'Mozilla/5.0', 'desktop', 'Chrome Browser', true, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW(), NOW()),
+(2, 2, 'session_token_002', '192.168.1.101', 'Mozilla/5.0', 'mobile', 'Safari Mobile', true, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW(), NOW());
+
+INSERT IGNORE INTO `OAuthToken` (`id`, `user_id`, `access_token`, `refresh_token`, `expires_at`, `created_at`) VALUES
+(1, 1, 'oauth_access_token_001', 'oauth_refresh_token_001', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW()),
+(2, 2, 'oauth_access_token_002', 'oauth_refresh_token_002', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW());
+
+INSERT IGNORE INTO `ProviderAccount` (`id`, `user_id`, `provider`, `provider_account_id`, `provider_email`, `provider_name`, `access_token`, `refresh_token`, `expires_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 'google', 'google_account_001', 'admin@realestate.com', 'Super Admin', 'google_access_token_001', 'google_refresh_token_001', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW(), NOW()),
+(2, 2, 'microsoft', 'microsoft_account_001', 'ahmed.manager@realestate.com', 'Ahmed Al Maktoum', 'microsoft_access_token_001', 'microsoft_refresh_token_001', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW(), NOW());
+
+-- ============================================================================
+-- SESSIONS & OAUTH - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Session` (`id`, `user_id`, `session_token`, `ip_address`, `user_agent`, `device_type`, `device_name`, `is_active`, `expires_at`, `last_activity`, `created_at`) VALUES
+(101, 101, 'session_token_101', '192.168.1.200', 'Mozilla/5.0', 'desktop', 'Firefox Browser', true, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW(), NOW()),
+(102, 102, 'session_token_102', '192.168.1.201', 'Mozilla/5.0', 'tablet', 'Safari Tablet', true, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW(), NOW());
+
+INSERT IGNORE INTO `OAuthToken` (`id`, `user_id`, `access_token`, `refresh_token`, `expires_at`, `created_at`) VALUES
+(101, 101, 'oauth_access_token_101', 'oauth_refresh_token_101', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW()),
+(102, 102, 'oauth_access_token_102', 'oauth_refresh_token_102', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW());
+
+INSERT IGNORE INTO `ProviderAccount` (`id`, `user_id`, `provider`, `provider_account_id`, `provider_email`, `provider_name`, `access_token`, `refresh_token`, `expires_at`, `created_at`, `updated_at`) VALUES
+(101, 101, 'google', 'google_account_101', 'admin@premiumproperties.com', 'Premium Admin', 'google_access_token_101', 'google_refresh_token_101', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW(), NOW()),
+(102, 102, 'microsoft', 'microsoft_account_101', 'khalid.manager@premiumproperties.com', 'Khalid Al Suwaidi', 'microsoft_access_token_101', 'microsoft_refresh_token_101', DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW(), NOW());
+
+-- ============================================================================
+-- KYC DOCUMENTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KycDocument` (`id`, `tenant_id`, `landlord_id`, `doc_type_id`, `path`, `created_at`) VALUES
+(1, 1, NULL, 1, '/uploads/kyc/tenant1_emirates_id.pdf', NOW()),
+(2, 1, NULL, 2, '/uploads/kyc/tenant1_passport.pdf', NOW()),
+(3, 2, NULL, 1, '/uploads/kyc/tenant2_emirates_id.pdf', NOW()),
+(4, NULL, 1, 1, '/uploads/kyc/landlord1_emirates_id.pdf', NOW()),
+(5, NULL, 1, 2, '/uploads/kyc/landlord1_passport.pdf', NOW());
+
+-- ============================================================================
+-- KYC DOCUMENTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KycDocument` (`id`, `tenant_id`, `landlord_id`, `doc_type_id`, `path`, `created_at`) VALUES
+(101, 101, NULL, 101, '/uploads/kyc/tenant101_emirates_id.pdf', NOW()),
+(102, 101, NULL, 102, '/uploads/kyc/tenant101_passport.pdf', NOW()),
+(103, 102, NULL, 101, '/uploads/kyc/tenant102_emirates_id.pdf', NOW()),
+(104, NULL, 101, 101, '/uploads/kyc/landlord101_emirates_id.pdf', NOW()),
+(105, NULL, 101, 102, '/uploads/kyc/landlord101_passport.pdf', NOW());
+
+-- ============================================================================
+-- UNIT IMAGES & DOCUMENTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `UnitImage` (`id`, `unit_id`, `image_url`, `image_type`, `caption`, `display_order`, `is_primary`, `created_at`) VALUES
+(1, 1, '/uploads/units/unit1_image1.jpg', 'interior', 'Living room view', 1, true, NOW()),
+(2, 1, '/uploads/units/unit1_image2.jpg', 'interior', 'Bedroom view', 2, false, NOW()),
+(3, 1, '/uploads/units/unit1_image3.jpg', 'exterior', 'Building facade', 3, false, NOW()),
+(4, 2, '/uploads/units/unit2_image1.jpg', 'interior', 'Modern kitchen', 1, true, NOW()),
+(5, 2, '/uploads/units/unit2_image2.jpg', 'interior', 'Master bedroom', 2, false, NOW()),
+(6, 3, '/uploads/units/unit3_image1.jpg', 'interior', 'Luxury living space', 1, true, NOW());
+
+INSERT IGNORE INTO `UnitDocument` (`id`, `unit_id`, `doc_type`, `document_url`, `document_name`, `expiry_date`, `created_at`) VALUES
+(1, 1, 'ejari', '/uploads/documents/unit1_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW()),
+(2, 1, 'dewa', '/uploads/documents/unit1_dewa.pdf', 'DEWA Bill', NULL, NOW()),
+(3, 2, 'ejari', '/uploads/documents/unit2_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW()),
+(4, 3, 'ejari', '/uploads/documents/unit3_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW());
+
+-- ============================================================================
+-- UNIT IMAGES & DOCUMENTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `UnitImage` (`id`, `unit_id`, `image_url`, `image_type`, `caption`, `display_order`, `is_primary`, `created_at`) VALUES
+(101, 101, '/uploads/units/unit101_image1.jpg', 'exterior', 'Villa exterior', 1, true, NOW()),
+(102, 101, '/uploads/units/unit101_image2.jpg', 'interior', 'Living room', 2, false, NOW()),
+(103, 101, '/uploads/units/unit101_image3.jpg', 'interior', 'Pool area', 3, false, NOW()),
+(104, 102, '/uploads/units/unit102_image1.jpg', 'interior', 'Apartment view', 1, true, NOW()),
+(105, 103, '/uploads/units/unit103_image1.jpg', 'interior', 'Spacious living', 1, true, NOW());
+
+INSERT IGNORE INTO `UnitDocument` (`id`, `unit_id`, `doc_type`, `document_url`, `document_name`, `expiry_date`, `created_at`) VALUES
+(101, 101, 'ejari', '/uploads/documents/unit101_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW()),
+(102, 101, 'adwea', '/uploads/documents/unit101_adwea.pdf', 'ADWEA Bill', NULL, NOW()),
+(103, 102, 'ejari', '/uploads/documents/unit102_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW()),
+(104, 103, 'ejari', '/uploads/documents/unit103_ejari.pdf', 'Ejari Certificate', '2025-12-31', NOW());
+
+-- ============================================================================
+-- SALES CONTRACTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `SalesContract` (`id`, `contract_no`, `contract_date`, `amount`, `service_amount`, `payment_terms`, `status`, `agent_commission`, `broker_commission`, `commission_paid`, `seller_id`, `buyer_id`, `salesman_id`, `broker_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 'SALE-2024-001', '2024-01-10', 1800000.00, 50000.00, 'Installment', 'completed', 45000.00, 36000.00, true, 1, 2, 3, 1, 1, 2, NOW(), NOW());
+
+INSERT IGNORE INTO `SalesContractunit` (`id`, `contract_id`, `unit_id`) VALUES
+(1, 1, 2);
+
+-- ============================================================================
+-- SALES CONTRACTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `SalesContract` (`id`, `contract_no`, `contract_date`, `amount`, `service_amount`, `payment_terms`, `status`, `agent_commission`, `broker_commission`, `commission_paid`, `seller_id`, `buyer_id`, `salesman_id`, `broker_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 'SALE-2024-101', '2024-01-12', 2200000.00, 60000.00, 'Installment', 'completed', 55000.00, 44000.00, true, 101, 102, 103, 101, 2, 102, NOW(), NOW());
+
+INSERT IGNORE INTO `SalesContractunit` (`id`, `contract_id`, `unit_id`) VALUES
+(101, 101, 102);
+
+-- ============================================================================
+-- CONTRACT PARKING - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `ContractParking` (`id`, `contract_id`, `contract_type`, `parking_id`, `vehicle_id`) VALUES
+(1, 1, 'rental', 1, 1),
+(2, 1, 'rental', 2, NULL);
+
+-- ============================================================================
+-- CONTRACT PARKING - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `ContractParking` (`id`, `contract_id`, `contract_type`, `parking_id`, `vehicle_id`) VALUES
+(101, 101, 'rental', 101, 101),
+(102, 101, 'sales', 102, NULL);
+
+-- ============================================================================
+-- HANDOVER - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Handover` (`id`, `contract_id`, `contract_type`, `no_of_keys_given`, `no_of_cards_given`, `additional_details`, `date`, `created_at`) VALUES
+(1, 1, 'rental', 2, 1, 'All keys and access card provided', '2024-02-01', NOW());
+
+INSERT IGNORE INTO `HandoverDocument` (`id`, `handover_id`, `doc_type_id`, `path`, `created_at`) VALUES
+(1, 1, 1, '/uploads/handover/handover1_emirates_id.pdf', NOW()),
+(2, 1, 2, '/uploads/handover/handover1_passport.pdf', NOW());
+
+-- ============================================================================
+-- HANDOVER - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Handover` (`id`, `contract_id`, `contract_type`, `no_of_keys_given`, `no_of_cards_given`, `additional_details`, `date`, `created_at`) VALUES
+(101, 101, 'rental', 3, 2, 'All keys and access cards provided', '2024-03-01', NOW());
+
+INSERT IGNORE INTO `HandoverDocument` (`id`, `handover_id`, `doc_type_id`, `path`, `created_at`) VALUES
+(101, 101, 101, '/uploads/handover/handover101_emirates_id.pdf', NOW()),
+(102, 101, 102, '/uploads/handover/handover101_passport.pdf', NOW());
+
+-- ============================================================================
+-- INVOICES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Invoice` (`id`, `invoice_no`, `contract_id`, `contract_type`, `amount`, `due_date`, `status`, `created_at`) VALUES
+(1, 'INV-2024-001', 1, 'rental', 85000.00, '2024-02-01', 'paid', NOW()),
+(2, 'INV-2024-002', 1, 'rental', 85000.00, '2024-03-01', 'pending', NOW());
+
+-- ============================================================================
+-- INVOICES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Invoice` (`id`, `invoice_no`, `contract_id`, `contract_type`, `amount`, `due_date`, `status`, `created_at`) VALUES
+(101, 'INV-2024-101', 101, 'rental', 75000.00, '2024-03-01', 'paid', NOW()),
+(102, 'INV-2024-102', 101, 'rental', 75000.00, '2024-04-01', 'pending', NOW());
+
+-- ============================================================================
+-- RECEIPTS & PAYMENTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Receipt` (`id`, `receipt_no`, `date`, `contract_id`, `contract_type`, `invoice_id`, `company_id`, `created_by`, `created_at`) VALUES
+(1, 'RCP-2024-001', '2024-02-01', 1, 'rental', 1, 1, 2, NOW()),
+(2, 'RCP-2024-002', '2024-01-10', 1, 'sales', NULL, 1, 2, NOW());
+
+INSERT IGNORE INTO `Payment` (`id`, `receipt_id`, `payment_type`, `amount_incl`, `status`, `instrument_no`, `description`, `returned_on`, `vat_amount`, `payment_under_id`, `created_at`) VALUES
+(1, 1, 'Cheque', 85000.00, 'cleared', 'CHQ-001', 'Monthly rent payment', NULL, 4250.00, 1, NOW()),
+(2, 1, 'Cash', 5000.00, 'received', NULL, 'Service charges', NULL, 250.00, 3, NOW()),
+(3, 2, 'Bank Transfer', 1800000.00, 'cleared', 'TRF-001', 'Property purchase payment', NULL, 90000.00, NULL, NOW());
+
+INSERT IGNORE INTO `Cheque` (`id`, `payment_id`, `date`, `is_deposited`, `is_received`, `deposited_on`, `cleared_on`, `bank_name`, `created_at`) VALUES
+(1, 1, '2024-02-01', true, true, '2024-02-02', '2024-02-05', 'Emirates NBD', NOW());
+
+-- ============================================================================
+-- RECEIPTS & PAYMENTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Receipt` (`id`, `receipt_no`, `date`, `contract_id`, `contract_type`, `invoice_id`, `company_id`, `created_by`, `created_at`) VALUES
+(101, 'RCP-2024-101', '2024-03-01', 101, 'rental', 101, 2, 102, NOW()),
+(102, 'RCP-2024-102', '2024-01-12', 101, 'sales', NULL, 2, 102, NOW());
+
+INSERT IGNORE INTO `Payment` (`id`, `receipt_id`, `payment_type`, `amount_incl`, `status`, `instrument_no`, `description`, `returned_on`, `vat_amount`, `payment_under_id`, `created_at`) VALUES
+(101, 101, 'Cheque', 75000.00, 'cleared', 'CHQ-101', 'Monthly rent payment', NULL, 3750.00, 101, NOW()),
+(102, 101, 'Cash', 4500.00, 'received', NULL, 'Service charges', NULL, 225.00, 103, NOW()),
+(103, 102, 'Bank Transfer', 2200000.00, 'cleared', 'TRF-101', 'Property purchase payment', NULL, 110000.00, NULL, NOW());
+
+INSERT IGNORE INTO `Cheque` (`id`, `payment_id`, `date`, `is_deposited`, `is_received`, `deposited_on`, `cleared_on`, `bank_name`, `created_at`) VALUES
+(101, 101, '2024-03-01', true, true, '2024-03-02', '2024-03-05', 'First Abu Dhabi Bank', NOW());
+
+-- ============================================================================
+-- LEAD FOLLOWUPS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadFollowup` (`id`, `uuid`, `lead_id`, `status_id`, `type_id`, `date`, `remarks`, `next_followup_date`, `company_id`, `created_by`, `created_at`) VALUES
+(1, '550e8400-e29b-41d4-a716-446655440003', 1, 3, 1, NOW(), 'Initial contact made, interested in viewing properties', DATE_ADD(NOW(), INTERVAL 3 DAY), 1, 3, NOW()),
+(2, '550e8400-e29b-41d4-a716-446655440004', 1, 4, 5, DATE_ADD(NOW(), INTERVAL 1 DAY), 'Property viewing scheduled for next week', DATE_ADD(NOW(), INTERVAL 7 DAY), 1, 3, NOW()),
+(3, '550e8400-e29b-41d4-a716-446655440005', 2, 2, 2, NOW(), 'Sent property details via email', DATE_ADD(NOW(), INTERVAL 2 DAY), 1, 3, NOW());
+
+-- ============================================================================
+-- LEAD FOLLOWUPS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadFollowup` (`id`, `uuid`, `lead_id`, `status_id`, `type_id`, `date`, `remarks`, `next_followup_date`, `company_id`, `created_by`, `created_at`) VALUES
+(101, '550e8400-e29b-41d4-a716-446655440103', 101, 103, 101, NOW(), 'Initial contact made, very interested', DATE_ADD(NOW(), INTERVAL 2 DAY), 2, 103, NOW()),
+(102, '550e8400-e29b-41d4-a716-446655440104', 101, 104, 105, DATE_ADD(NOW(), INTERVAL 1 DAY), 'Villa viewing scheduled', DATE_ADD(NOW(), INTERVAL 5 DAY), 2, 103, NOW()),
+(103, '550e8400-e29b-41d4-a716-446655440105', 102, 102, 102, NOW(), 'Property catalog sent', DATE_ADD(NOW(), INTERVAL 3 DAY), 2, 103, NOW());
+
+-- ============================================================================
+-- LEAD PREFERENCES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadPreferredArea` (`id`, `lead_id`, `area_id`) VALUES
+(1, 1, 2),
+(2, 1, 4),
+(3, 2, 1);
+
+INSERT IGNORE INTO `LeadPreferredunitType` (`id`, `lead_id`, `unit_type_id`) VALUES
+(1, 1, 3),
+(2, 2, 4);
+
+INSERT IGNORE INTO `LeadPreferredAmenity` (`id`, `lead_id`, `amenity_id`) VALUES
+(1, 1, 1),
+(2, 1, 2),
+(3, 1, 3),
+(4, 2, 1),
+(5, 2, 4);
+
+-- ============================================================================
+-- LEAD PREFERENCES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadPreferredArea` (`id`, `lead_id`, `area_id`) VALUES
+(101, 101, 101),
+(102, 101, 103),
+(103, 102, 102);
+
+INSERT IGNORE INTO `LeadPreferredunitType` (`id`, `lead_id`, `unit_type_id`) VALUES
+(101, 101, 105),
+(102, 102, 104);
+
+INSERT IGNORE INTO `LeadPreferredAmenity` (`id`, `lead_id`, `amenity_id`) VALUES
+(101, 101, 101),
+(102, 101, 102),
+(103, 101, 103),
+(104, 102, 101),
+(105, 102, 104);
+
+-- ============================================================================
+-- REQUESTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Request` (`id`, `request_no`, `type_id`, `status_id`, `description`, `tenant_id`, `landlord_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 'REQ-2024-001', 2, 1, 'Request for additional parking space', 1, NULL, 1, 1, NOW(), NOW()),
+(2, 'REQ-2024-002', 3, 2, 'Access card request for new tenant', 1, NULL, 1, 1, NOW(), NOW()),
+(3, 'REQ-2024-003', 4, 1, 'NOC request for renovation', NULL, 1, 1, 2, NOW(), NOW());
+
+-- ============================================================================
+-- REQUESTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Request` (`id`, `request_no`, `type_id`, `status_id`, `description`, `tenant_id`, `landlord_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 'REQ-2024-101', 102, 101, 'Request for parking space', 101, NULL, 2, 101, NOW(), NOW()),
+(102, 'REQ-2024-102', 103, 102, 'Access card request', 102, NULL, 2, 101, NOW(), NOW()),
+(103, 'REQ-2024-103', 104, 101, 'NOC request for modifications', NULL, 101, 2, 102, NOW(), NOW());
+
+-- ============================================================================
+-- TICKET COMMENTS & FOLLOWUPS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `TicketComment` (`id`, `ticket_id`, `comment`, `created_by`, `created_at`) VALUES
+(1, 1, 'Technician assigned, will visit tomorrow', 2, NOW()),
+(2, 1, 'Issue resolved, faucet replaced', 2, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(3, 2, 'HVAC technician scheduled for inspection', 2, NOW());
+
+INSERT IGNORE INTO `TicketFollowup` (`id`, `ticket_id`, `remarks`, `status_id`, `created_by`, `created_at`) VALUES
+(1, 1, 'Initial assessment completed', 2, 2, NOW()),
+(2, 1, 'Repair work completed successfully', 4, 2, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(3, 2, 'AC unit inspected, needs parts replacement', 3, 2, NOW());
+
+-- ============================================================================
+-- TICKET COMMENTS & FOLLOWUPS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `TicketComment` (`id`, `ticket_id`, `comment`, `created_by`, `created_at`) VALUES
+(101, 101, 'Plumber assigned, will fix today', 102, NOW()),
+(102, 101, 'Water heater repaired successfully', 102, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(103, 102, 'Electrician scheduled for repair', 102, NOW());
+
+INSERT IGNORE INTO `TicketFollowup` (`id`, `ticket_id`, `remarks`, `status_id`, `created_by`, `created_at`) VALUES
+(101, 101, 'Initial inspection done', 102, 102, NOW()),
+(102, 101, 'Repair completed', 104, 102, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(103, 102, 'Electrical work in progress', 102, 102, NOW());
+
+-- ============================================================================
+-- COMPLAINTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Complaint` (`id`, `complaint_no`, `type`, `title`, `description`, `status_id`, `tenant_id`, `landlord_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 'CMP-2024-001', 'noise', 'Excessive noise from neighbors', 'Loud music playing late at night', 1, 1, NULL, 1, 1, NOW(), NOW()),
+(2, 'CMP-2024-002', 'maintenance', 'Building maintenance issue', 'Elevator not working properly', 2, NULL, NULL, 1, 2, NOW(), NOW());
+
+INSERT IGNORE INTO `ComplaintFollowup` (`id`, `complaint_id`, `remarks`, `status_id`, `created_by`, `created_at`) VALUES
+(1, 1, 'Warning issued to neighbors', 2, 1, NOW()),
+(2, 2, 'Elevator maintenance scheduled', 2, 2, NOW());
+
+-- ============================================================================
+-- COMPLAINTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Complaint` (`id`, `complaint_no`, `type`, `title`, `description`, `status_id`, `tenant_id`, `landlord_id`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 'CMP-2024-101', 'noise', 'Noise complaint', 'Construction noise during quiet hours', 1, 101, NULL, 2, 101, NOW(), NOW()),
+(102, 'CMP-2024-102', 'security', 'Security concern', 'Security gate not functioning', 2, NULL, NULL, 2, 102, NOW(), NOW());
+
+INSERT IGNORE INTO `ComplaintFollowup` (`id`, `complaint_id`, `remarks`, `status_id`, `created_by`, `created_at`) VALUES
+(101, 101, 'Construction hours adjusted', 2, 101, NOW()),
+(102, 102, 'Security gate repaired', 3, 102, NOW());
+
+-- ============================================================================
+-- RENTAL APPROVALS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `RentalApproval` (`id`, `request_no`, `unit_id`, `tenant_id`, `status`, `remarks`, `company_id`, `created_by`, `approved_by`, `created_at`, `updated_at`) VALUES
+(1, 'APP-2024-001', 1, 1, 'approved', 'Tenant approved for Unit 101', 1, 2, 1, NOW(), NOW()),
+(2, 'APP-2024-002', 4, 2, 'pending', 'Application under review', 1, 2, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- RENTAL APPROVALS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `RentalApproval` (`id`, `request_no`, `unit_id`, `tenant_id`, `status`, `remarks`, `company_id`, `created_by`, `approved_by`, `created_at`, `updated_at`) VALUES
+(101, 'APP-2024-101', 101, 101, 'approved', 'Tenant approved for Villa A1', 2, 102, 101, NOW(), NOW()),
+(102, 'APP-2024-102', 102, 102, 'pending', 'Application pending review', 2, 102, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- PROPERTY VIEWINGS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyViewing` (`id`, `unit_id`, `lead_id`, `tenant_id`, `viewer_name`, `viewer_email`, `viewer_phone`, `viewing_date`, `viewing_time`, `status`, `notes`, `feedback`, `rating`, `company_id`, `assigned_to`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, NULL, 'David Wilson', 'david.wilson@email.com', '+971501234500', DATE_ADD(NOW(), INTERVAL 7 DAY), '10:00', 'scheduled', 'First viewing scheduled', NULL, NULL, 1, 3, 3, NOW(), NOW()),
+(2, 2, NULL, 1, 'John Smith', 'john.smith@email.com', '+971501111111', DATE_ADD(NOW(), INTERVAL 3 DAY), '14:00', 'scheduled', 'Tenant viewing for renewal', NULL, NULL, 1, 2, 2, NOW(), NOW());
+
+-- ============================================================================
+-- PROPERTY VIEWINGS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyViewing` (`id`, `unit_id`, `lead_id`, `tenant_id`, `viewer_name`, `viewer_email`, `viewer_phone`, `viewing_date`, `viewing_time`, `status`, `notes`, `feedback`, `rating`, `company_id`, `assigned_to`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 101, 101, NULL, 'James Taylor', 'james.taylor@email.com', '+971511234500', DATE_ADD(NOW(), INTERVAL 5 DAY), '11:00', 'scheduled', 'Villa viewing scheduled', NULL, NULL, 2, 103, 103, NOW(), NOW()),
+(102, 102, NULL, 101, 'Michael Brown', 'michael.brown@email.com', '+971511111111', DATE_ADD(NOW(), INTERVAL 2 DAY), '15:00', 'scheduled', 'Tenant viewing', NULL, NULL, 2, 102, 102, NOW(), NOW());
+
+-- ============================================================================
+-- UNIT FAVORITES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `UnitFavorite` (`id`, `unit_id`, `user_id`, `lead_id`, `email`, `notes`, `created_at`) VALUES
+(1, 1, NULL, 1, 'david.wilson@email.com', 'Interested in this property', NOW()),
+(2, 2, 3, NULL, NULL, 'Agent favorite', NOW()),
+(3, 3, NULL, NULL, 'sarah.j@email.com', 'Potential buyer', NOW());
+
+-- ============================================================================
+-- UNIT FAVORITES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `UnitFavorite` (`id`, `unit_id`, `user_id`, `lead_id`, `email`, `notes`, `created_at`) VALUES
+(101, 101, NULL, 101, 'james.taylor@email.com', 'Very interested', NOW()),
+(102, 102, 103, NULL, NULL, 'Agent recommendation', NOW()),
+(103, 103, NULL, NULL, 'isabella.garcia@email.com', 'Potential rental', NOW());
+
+-- ============================================================================
+-- PROPERTY INSPECTIONS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyInspection` (`id`, `unit_id`, `contract_id`, `contract_type`, `inspection_type`, `inspection_date`, `inspector_name`, `inspector_notes`, `condition_rating`, `photos`, `defects_found`, `recommendations`, `company_id`, `created_by`, `created_at`) VALUES
+(1, 3, 1, 'rental', 'move-in', '2024-02-01', 'Ahmed Al Maktoum', 'Property in good condition', 5, '/uploads/inspections/inspection1_photos.jpg', 'Minor scratches on wall', 'Touch up paint needed', 1, 2, NOW()),
+(2, 1, NULL, NULL, 'routine', DATE_ADD(NOW(), INTERVAL 30 DAY), 'Ahmed Al Maktoum', 'Scheduled routine inspection', NULL, NULL, NULL, NULL, 1, 2, NOW());
+
+-- ============================================================================
+-- PROPERTY INSPECTIONS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyInspection` (`id`, `unit_id`, `contract_id`, `contract_type`, `inspection_type`, `inspection_date`, `inspector_name`, `inspector_notes`, `condition_rating`, `photos`, `defects_found`, `recommendations`, `company_id`, `created_by`, `created_at`) VALUES
+(101, 103, 101, 'rental', 'move-in', '2024-03-01', 'Khalid Al Suwaidi', 'Property excellent condition', 5, '/uploads/inspections/inspection101_photos.jpg', 'None', 'No issues found', 2, 102, NOW()),
+(102, 101, NULL, NULL, 'routine', DATE_ADD(NOW(), INTERVAL 30 DAY), 'Khalid Al Suwaidi', 'Scheduled inspection', NULL, NULL, NULL, NULL, 2, 102, NOW());
+
+-- ============================================================================
+-- PROPERTY VALUATIONS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyValuation` (`id`, `unit_id`, `valuation_type`, `estimated_rent`, `estimated_sale`, `valuation_date`, `valuer_name`, `valuer_notes`, `market_analysis`, `comparable_units`, `company_id`, `created_by`, `created_at`) VALUES
+(1, 1, 'market', 45000.00, 1200000.00, NOW(), 'Ahmed Al Maktoum', 'Current market value assessment', 'Market is stable with good demand', 'Unit 201, Unit 102', 1, 2, NOW()),
+(2, 2, 'rental', 65000.00, NULL, NOW(), 'Ahmed Al Maktoum', 'Rental valuation only', 'High rental demand in area', 'Unit 301, Unit 202', 1, 2, NOW());
+
+-- ============================================================================
+-- PROPERTY VALUATIONS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyValuation` (`id`, `unit_id`, `valuation_type`, `estimated_rent`, `estimated_sale`, `valuation_date`, `valuer_name`, `valuer_notes`, `market_analysis`, `comparable_units`, `company_id`, `created_by`, `created_at`) VALUES
+(101, 101, 'market', 120000.00, 3500000.00, NOW(), 'Khalid Al Suwaidi', 'Premium villa valuation', 'Luxury market is strong', 'Villa B2', 2, 102, NOW()),
+(102, 102, 'rental', 55000.00, NULL, NOW(), 'Khalid Al Suwaidi', 'Rental assessment', 'Good rental yield', 'Unit 301, Unit 101', 2, 102, NOW());
+
+-- ============================================================================
+-- PROPERTY INSURANCE - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyInsurance` (`id`, `unit_id`, `insurance_type`, `insurance_provider`, `policy_number`, `coverage_amount`, `premium_amount`, `start_date`, `end_date`, `renewal_date`, `is_active`, `documents`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 'property', 'Emirates Insurance', 'POL-2024-001', 1200000.00, 12000.00, '2024-01-01', '2025-12-31', '2025-12-01', true, '/uploads/insurance/unit1_policy.pdf', 1, 2, NOW(), NOW()),
+(2, 2, 'property', 'ADNIC', 'POL-2024-002', 1800000.00, 18000.00, '2024-01-01', '2025-12-31', '2025-12-01', true, '/uploads/insurance/unit2_policy.pdf', 1, 2, NOW(), NOW());
+
+-- ============================================================================
+-- PROPERTY INSURANCE - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyInsurance` (`id`, `unit_id`, `insurance_type`, `insurance_provider`, `policy_number`, `coverage_amount`, `premium_amount`, `start_date`, `end_date`, `renewal_date`, `is_active`, `documents`, `company_id`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 101, 'property', 'Abu Dhabi National Insurance', 'POL-2024-101', 3500000.00, 35000.00, '2024-01-01', '2025-12-31', '2025-12-01', true, '/uploads/insurance/unit101_policy.pdf', 2, 102, NOW(), NOW()),
+(102, 102, 'property', 'Oman Insurance', 'POL-2024-102', 1600000.00, 16000.00, '2024-01-01', '2025-12-31', '2025-12-01', true, '/uploads/insurance/unit102_policy.pdf', 2, 102, NOW(), NOW());
+
+-- ============================================================================
+-- PROPERTY MAINTENANCE HISTORY - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyMaintenanceHistory` (`id`, `unit_id`, `maintenance_type`, `description`, `cost`, `vendor_name`, `maintenance_date`, `next_maintenance_date`, `documents`, `company_id`, `created_by`, `created_at`) VALUES
+(1, 1, 'routine', 'AC servicing and cleaning', 500.00, 'Cool Air Services', DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 90 DAY), '/uploads/maintenance/maintenance1_receipt.pdf', 1, 2, NOW()),
+(2, 2, 'repair', 'Kitchen faucet replacement', 200.00, 'Quick Fix Plumbing', DATE_SUB(NOW(), INTERVAL 15 DAY), NULL, '/uploads/maintenance/maintenance2_receipt.pdf', 1, 2, NOW()),
+(3, 3, 'routine', 'Deep cleaning and sanitization', 800.00, 'Clean Pro Services', DATE_SUB(NOW(), INTERVAL 60 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY), '/uploads/maintenance/maintenance3_receipt.pdf', 1, 2, NOW());
+
+-- ============================================================================
+-- PROPERTY MAINTENANCE HISTORY - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyMaintenanceHistory` (`id`, `unit_id`, `maintenance_type`, `description`, `cost`, `vendor_name`, `maintenance_date`, `next_maintenance_date`, `documents`, `company_id`, `created_by`, `created_at`) VALUES
+(101, 101, 'routine', 'Pool cleaning and maintenance', 1200.00, 'Aqua Pool Services', DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_ADD(NOW(), INTERVAL 10 DAY), '/uploads/maintenance/maintenance101_receipt.pdf', 2, 102, NOW()),
+(102, 102, 'repair', 'Electrical outlet repair', 150.00, 'Spark Electric', DATE_SUB(NOW(), INTERVAL 10 DAY), NULL, '/uploads/maintenance/maintenance102_receipt.pdf', 2, 102, NOW()),
+(103, 103, 'routine', 'HVAC system maintenance', 600.00, 'Climate Control', DATE_SUB(NOW(), INTERVAL 45 DAY), DATE_ADD(NOW(), INTERVAL 45 DAY), '/uploads/maintenance/maintenance103_receipt.pdf', 2, 102, NOW());
+
+-- ============================================================================
+-- PROPERTY NOTIFICATIONS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyNotification` (`id`, `unit_id`, `user_id`, `notification_type`, `title`, `message`, `is_read`, `action_url`, `company_id`, `created_at`) VALUES
+(1, 1, 1, 'maintenance', 'Maintenance Scheduled', 'AC servicing scheduled for next week', false, '/units/1', 1, NOW()),
+(2, 3, 1, 'rent', 'Rent Due Reminder', 'Rent payment due in 5 days', false, '/contracts/1', 1, NOW()),
+(3, NULL, 2, 'system', 'New Lead Assigned', 'New lead assigned to you', false, '/leads/1', 1, NOW());
+
+-- ============================================================================
+-- PROPERTY NOTIFICATIONS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyNotification` (`id`, `unit_id`, `user_id`, `notification_type`, `title`, `message`, `is_read`, `action_url`, `company_id`, `created_at`) VALUES
+(101, 101, 101, 'maintenance', 'Maintenance Scheduled', 'Pool maintenance scheduled', false, '/units/101', 2, NOW()),
+(102, 103, 101, 'rent', 'Rent Due Reminder', 'Rent payment due soon', false, '/contracts/101', 2, NOW()),
+(103, NULL, 102, 'system', 'New Lead Assigned', 'New lead assigned to you', false, '/leads/101', 2, NOW());
+
+-- ============================================================================
+-- PROPERTY ANALYTICS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyAnalytics` (`id`, `unit_id`, `date`, `views_count`, `favorites_count`, `inquiries_count`, `viewings_count`, `offers_count`, `company_id`, `created_at`) VALUES
+(1, 1, CURDATE(), 45, 12, 8, 3, 1, 1, NOW()),
+(2, 2, CURDATE(), 38, 9, 6, 2, 0, 1, NOW()),
+(3, 3, CURDATE(), 52, 15, 10, 4, 2, 1, NOW()),
+(4, 1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 32, 8, 5, 2, 0, 1, NOW()),
+(5, 2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 28, 6, 4, 1, 0, 1, NOW());
+
+-- ============================================================================
+-- PROPERTY ANALYTICS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `PropertyAnalytics` (`id`, `unit_id`, `date`, `views_count`, `favorites_count`, `inquiries_count`, `viewings_count`, `offers_count`, `company_id`, `created_at`) VALUES
+(101, 101, CURDATE(), 62, 18, 12, 5, 2, 2, NOW()),
+(102, 102, CURDATE(), 48, 11, 7, 3, 1, 2, NOW()),
+(103, 103, CURDATE(), 55, 14, 9, 4, 1, 2, NOW()),
+(104, 101, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 45, 12, 8, 3, 1, 2, NOW()),
+(105, 102, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 35, 9, 6, 2, 0, 2, NOW());
+
+-- ============================================================================
+-- LEAD ROUTING RULES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadRoutingRule` (`id`, `company_id`, `rule_name`, `priority`, `is_active`, `conditions`, `assignment_type`, `assigned_user_id`, `assigned_role_id`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Dubai Marina Leads', 1, true, '{"area": "Dubai Marina", "property_type": "Apartment"}', 'user', 3, NULL, NOW(), NOW()),
+(2, 1, 'High Value Leads', 2, true, '{"min_price": {"$gte": 2000000}}', 'role', NULL, 3, NOW(), NOW()),
+(3, 1, 'Website Leads', 3, true, '{"activity_source": "Website"}', 'user', 4, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- LEAD ROUTING RULES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadRoutingRule` (`id`, `company_id`, `rule_name`, `priority`, `is_active`, `conditions`, `assignment_type`, `assigned_user_id`, `assigned_role_id`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Villa Leads', 1, true, '{"property_type": "Villa"}', 'user', 103, NULL, NOW(), NOW()),
+(102, 2, 'Premium Leads', 2, true, '{"min_price": {"$gte": 3000000}}', 'role', NULL, 103, NOW(), NOW()),
+(103, 2, 'Phone Call Leads', 3, true, '{"activity_source": "Phone Call"}', 'user', 104, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- LEAD PIPELINES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadPipeline` (`id`, `company_id`, `name`, `stages`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Standard Sales Pipeline', '["New", "Contacted", "Qualified", "Viewing Scheduled", "Offer Made", "Converted"]', true, true, NOW(), NOW()),
+(2, 1, 'Rental Pipeline', '["New", "Contacted", "Qualified", "Viewing Scheduled", "Approved", "Converted"]', false, true, NOW(), NOW());
+
+-- ============================================================================
+-- LEAD PIPELINES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `LeadPipeline` (`id`, `company_id`, `name`, `stages`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Premium Sales Pipeline', '["New", "Contacted", "Qualified", "Viewing Scheduled", "Offer Made", "Converted"]', true, true, NOW(), NOW()),
+(102, 2, 'Luxury Rental Pipeline', '["New", "Contacted", "Qualified", "Viewing Scheduled", "Approved", "Converted"]', false, true, NOW(), NOW());
+
+-- ============================================================================
+-- AUTOMATION RULES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `AutomationRule` (`id`, `company_id`, `name`, `trigger_type`, `trigger_conditions`, `action_type`, `template_id`, `schedule_delay`, `schedule_unit`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Welcome Email for New Leads', 'lead_created', '{"status": "New"}', 'send_email', 1, 0, 'minutes', true, NOW(), NOW()),
+(2, 1, 'Follow-up Reminder', 'lead_updated', '{"status": "Contacted"}', 'send_email', 2, 3, 'days', true, NOW(), NOW()),
+(3, 1, 'Contract Expiry Reminder', 'contract_expiring', '{"days_before": 30}', 'send_email', 3, 30, 'days', true, NOW(), NOW());
+
+-- ============================================================================
+-- AUTOMATION RULES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `AutomationRule` (`id`, `company_id`, `name`, `trigger_type`, `trigger_conditions`, `action_type`, `template_id`, `schedule_delay`, `schedule_unit`, `is_active`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Welcome Email for New Leads', 'lead_created', '{"status": "New"}', 'send_email', 101, 0, 'minutes', true, NOW(), NOW()),
+(102, 2, 'Follow-up Reminder', 'lead_updated', '{"status": "Contacted"}', 'send_email', 102, 2, 'days', true, NOW(), NOW()),
+(103, 2, 'Contract Expiry Reminder', 'contract_expiring', '{"days_before": 30}', 'send_email', 103, 30, 'days', true, NOW(), NOW());
+
+-- ============================================================================
+-- MESSAGE TEMPLATES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `MessageTemplate` (`id`, `company_id`, `type`, `name`, `subject`, `body`, `variables`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'email', 'Welcome Email', 'Welcome to Dubai Real Estate Management', 'Dear {{name}},\n\nThank you for your interest in our properties. We will contact you soon.\n\nBest regards,\nDubai Real Estate Management', '{"name": "string"}', true, NOW(), NOW()),
+(2, 1, 'email', 'Follow-up Reminder', 'Property Inquiry Follow-up', 'Dear {{name}},\n\nWe wanted to follow up on your property inquiry. Please let us know if you have any questions.\n\nBest regards,\nDubai Real Estate Management', '{"name": "string"}', true, NOW(), NOW()),
+(3, 1, 'email', 'Contract Expiry', 'Contract Expiry Reminder', 'Dear {{tenant_name}},\n\nYour rental contract will expire on {{expiry_date}}. Please contact us to discuss renewal.\n\nBest regards,\nDubai Real Estate Management', '{"tenant_name": "string", "expiry_date": "date"}', true, NOW(), NOW()),
+(4, 1, 'sms', 'Viewing Reminder', 'Property Viewing Reminder', 'Reminder: Your property viewing is scheduled for {{viewing_date}} at {{viewing_time}}.', '{"viewing_date": "date", "viewing_time": "string"}', true, NOW(), NOW());
+
+-- ============================================================================
+-- MESSAGE TEMPLATES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `MessageTemplate` (`id`, `company_id`, `type`, `name`, `subject`, `body`, `variables`, `is_active`, `created_at`, `updated_at`) VALUES
+(101, 2, 'email', 'Welcome Email', 'Welcome to Premium Properties LLC', 'Dear {{name}},\n\nThank you for your interest in our premium properties. We will contact you shortly.\n\nBest regards,\nPremium Properties LLC', '{"name": "string"}', true, NOW(), NOW()),
+(102, 2, 'email', 'Follow-up Reminder', 'Property Inquiry Follow-up', 'Dear {{name}},\n\nFollowing up on your property inquiry. We are here to assist you.\n\nBest regards,\nPremium Properties LLC', '{"name": "string"}', true, NOW(), NOW()),
+(103, 2, 'email', 'Contract Expiry', 'Contract Expiry Reminder', 'Dear {{tenant_name}},\n\nYour rental contract expires on {{expiry_date}}. Please contact us for renewal options.\n\nBest regards,\nPremium Properties LLC', '{"tenant_name": "string", "expiry_date": "date"}', true, NOW(), NOW()),
+(104, 2, 'sms', 'Viewing Reminder', 'Property Viewing Reminder', 'Reminder: Your viewing is on {{viewing_date}} at {{viewing_time}}.', '{"viewing_date": "date", "viewing_time": "string"}', true, NOW(), NOW());
+
+-- ============================================================================
+-- MICROSITES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Microsite` (`id`, `unit_id`, `company_id`, `slug`, `template_id`, `seo_title`, `seo_description`, `seo_keywords`, `custom_css`, `custom_js`, `is_published`, `published_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'burj-khalifa-unit-101', NULL, 'Luxury 1 Bedroom Apartment in Burj Khalifa', 'Spacious 1 bedroom apartment with city view in Burj Khalifa', 'burj khalifa, apartment, dubai, luxury', NULL, NULL, true, NOW(), NOW(), NOW()),
+(2, 3, 1, 'burj-khalifa-unit-301', NULL, 'Premium 3 Bedroom Apartment in Burj Khalifa', 'Luxury 3 bedroom apartment with panoramic views', 'burj khalifa, apartment, dubai, premium', NULL, NULL, true, NOW(), NOW(), NOW());
+
+-- ============================================================================
+-- MICROSITES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Microsite` (`id`, `unit_id`, `company_id`, `slug`, `template_id`, `seo_title`, `seo_description`, `seo_keywords`, `custom_css`, `custom_js`, `is_published`, `published_at`, `created_at`, `updated_at`) VALUES
+(101, 101, 2, 'al-reem-villa-a1', NULL, 'Luxury 4 Bedroom Villa in Al Reem Island', 'Luxury 4 bedroom villa with private pool', 'al reem island, villa, abu dhabi, luxury', NULL, NULL, true, NOW(), NOW(), NOW()),
+(102, 104, 2, 'saadiyat-villa-b2', NULL, 'Premium 5 Bedroom Beachfront Villa', 'Premium 5 bedroom beachfront villa in Saadiyat Island', 'saadiyat island, villa, beachfront, premium', NULL, NULL, true, NOW(), NOW(), NOW());
+
+-- ============================================================================
+-- MICROSITE TEMPLATES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `MicrositeTemplate` (`id`, `company_id`, `name`, `description`, `template_html`, `template_css`, `template_js`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Modern Property Template', 'Modern and clean template for property listings', '<div class="property-template"><h1>{{unit_name}}</h1><p>{{description}}</p></div>', '.property-template { font-family: Arial; }', 'console.log("Property loaded");', true, true, NOW(), NOW()),
+(2, 1, 'Luxury Property Template', 'Premium template for luxury properties', '<div class="luxury-template"><h1>{{unit_name}}</h1><p>{{description}}</p></div>', '.luxury-template { font-family: Georgia; }', 'console.log("Luxury property loaded");', false, true, NOW(), NOW());
+
+-- ============================================================================
+-- MICROSITE TEMPLATES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `MicrositeTemplate` (`id`, `company_id`, `name`, `description`, `template_html`, `template_css`, `template_js`, `is_default`, `is_active`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Premium Property Template', 'Premium template for high-end properties', '<div class="premium-template"><h1>{{unit_name}}</h1><p>{{description}}</p></div>', '.premium-template { font-family: Helvetica; }', 'console.log("Premium property loaded");', true, true, NOW(), NOW()),
+(102, 2, 'Villa Showcase Template', 'Special template for villa listings', '<div class="villa-template"><h1>{{unit_name}}</h1><p>{{description}}</p></div>', '.villa-template { font-family: Times; }', 'console.log("Villa loaded");', false, true, NOW(), NOW());
+
+-- ============================================================================
+-- ATTENDANCE - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Attendance` (`id`, `user_id`, `company_id`, `date`, `check_in_time`, `check_out_time`, `check_in_latitude`, `check_in_longitude`, `check_out_latitude`, `check_out_longitude`, `status`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 2, 1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 9 HOUR), DATE_ADD(CURDATE(), INTERVAL 18 HOUR), 25.1972, 55.2744, 25.1972, 55.2744, 'present', 'On time', NOW(), NOW()),
+(2, 3, 1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 9 HOUR), NULL, 25.1972, 55.2744, NULL, NULL, 'present', 'Checked in', NOW(), NOW()),
+(3, 2, 1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 9 HOUR), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 18 HOUR), 25.1972, 55.2744, 25.1972, 55.2744, 'present', NULL, NOW(), NOW());
+
+-- ============================================================================
+-- ATTENDANCE - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Attendance` (`id`, `user_id`, `company_id`, `date`, `check_in_time`, `check_out_time`, `check_in_latitude`, `check_in_longitude`, `check_out_latitude`, `check_out_longitude`, `status`, `notes`, `created_at`, `updated_at`) VALUES
+(101, 102, 2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 9 HOUR), DATE_ADD(CURDATE(), INTERVAL 18 HOUR), 24.5200, 54.4200, 24.5200, 54.4200, 'present', 'On time', NOW(), NOW()),
+(102, 103, 2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 9 HOUR), NULL, 24.5300, 54.6000, NULL, NULL, 'present', 'Checked in', NOW(), NOW()),
+(103, 102, 2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 9 HOUR), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 18 HOUR), 24.5200, 54.4200, 24.5200, 54.4200, 'present', NULL, NOW(), NOW());
+
+-- ============================================================================
+-- USER ACTIVITIES - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `UserActivity` (`id`, `user_id`, `company_id`, `date`, `activity_type`, `description`, `duration_minutes`, `metadata`, `created_at`) VALUES
+(1, 2, 1, CURDATE(), 'property_view', 'Viewed property listings', 30, '{"properties_viewed": 5}', NOW()),
+(2, 3, 1, CURDATE(), 'lead_contact', 'Contacted 3 leads', 45, '{"leads_contacted": 3}', NOW()),
+(3, 2, 1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'contract_creation', 'Created rental contract', 60, '{"contract_id": 1}', NOW()),
+(4, 3, 1, CURDATE(), 'property_showing', 'Conducted property viewing', 90, '{"viewing_id": 1}', NOW());
+
+-- ============================================================================
+-- USER ACTIVITIES - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `UserActivity` (`id`, `user_id`, `company_id`, `date`, `activity_type`, `description`, `duration_minutes`, `metadata`, `created_at`) VALUES
+(101, 102, 2, CURDATE(), 'property_view', 'Viewed property listings', 25, '{"properties_viewed": 4}', NOW()),
+(102, 103, 2, CURDATE(), 'lead_contact', 'Contacted 2 leads', 35, '{"leads_contacted": 2}', NOW()),
+(103, 102, 2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'contract_creation', 'Created rental contract', 55, '{"contract_id": 101}', NOW()),
+(104, 103, 2, CURDATE(), 'property_showing', 'Conducted villa viewing', 120, '{"viewing_id": 101}', NOW());
+
+-- ============================================================================
+-- KANBAN BOARDS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanBoard` (`id`, `company_id`, `name`, `description`, `board_type`, `is_template`, `is_active`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Lead Management Board', 'Board for managing leads through pipeline', 'leads', false, true, 2, NOW(), NOW()),
+(2, 1, 'Property Management Board', 'Board for property-related tasks', 'properties', false, true, 2, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN BOARDS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanBoard` (`id`, `company_id`, `name`, `description`, `board_type`, `is_template`, `is_active`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Lead Management Board', 'Board for managing leads', 'leads', false, true, 102, NOW(), NOW()),
+(102, 2, 'Property Management Board', 'Board for property tasks', 'properties', false, true, 102, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN COLUMNS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanColumn` (`id`, `board_id`, `name`, `position`, `color`, `is_done`, `wip_limit`, `created_at`, `updated_at`) VALUES
+(1, 1, 'New Leads', 0, '#3b82f6', false, NULL, NOW(), NOW()),
+(2, 1, 'Contacted', 1, '#10b981', false, NULL, NOW(), NOW()),
+(3, 1, 'Qualified', 2, '#f59e0b', false, NULL, NOW(), NOW()),
+(4, 1, 'Converted', 3, '#8b5cf6', true, NULL, NOW(), NOW()),
+(5, 2, 'Open', 0, '#ef4444', false, NULL, NOW(), NOW()),
+(6, 2, 'In Progress', 1, '#f59e0b', false, 5, NOW(), NOW()),
+(7, 2, 'Completed', 2, '#10b981', true, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN COLUMNS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanColumn` (`id`, `board_id`, `name`, `position`, `color`, `is_done`, `wip_limit`, `created_at`, `updated_at`) VALUES
+(101, 101, 'New Leads', 0, '#3b82f6', false, NULL, NOW(), NOW()),
+(102, 101, 'Contacted', 1, '#10b981', false, NULL, NOW(), NOW()),
+(103, 101, 'Qualified', 2, '#f59e0b', false, NULL, NOW(), NOW()),
+(104, 101, 'Converted', 3, '#8b5cf6', true, NULL, NOW(), NOW()),
+(105, 102, 'Open', 0, '#ef4444', false, NULL, NOW(), NOW()),
+(106, 102, 'In Progress', 1, '#f59e0b', false, 5, NOW(), NOW()),
+(107, 102, 'Completed', 2, '#10b981', true, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN CARDS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCard` (`id`, `board_id`, `column_id`, `title`, `description`, `card_type`, `entity_id`, `entity_type`, `assigned_to`, `priority`, `due_date`, `position`, `is_archived`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'New Lead: David Wilson', 'Looking for 2 bedroom apartment', 'lead', 1, 'Lead', 3, 'high', DATE_ADD(NOW(), INTERVAL 3 DAY), 0, false, 2, NOW(), NOW()),
+(2, 1, 2, 'Lead: Emma Brown', 'Interested in purchasing', 'lead', 2, 'Lead', 3, 'medium', DATE_ADD(NOW(), INTERVAL 5 DAY), 0, false, 2, NOW(), NOW()),
+(3, 2, 5, 'Property Maintenance: Unit 1', 'AC servicing required', 'property', 1, 'Unit', 2, 'medium', DATE_ADD(NOW(), INTERVAL 7 DAY), 0, false, 2, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN CARDS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCard` (`id`, `board_id`, `column_id`, `title`, `description`, `card_type`, `entity_id`, `entity_type`, `assigned_to`, `priority`, `due_date`, `position`, `is_archived`, `created_by`, `created_at`, `updated_at`) VALUES
+(101, 101, 101, 'New Lead: James Taylor', 'Looking for 4 bedroom villa', 'lead', 101, 'Lead', 103, 'high', DATE_ADD(NOW(), INTERVAL 2 DAY), 0, false, 102, NOW(), NOW()),
+(102, 101, 102, 'Lead: Isabella Garcia', 'Interested in apartment', 'lead', 102, 'Lead', 103, 'medium', DATE_ADD(NOW(), INTERVAL 4 DAY), 0, false, 102, NOW(), NOW()),
+(103, 102, 105, 'Property Maintenance: Villa A1', 'Pool maintenance needed', 'property', 101, 'Unit', 102, 'medium', DATE_ADD(NOW(), INTERVAL 6 DAY), 0, false, 102, NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN CARD COMMENTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardComment` (`id`, `card_id`, `user_id`, `comment`, `created_at`, `updated_at`) VALUES
+(1, 1, 3, 'Initial contact made, very interested', NOW(), NOW()),
+(2, 1, 2, 'Schedule property viewing', DATE_ADD(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 HOUR)),
+(3, 3, 2, 'Technician assigned', NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN CARD COMMENTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardComment` (`id`, `card_id`, `user_id`, `comment`, `created_at`, `updated_at`) VALUES
+(101, 101, 103, 'Initial contact established', NOW(), NOW()),
+(102, 101, 102, 'Schedule villa viewing', DATE_ADD(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 HOUR)),
+(103, 103, 102, 'Pool service scheduled', NOW(), NOW());
+
+-- ============================================================================
+-- KANBAN CARD ATTACHMENTS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardAttachment` (`id`, `card_id`, `file_name`, `file_url`, `file_type`, `file_size`, `uploaded_by`, `created_at`) VALUES
+(1, 1, 'lead_details.pdf', '/uploads/kanban/lead1_details.pdf', 'application/pdf', 245760, 3, NOW()),
+(2, 3, 'maintenance_report.pdf', '/uploads/kanban/maintenance_report.pdf', 'application/pdf', 512000, 2, NOW());
+
+-- ============================================================================
+-- KANBAN CARD ATTACHMENTS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardAttachment` (`id`, `card_id`, `file_name`, `file_url`, `file_type`, `file_size`, `uploaded_by`, `created_at`) VALUES
+(101, 101, 'lead_details.pdf', '/uploads/kanban/lead101_details.pdf', 'application/pdf', 245760, 103, NOW()),
+(102, 103, 'maintenance_report.pdf', '/uploads/kanban/maintenance_report101.pdf', 'application/pdf', 512000, 102, NOW());
+
+-- ============================================================================
+-- KANBAN LABELS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanLabel` (`id`, `board_id`, `company_id`, `name`, `color`, `created_at`) VALUES
+(1, 1, 1, 'High Priority', '#ef4444', NOW()),
+(2, 1, 1, 'Follow-up', '#f59e0b', NOW()),
+(3, 1, 1, 'Qualified', '#10b981', NOW()),
+(4, 2, 1, 'Urgent', '#ef4444', NOW()),
+(5, 2, 1, 'Routine', '#3b82f6', NOW());
+
+-- ============================================================================
+-- KANBAN LABELS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanLabel` (`id`, `board_id`, `company_id`, `name`, `color`, `created_at`) VALUES
+(101, 101, 2, 'High Priority', '#ef4444', NOW()),
+(102, 101, 2, 'Follow-up', '#f59e0b', NOW()),
+(103, 101, 2, 'Qualified', '#10b981', NOW()),
+(104, 102, 2, 'Urgent', '#ef4444', NOW()),
+(105, 102, 2, 'Routine', '#3b82f6', NOW());
+
+-- ============================================================================
+-- KANBAN CARD LABELS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardLabel` (`id`, `card_id`, `label_id`, `created_at`) VALUES
+(1, 1, 1, NOW()),
+(2, 1, 2, NOW()),
+(3, 2, 3, NOW()),
+(4, 3, 4, NOW());
+
+-- ============================================================================
+-- KANBAN CARD LABELS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `KanbanCardLabel` (`id`, `card_id`, `label_id`, `created_at`) VALUES
+(101, 101, 101, NOW()),
+(102, 101, 102, NOW()),
+(103, 102, 103, NOW()),
+(104, 103, 104, NOW());
+
+-- ============================================================================
+-- AD CAMPAIGNS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `AdCampaign` (`id`, `company_id`, `campaign_name`, `source`, `start_date`, `end_date`, `budget`, `spent`, `leads_count`, `conversions`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Dubai Marina Properties', 'Google Ads', '2024-01-01', '2024-12-31', 50000.00, 12500.00, 45, 8, true, NOW(), NOW()),
+(2, 1, 'Luxury Apartments Campaign', 'Facebook Ads', '2024-01-15', '2024-06-30', 30000.00, 8500.00, 32, 5, true, NOW(), NOW());
+
+-- ============================================================================
+-- AD CAMPAIGNS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `AdCampaign` (`id`, `company_id`, `campaign_name`, `source`, `start_date`, `end_date`, `budget`, `spent`, `leads_count`, `conversions`, `is_active`, `created_at`, `updated_at`) VALUES
+(101, 2, 'Premium Villas Campaign', 'Google Ads', '2024-01-01', '2024-12-31', 75000.00, 18000.00, 38, 6, true, NOW(), NOW()),
+(102, 2, 'Luxury Properties', 'Instagram Ads', '2024-02-01', '2024-08-31', 40000.00, 9500.00, 28, 4, true, NOW(), NOW());
+
+-- ============================================================================
+-- INTEGRATIONS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Integration` (`id`, `company_id`, `integration_type`, `api_key`, `api_secret`, `access_token`, `refresh_token`, `config`, `is_active`, `last_sync_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 'google_calendar', 'google_api_key_001', 'google_api_secret_001', 'google_access_token_001', 'google_refresh_token_001', '{"calendar_id": "primary"}', true, NOW(), NOW(), NOW()),
+(2, 1, 'whatsapp_business', 'whatsapp_api_key_001', 'whatsapp_api_secret_001', 'whatsapp_access_token_001', NULL, '{"phone_number": "+971501234567"}', true, DATE_SUB(NOW(), INTERVAL 1 HOUR), NOW(), NOW());
+
+-- ============================================================================
+-- INTEGRATIONS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Integration` (`id`, `company_id`, `integration_type`, `api_key`, `api_secret`, `access_token`, `refresh_token`, `config`, `is_active`, `last_sync_at`, `created_at`, `updated_at`) VALUES
+(101, 2, 'google_calendar', 'google_api_key_101', 'google_api_secret_101', 'google_access_token_101', 'google_refresh_token_101', '{"calendar_id": "primary"}', true, NOW(), NOW(), NOW()),
+(102, 2, 'whatsapp_business', 'whatsapp_api_key_101', 'whatsapp_api_secret_101', 'whatsapp_access_token_101', NULL, '{"phone_number": "+971502234567"}', true, DATE_SUB(NOW(), INTERVAL 1 HOUR), NOW(), NOW());
+
+-- ============================================================================
+-- WEBHOOKS - COMPANY 1
+-- ============================================================================
+
+INSERT IGNORE INTO `Webhook` (`id`, `company_id`, `integration_id`, `event_type`, `url`, `secret`, `is_active`, `last_triggered_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'lead_created', 'https://webhook.example.com/leads', 'webhook_secret_001', true, DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW(), NOW()),
+(2, 1, 1, 'contract_created', 'https://webhook.example.com/contracts', 'webhook_secret_002', true, DATE_SUB(NOW(), INTERVAL 1 DAY), NOW(), NOW()),
+(3, 1, 2, 'lead_status_changed', 'https://webhook.example.com/lead-status', 'webhook_secret_003', true, NULL, NOW(), NOW());
+
+-- ============================================================================
+-- WEBHOOKS - COMPANY 2
+-- ============================================================================
+
+INSERT IGNORE INTO `Webhook` (`id`, `company_id`, `integration_id`, `event_type`, `url`, `secret`, `is_active`, `last_triggered_at`, `created_at`, `updated_at`) VALUES
+(101, 2, 101, 'lead_created', 'https://webhook.example.com/leads-premium', 'webhook_secret_101', true, DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW(), NOW()),
+(102, 2, 101, 'contract_created', 'https://webhook.example.com/contracts-premium', 'webhook_secret_102', true, DATE_SUB(NOW(), INTERVAL 1 DAY), NOW(), NOW()),
+(103, 2, 102, 'lead_status_changed', 'https://webhook.example.com/lead-status-premium', 'webhook_secret_103', true, NULL, NOW(), NOW());
+
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -667,29 +1568,79 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- COMPANY 1 (Dubai Real Estate Management):
 -- - 4 Users (1 Admin, 1 Manager, 2 Agents)
 -- - 5 Roles with permissions
+-- - 2 Sessions, 2 OAuth Tokens, 2 Provider Accounts
 -- - 1 Country, 2 States, 6 Areas (Dubai locations)
--- - 4 Buildings, 10 Floors
+-- - 2 Emirates, 4 Neighbourhoods, 4 Clusters, 4 Buildings, 2 Building_LVL1, 2 Building_LVL2 (Location hierarchy)
+-- - 4 Buildings (linked to Locations), 10 Floors
 -- - 5 Units with amenities (Dubai properties)
+-- - 6 Unit Images, 4 Unit Documents
 -- - 3 Tenants, 2 Landlords
+-- - 5 KYC Documents
 -- - 3 Brokers
+-- - 1 Rental Contract, 1 Sales Contract
+-- - 2 Contract Parking, 1 Handover, 2 Handover Documents
+-- - 2 Invoices, 2 Receipts, 3 Payments, 1 Cheque
 -- - Master data for Leads, Tickets, Requests, Complaints
--- - 2 Sample Leads
--- - 1 Sample Rental Contract
--- - 2 Sample Tickets
+-- - 2 Sample Leads, 3 Lead Followups
+-- - 3 Lead Preferred Areas, 2 Lead Preferred Unit Types, 5 Lead Preferred Amenities
+-- - 3 Requests
+-- - 2 Sample Tickets, 3 Ticket Comments, 3 Ticket Followups
+-- - 2 Complaints, 2 Complaint Followups
+-- - 2 Rental Approvals
+-- - 2 Property Viewings, 3 Unit Favorites
+-- - 2 Property Inspections, 2 Property Valuations
+-- - 2 Property Insurance policies
+-- - 3 Property Maintenance History records
+-- - 3 Property Notifications
+-- - 5 Property Analytics records
+-- - 3 Lead Routing Rules, 2 Lead Pipelines
+-- - 3 Automation Rules, 4 Message Templates
+-- - 2 Microsites, 2 Microsite Templates
+-- - 3 Attendance records, 4 User Activities
+-- - 2 Kanban Boards, 7 Kanban Columns, 3 Kanban Cards
+-- - 3 Kanban Card Comments, 2 Kanban Card Attachments
+-- - 5 Kanban Labels, 4 Kanban Card Labels
+-- - 2 Ad Campaigns
+-- - 2 Integrations, 3 Webhooks
 -- - 2 Sample Announcements
 --
 -- COMPANY 2 (Premium Properties LLC):
 -- - 4 Users (1 Admin, 1 Manager, 2 Agents)
 -- - 5 Roles with permissions
+-- - 2 Sessions, 2 OAuth Tokens, 2 Provider Accounts
 -- - 1 Country, 2 States, 5 Areas (Abu Dhabi & Sharjah locations)
--- - 4 Buildings, 10 Floors
+-- - 2 Emirates, 4 Neighbourhoods, 4 Clusters, 4 Buildings, 2 Building_LVL1, 2 Building_LVL2 (Location hierarchy)
+-- - 4 Buildings (linked to Locations), 10 Floors
 -- - 5 Units with amenities (Abu Dhabi & Sharjah properties)
+-- - 5 Unit Images, 4 Unit Documents
 -- - 3 Tenants, 2 Landlords
+-- - 5 KYC Documents
 -- - 3 Brokers
+-- - 1 Rental Contract, 1 Sales Contract
+-- - 2 Contract Parking, 1 Handover, 2 Handover Documents
+-- - 2 Invoices, 2 Receipts, 3 Payments, 1 Cheque
 -- - Master data for Leads, Tickets, Requests, Complaints
--- - 2 Sample Leads
--- - 1 Sample Rental Contract
--- - 2 Sample Tickets
+-- - 2 Sample Leads, 3 Lead Followups
+-- - 3 Lead Preferred Areas, 2 Lead Preferred Unit Types, 5 Lead Preferred Amenities
+-- - 3 Requests
+-- - 2 Sample Tickets, 3 Ticket Comments, 3 Ticket Followups
+-- - 2 Complaints, 2 Complaint Followups
+-- - 2 Rental Approvals
+-- - 2 Property Viewings, 3 Unit Favorites
+-- - 2 Property Inspections, 2 Property Valuations
+-- - 2 Property Insurance policies
+-- - 3 Property Maintenance History records
+-- - 3 Property Notifications
+-- - 5 Property Analytics records
+-- - 3 Lead Routing Rules, 2 Lead Pipelines
+-- - 3 Automation Rules, 4 Message Templates
+-- - 2 Microsites, 2 Microsite Templates
+-- - 3 Attendance records, 4 User Activities
+-- - 2 Kanban Boards, 7 Kanban Columns, 3 Kanban Cards
+-- - 3 Kanban Card Comments, 2 Kanban Card Attachments
+-- - 5 Kanban Labels, 4 Kanban Card Labels
+-- - 2 Ad Campaigns
+-- - 2 Integrations, 3 Webhooks
 -- - 2 Sample Announcements
 --
 -- Default Login Credentials:

@@ -185,7 +185,7 @@ export default function LocationsPage() {
         <div className="text-xs sm:text-xs md:text-sm text-muted-foreground">
           {location.latitude && location.longitude ? (
             <>
-              {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+              {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}
             </>
           ) : (
             'N/A'
