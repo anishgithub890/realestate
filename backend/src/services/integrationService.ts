@@ -2,6 +2,8 @@ import prisma from '../config/database';
 import { NotFoundError, ValidationError } from '../utils/errors';
 import { parsePagination, buildOrderBy } from '../utils/pagination';
 import crypto from 'crypto';
+import https from 'https';
+import http from 'http';
 
 export class IntegrationService {
   /**
@@ -544,6 +546,208 @@ export class IntegrationService {
       return result;
     } catch (error: any) {
       throw error;
+    }
+  }
+
+  /**
+   * Test webhook by sending a test payload
+   */
+  async testWebhook(webhookId: number, companyId: number) {
+    const webhook = await prisma.webhook.findFirst({
+      where: {
+        id: webhookId,
+        company_id: companyId,
+      },
+    });
+
+    if (!webhook) {
+      throw new NotFoundError('Webhook not found');
+    }
+
+    if (!webhook.is_active) {
+      throw new ValidationError('Webhook is not active');
+    }
+
+    // Generate test payload based on event type
+    const testPayload = this.generateTestPayload(webhook.event_type);
+
+    // Send HTTP request to webhook URL
+    const headers: any = {
+      'Content-Type': 'application/json',
+      'User-Agent': 'RealEstate-Webhook/1.0',
+    };
+
+    // Add signature if secret is set
+    if (webhook.secret) {
+      const signature = crypto
+        .createHmac('sha256', webhook.secret)
+        .update(JSON.stringify(testPayload))
+        .digest('hex');
+      headers['X-Webhook-Signature'] = signature;
+    }
+
+    try {
+      const url = new URL(webhook.url);
+      const isHttps = url.protocol === 'https:';
+      const client = isHttps ? https : http;
+      const payload = JSON.stringify(testPayload);
+
+      const response = await new Promise<any>((resolve, reject) => {
+        const options = {
+          hostname: url.hostname,
+          port: url.port || (isHttps ? 443 : 80),
+          path: url.pathname + url.search,
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Length': Buffer.byteLength(payload),
+          },
+          timeout: 10000,
+        };
+
+        const req = client.request(options, (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            try {
+              const parsedData = data ? JSON.parse(data) : {};
+              resolve({
+                status: res.statusCode || 200,
+                data: parsedData,
+                headers: res.headers,
+              });
+            } catch {
+              resolve({
+                status: res.statusCode || 200,
+                data: data,
+                headers: res.headers,
+              });
+            }
+          });
+        });
+
+        req.on('error', (error) => {
+          reject(error);
+        });
+
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('Request timeout'));
+        });
+
+        req.write(payload);
+        req.end();
+      });
+
+      // Update last triggered time
+      await prisma.webhook.update({
+        where: { id: webhookId },
+        data: { last_triggered_at: new Date() },
+      });
+
+      return {
+        success: true,
+        status_code: response.status,
+        response_data: response.data,
+        message: 'Webhook test sent successfully',
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        status_code: 0,
+        response_data: null,
+        error: error.message,
+        message: 'Webhook test failed',
+      };
+    }
+  }
+
+  /**
+   * Generate test payload based on event type
+   */
+  private generateTestPayload(eventType: string): any {
+    const basePayload = {
+      event: eventType,
+      timestamp: new Date().toISOString(),
+      test: true,
+    };
+
+    switch (eventType) {
+      case 'lead.created':
+        return {
+          ...basePayload,
+          name: 'Test Lead',
+          email: 'test@example.com',
+          mobile_no: '+971501234567',
+          property_type: 'apartment',
+          interest_type: 'rent',
+          min_price: 50000,
+          max_price: 100000,
+          source: 'Webhook Test',
+        };
+
+      case 'lead.updated':
+        return {
+          ...basePayload,
+          email: 'test@example.com',
+          name: 'Updated Test Lead',
+          status: 'contacted',
+        };
+
+      case 'lead.assigned':
+        return {
+          ...basePayload,
+          email: 'test@example.com',
+          assigned_to: 'Test User',
+        };
+
+      case 'contract.created':
+        return {
+          ...basePayload,
+          contract_id: 'TEST-001',
+          contract_type: 'rental',
+          unit_id: 1,
+          tenant_id: 1,
+          start_date: new Date().toISOString(),
+          end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        };
+
+      case 'contract.updated':
+        return {
+          ...basePayload,
+          contract_id: 'TEST-001',
+          status: 'active',
+        };
+
+      case 'payment.received':
+        return {
+          ...basePayload,
+          payment_id: 'PAY-001',
+          amount: 5000,
+          currency: 'AED',
+          contract_id: 'TEST-001',
+        };
+
+      case 'ticket.created':
+        return {
+          ...basePayload,
+          ticket_id: 'TICKET-001',
+          subject: 'Test Ticket',
+          description: 'This is a test ticket',
+          priority: 'medium',
+        };
+
+      case 'ticket.updated':
+        return {
+          ...basePayload,
+          ticket_id: 'TICKET-001',
+          status: 'in_progress',
+        };
+
+      default:
+        return basePayload;
     }
   }
 }

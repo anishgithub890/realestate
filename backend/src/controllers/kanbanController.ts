@@ -43,13 +43,19 @@ export class KanbanController {
         return res.status(401).json({ success: false, error: 'Unauthorized' });
       }
 
+      console.log('Creating kanban board with data:', req.body);
+      console.log('Company ID:', req.user.companyId, 'User ID:', req.user.userId);
+
       const board = await kanbanService.createBoard(
         req.body,
         req.user.companyId,
         req.user.userId
       );
+      
+      console.log('Board created successfully:', board.id);
       return sendSuccess(res, board, 'Board created successfully', 201);
     } catch (error: any) {
+      console.error('Error creating kanban board:', error);
       return next(error);
     }
   }

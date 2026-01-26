@@ -99,5 +99,12 @@ router.delete(
   integrationController.deleteWebhook.bind(integrationController)
 );
 
+router.post(
+  '/webhooks/:id/test',
+  validateId,
+  validate,
+  integrationController.testWebhook.bind(integrationController)
+);
+
 export default router;
 

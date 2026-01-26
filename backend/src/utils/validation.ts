@@ -11,6 +11,18 @@ export const validateId = [
   param('id').isInt({ min: 1 }).withMessage('ID must be a positive integer'),
 ];
 
+export const validateBoardId = [
+  param('boardId').isInt({ min: 1 }).withMessage('Board ID must be a positive integer'),
+];
+
+export const validateCardId = [
+  param('cardId').isInt({ min: 1 }).withMessage('Card ID must be a positive integer'),
+];
+
+export const validateTemplateId = [
+  param('templateId').isInt({ min: 1 }).withMessage('Template ID must be a positive integer'),
+];
+
 export const validateLocationId = [
   param('id').isUUID().withMessage('Location ID must be a valid UUID'),
 ];
@@ -139,9 +151,19 @@ export const validateLeadUpdate = [
 export const validateKanbanBoardCreate = [
   body('name').notEmpty().withMessage('Board name is required'),
   body('board_type').isIn(['leads', 'properties', 'deals', 'contracts', 'maintenance', 'custom']).withMessage('Invalid board type'),
-  body('description').optional().isString().withMessage('Description must be a string'),
-  body('is_template').optional().isBoolean().withMessage('is_template must be a boolean'),
-  body('is_active').optional().isBoolean().withMessage('is_active must be a boolean'),
+  body('description').optional({ nullable: true, checkFalsy: true }).isString().withMessage('Description must be a string'),
+  body('is_template').optional().custom((value) => {
+    if (value === undefined || value === null) return true;
+    if (typeof value === 'boolean') return true;
+    if (value === 'true' || value === 'false') return true;
+    throw new Error('is_template must be a boolean');
+  }),
+  body('is_active').optional().custom((value) => {
+    if (value === undefined || value === null) return true;
+    if (typeof value === 'boolean') return true;
+    if (value === 'true' || value === 'false') return true;
+    throw new Error('is_active must be a boolean');
+  }),
 ];
 
 export const validateKanbanBoardUpdate = [
@@ -162,13 +184,13 @@ export const validateKanbanColumnCreate = [
 export const validateKanbanCardCreate = [
   body('column_id').isInt({ min: 1 }).withMessage('Column ID is required'),
   body('title').notEmpty().withMessage('Card title is required'),
-  body('description').optional().isString().withMessage('Description must be a string'),
+  body('description').optional({ nullable: true, checkFalsy: true }).isString().withMessage('Description must be a string'),
   body('card_type').optional().isString().withMessage('Card type must be a string'),
-  body('entity_id').optional().isInt({ min: 1 }).withMessage('Entity ID must be a positive integer'),
-  body('entity_type').optional().isIn(['lead', 'property', 'unit', 'contract']).withMessage('Invalid entity type'),
-  body('assigned_to').optional().isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
+  body('entity_id').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Entity ID must be a positive integer'),
+  body('entity_type').optional({ nullable: true, checkFalsy: true }).isIn(['lead', 'property', 'unit', 'contract']).withMessage('Invalid entity type'),
+  body('assigned_to').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Assigned user ID must be a positive integer'),
   body('priority').optional().isIn(['low', 'medium', 'high', 'urgent']).withMessage('Invalid priority'),
-  body('due_date').optional().isISO8601().withMessage('Due date must be a valid ISO 8601 date'),
+  body('due_date').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Due date must be a valid ISO 8601 date'),
   body('position').optional().isInt({ min: 0 }).withMessage('Position must be a non-negative integer'),
   body('label_ids').optional().isArray().withMessage('Label IDs must be an array'),
   body('label_ids.*').optional().isInt({ min: 1 }).withMessage('Each label ID must be a positive integer'),

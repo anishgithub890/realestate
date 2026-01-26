@@ -197,5 +197,29 @@ export class IntegrationController {
       return next(error);
     }
   }
+
+  // Test webhook endpoint
+  async testWebhook(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+
+      const id = parseInt(req.params.id);
+      const result = await integrationService.testWebhook(id, req.user.companyId);
+      
+      if (result.success) {
+        return sendSuccess(res, result, 'Webhook test sent successfully');
+      } else {
+        return res.status(200).json({
+          success: false,
+          data: result,
+          error: result.error || 'Webhook test failed',
+        });
+      }
+    } catch (error: any) {
+      return next(error);
+    }
+  }
 }
 

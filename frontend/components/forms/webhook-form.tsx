@@ -142,7 +142,7 @@ export function WebhookForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === 'create' ? 'Create Webhook' : 'Edit Webhook'}</DialogTitle>
           <DialogDescription>
@@ -171,6 +171,14 @@ export function WebhookForm({
                 <SelectItem value="payment.received">Payment Received</SelectItem>
                 <SelectItem value="ticket.created">Ticket Created</SelectItem>
                 <SelectItem value="ticket.updated">Ticket Updated</SelectItem>
+                <SelectItem value="complaint.created">Complaint Created</SelectItem>
+                <SelectItem value="complaint.updated">Complaint Updated</SelectItem>
+                <SelectItem value="request.created">Request Created</SelectItem>
+                <SelectItem value="request.updated">Request Updated</SelectItem>
+                <SelectItem value="viewing.scheduled">Viewing Scheduled</SelectItem>
+                <SelectItem value="viewing.completed">Viewing Completed</SelectItem>
+                <SelectItem value="unit.created">Unit Created</SelectItem>
+                <SelectItem value="unit.updated">Unit Updated</SelectItem>
               </SelectContent>
             </Select>
             {errors.event_type && (

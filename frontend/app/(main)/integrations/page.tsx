@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Plug, Webhook, Settings, CheckCircle2, XCircle, Edit, Trash2, RefreshCw, Play } from 'lucide-react';
+import { Plus, Plug, Webhook, Settings, CheckCircle2, XCircle, Edit, Trash2, RefreshCw, Play, Copy, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WebhookForm } from '@/components/forms/webhook-form';
 import { IntegrationForm } from '@/components/forms/integration-form';
@@ -132,20 +132,42 @@ export default function IntegrationsPage() {
     }
   };
 
-  const handleTestWebhook = async (webhook: any) => {
-    try {
-      // Test webhook by sending a sample payload
-      toast({
-        title: 'Info',
-        description: 'Webhook test functionality coming soon',
-      });
-    } catch (error: any) {
+  const testWebhookMutation = useMutation({
+    mutationFn: (id: number) => api.post(`/integrations/webhooks/${id}/test`),
+    onSuccess: (data: any) => {
+      if (data.success) {
+        toast({
+          title: 'Success',
+          description: `Webhook test sent successfully. Status: ${data.data?.status_code || 'N/A'}`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['webhooks'] });
+      } else {
+        toast({
+          title: 'Test Failed',
+          description: data.error || 'Webhook test failed. Check the response for details.',
+          variant: 'destructive',
+        });
+      }
+    },
+    onError: (error: any) => {
       toast({
         title: 'Error',
         description: error.response?.data?.error || 'Failed to test webhook',
         variant: 'destructive',
       });
+    },
+  });
+
+  const handleTestWebhook = async (webhook: any) => {
+    if (!webhook.is_active) {
+      toast({
+        title: 'Error',
+        description: 'Cannot test inactive webhook. Please activate it first.',
+        variant: 'destructive',
+      });
+      return;
     }
+    testWebhookMutation.mutate(webhook.id);
   };
 
   const deleteWebhookMutation = useMutation({
@@ -239,6 +261,19 @@ export default function IntegrationsPage() {
 
   const getIntegrationForType = (type: string) => {
     return integrations.find((int: any) => int.integration_type === type);
+  };
+
+  const handleCopyWebhookUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    toast({
+      title: 'Copied',
+      description: 'Webhook URL copied to clipboard',
+    });
+  };
+
+  const getWebhookReceiveUrl = (webhookId: number) => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${baseUrl}/api/integrations/webhooks/${webhookId}/receive`;
   };
 
   return (
@@ -452,31 +487,62 @@ export default function IntegrationsPage() {
                   No webhooks configured. Create your first webhook to get started.
                 </div>
               ) : (
-                <div className="overflow-x-auto -mx-6 sm:mx-0">
-                  <div className="inline-block min-w-full align-middle px-6 sm:px-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Event Type</TableHead>
-                          <TableHead>URL</TableHead>
-                          <TableHead>Last Triggered</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Event Type</TableHead>
+                        <TableHead>Webhook URL</TableHead>
+                        <TableHead>Receive URL</TableHead>
+                        <TableHead>Last Triggered</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
                       <TableBody>
                         {webhooks.map((webhook: any) => (
                           <TableRow key={webhook.id}>
                             <TableCell>
-                              <Badge variant="outline">{webhook.event_type}</Badge>
-                            </TableCell>
-                            <TableCell className="font-mono text-sm">
-                              {webhook.url}
+                              <Badge variant="outline" className="text-xs">{webhook.event_type}</Badge>
                             </TableCell>
                             <TableCell>
-                              {webhook.last_triggered_at
-                                ? new Date(webhook.last_triggered_at).toLocaleString()
-                                : 'Never'}
+                              <div className="flex items-center gap-2 min-w-0 max-w-[250px]">
+                                <div className="font-mono text-xs break-all flex-1 min-w-0 truncate" title={webhook.url}>
+                                  {webhook.url}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleCopyWebhookUrl(webhook.url)}
+                                  title="Copy Webhook URL"
+                                  className="shrink-0 h-6 w-6 p-0"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2 min-w-0 max-w-[250px]">
+                                <div className="font-mono text-xs break-all flex-1 min-w-0 truncate" title={getWebhookReceiveUrl(webhook.id)}>
+                                  {getWebhookReceiveUrl(webhook.id)}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleCopyWebhookUrl(getWebhookReceiveUrl(webhook.id))}
+                                  title="Copy Receive URL"
+                                  className="shrink-0 h-6 w-6 p-0"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-xs sm:text-sm">
+                                {webhook.last_triggered_at
+                                  ? new Date(webhook.last_triggered_at).toLocaleString()
+                                  : 'Never'}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <Badge variant={webhook.is_active ? 'default' : 'secondary'}>
@@ -527,7 +593,6 @@ export default function IntegrationsPage() {
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
                 </div>
               )}
             </CardContent>

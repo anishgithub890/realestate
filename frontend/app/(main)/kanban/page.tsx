@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Container } from '@/components/ui/container';
 import { Plus, Search, Layout, MoreVertical, Edit, Trash2, Copy } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -17,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmDialog } from '@/components/data-display/delete-confirm-dialog';
+import { KanbanBoardForm } from '@/components/forms/kanban-board-form';
 
 interface KanbanBoard {
   id: number;
@@ -34,9 +36,13 @@ interface KanbanBoard {
 
 export default function KanbanPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [boardToDelete, setBoardToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState<KanbanBoard | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const { toast } = useToast();
 
   const { data, isLoading, refetch } = useQuery<any>({
@@ -72,6 +78,18 @@ export default function KanbanPage() {
     }
   };
 
+  const handleCreate = () => {
+    setSelectedBoard(null);
+    setFormMode('create');
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (board: KanbanBoard) => {
+    setSelectedBoard(board);
+    setFormMode('edit');
+    setIsFormOpen(true);
+  };
+
   const handleDuplicate = async (board: KanbanBoard) => {
     try {
       await api.post(`/kanban/boards/templates/${board.id}/duplicate`);
@@ -79,7 +97,7 @@ export default function KanbanPage() {
         title: 'Success',
         description: 'Board duplicated successfully',
       });
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['kanban-boards'] });
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -99,26 +117,27 @@ export default function KanbanPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Kanban Boards</h1>
-          <p className="text-gray-600 mt-2">Manage your workflow with visual boards</p>
+    <Container className="py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900">Kanban Boards</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">Manage your workflow with visual boards</p>
         </div>
-        <Button onClick={() => router.push('/kanban/new')}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Board
+        <Button onClick={handleCreate} size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9 shrink-0">
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Create Board</span>
+          <span className="sm:hidden">Create</span>
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="relative flex-1 min-w-0 max-w-full sm:max-w-md">
+          <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <Input
             placeholder="Search boards..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
           />
         </div>
       </div>
@@ -160,7 +179,7 @@ export default function KanbanPage() {
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push(`/kanban/${board.id}/edit`);
+                            handleEdit(board);
                           }}
                         >
                           <Edit className="w-4 h-4 mr-2" />
@@ -215,6 +234,17 @@ export default function KanbanPage() {
         </div>
       )}
 
+      <KanbanBoardForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        board={selectedBoard || undefined}
+        mode={formMode}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['kanban-boards'] });
+          setIsFormOpen(false);
+        }}
+      />
+
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -222,7 +252,7 @@ export default function KanbanPage() {
         description={`Are you sure you want to delete "${boardToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </Container>
   );
 }
 

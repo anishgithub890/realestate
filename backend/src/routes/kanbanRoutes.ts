@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { KanbanController } from '../controllers/kanbanController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validator';
-import { validatePagination, validateId, validateKanbanBoardCreate, validateKanbanBoardUpdate, validateKanbanColumnCreate, validateKanbanCardCreate, validateKanbanCardUpdate } from '../utils/validation';
+import { validatePagination, validateId, validateBoardId, validateCardId, validateTemplateId, validateKanbanBoardCreate, validateKanbanBoardUpdate, validateKanbanColumnCreate, validateKanbanCardCreate, validateKanbanCardUpdate } from '../utils/validation';
 
 const router = Router();
 const kanbanController = new KanbanController();
@@ -13,159 +13,133 @@ router.use(authenticate);
 // Boards
 router.get(
   '/boards',
-  validatePagination,
-  validate,
+  validate(validatePagination),
   kanbanController.getBoards.bind(kanbanController)
 );
 
 router.get(
   '/boards/:id',
-  validateId,
-  validate,
+  validate(validateId),
   kanbanController.getBoardById.bind(kanbanController)
 );
 
 router.post(
   '/boards',
-  validateKanbanBoardCreate,
-  validate,
+  validate(validateKanbanBoardCreate),
   kanbanController.createBoard.bind(kanbanController)
 );
 
 router.put(
   '/boards/:id',
-  validateId,
-  validateKanbanBoardUpdate,
-  validate,
+  validate([...validateId, ...validateKanbanBoardUpdate]),
   kanbanController.updateBoard.bind(kanbanController)
 );
 
 router.delete(
   '/boards/:id',
-  validateId,
-  validate,
+  validate(validateId),
   kanbanController.deleteBoard.bind(kanbanController)
 );
 
 router.post(
   '/boards/templates/:templateId/duplicate',
-  validateId,
-  validate,
+  validate(validateTemplateId),
   kanbanController.duplicateBoard.bind(kanbanController)
 );
 
 // Board Statistics
 router.get(
   '/boards/:boardId/stats',
-  validateId,
-  validate,
+  validate(validateBoardId),
   kanbanController.getBoardStats.bind(kanbanController)
 );
 
 // Columns
 router.post(
   '/boards/:boardId/columns',
-  validateId,
-  validateKanbanColumnCreate,
-  validate,
+  validate([...validateBoardId, ...validateKanbanColumnCreate]),
   kanbanController.createColumn.bind(kanbanController)
 );
 
 router.put(
   '/columns/:id',
-  validateId,
-  validateKanbanColumnCreate,
-  validate,
+  validate([...validateId, ...validateKanbanColumnCreate]),
   kanbanController.updateColumn.bind(kanbanController)
 );
 
 router.delete(
   '/columns/:id',
-  validateId,
-  validate,
+  validate(validateId),
   kanbanController.deleteColumn.bind(kanbanController)
 );
 
 router.post(
   '/boards/:boardId/columns/reorder',
-  validateId,
-  validate,
+  validate(validateBoardId),
   kanbanController.reorderColumns.bind(kanbanController)
 );
 
 // Cards
 router.get(
   '/boards/:boardId/cards',
-  validateId,
-  validate,
+  validate(validateBoardId),
   kanbanController.getCards.bind(kanbanController)
 );
 
 router.get(
   '/cards/:id',
-  validateId,
-  validate,
+  validate(validateId),
   kanbanController.getCardById.bind(kanbanController)
 );
 
 router.post(
   '/boards/:boardId/cards',
-  validateId,
-  validateKanbanCardCreate,
-  validate,
+  validate([...validateBoardId, ...validateKanbanCardCreate]),
   kanbanController.createCard.bind(kanbanController)
 );
 
 router.put(
   '/cards/:id',
-  validateId,
-  validateKanbanCardUpdate,
-  validate,
+  validate([...validateId, ...validateKanbanCardUpdate]),
   kanbanController.updateCard.bind(kanbanController)
 );
 
 router.post(
   '/cards/:cardId/move',
-  validateId,
-  validate,
+  validate(validateCardId),
   kanbanController.moveCard.bind(kanbanController)
 );
 
 router.delete(
   '/cards/:id',
-  validateId,
-  validate,
+  validate(validateId),
   kanbanController.deleteCard.bind(kanbanController)
 );
 
 // Card Comments
 router.post(
   '/cards/:cardId/comments',
-  validateId,
-  validate,
+  validate(validateCardId),
   kanbanController.addComment.bind(kanbanController)
 );
 
 // Card Attachments
 router.post(
   '/cards/:cardId/attachments',
-  validateId,
-  validate,
+  validate(validateCardId),
   kanbanController.addAttachment.bind(kanbanController)
 );
 
 // Labels
 router.post(
   '/boards/:boardId/labels',
-  validateId,
-  validate,
+  validate(validateBoardId),
   kanbanController.createLabel.bind(kanbanController)
 );
 
 router.post(
   '/cards/:cardId/labels',
-  validateId,
-  validate,
+  validate(validateCardId),
   kanbanController.addLabelsToCard.bind(kanbanController)
 );
 

@@ -151,6 +151,24 @@ export class KanbanService {
       throw new ValidationError(`Invalid board type. Valid types: ${validBoardTypes.join(', ')}`);
     }
 
+    // Convert string booleans to actual booleans if needed
+    const isTemplate = typeof data.is_template === 'string' 
+      ? data.is_template === 'true' 
+      : (data.is_template || false);
+    const isActive = typeof data.is_active === 'string'
+      ? data.is_active === 'true'
+      : (data.is_active !== undefined ? data.is_active : true);
+
+    console.log('Creating kanban board with processed data:', {
+      company_id: companyId,
+      name: data.name,
+      description: data.description,
+      board_type: data.board_type,
+      is_template: isTemplate,
+      is_active: isActive,
+      created_by: createdBy,
+    });
+
     // Create board
     const board = await prisma.kanbanBoard.create({
       data: {
@@ -158,8 +176,8 @@ export class KanbanService {
         name: data.name,
         description: data.description || null,
         board_type: data.board_type,
-        is_template: data.is_template || false,
-        is_active: data.is_active !== undefined ? data.is_active : true,
+        is_template: isTemplate,
+        is_active: isActive,
         created_by: createdBy,
       },
       include: {
